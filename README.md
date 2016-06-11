@@ -6,12 +6,12 @@ scikit-learn wrappers for various implementations QUIC
 
 This project currently depends on the pyquic module for python QUIC bindings.  We include this project as a submodule which needs to be checked out independently.
 
-## When first checking out this repo run:
+### When first checking out this repo run:
     git submodule init
     git submodule update --checkout --remote
 
-## Updating latest develop from keystone
+### Updating pyquic in your working branch
     git submodule update --checkout --remote
 
-## See readme at:
+### See readme at:
     https://github.com/osdf/pyquic
