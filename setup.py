@@ -2,8 +2,8 @@
 Setup script that:
 
 /pyquic:
-    - flattens pyquic module 
     - compiles pyquic
+    - copies py_quic into base directory so that we can use the module directly
 '''
 import os
 import shutil
