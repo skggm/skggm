@@ -1,0 +1,3 @@
+[submodule "pyquic"]
+	path = pyquic
+	url = git@github.com:osdf/pyquic.git
