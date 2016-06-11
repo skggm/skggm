@@ -19,17 +19,14 @@ class temp_cd():
         os.chdir(self._return_dir)
 
 def setup_pyquic():
-    with temp_cd('pyquic'):
-        for filename in os.listdir('py_quic'):
-            if filename.startswith('.'):
-                continue
-
-            filepath = os.path.join('py_quic', filename)
-            shutil.move(filepath, '.')
-            
-        shutil.rmtree('py_quic')
+    with temp_cd('pyquic/py_quic'):
         os.system('make')
 
+    shutil.copytree('pyquic/py_quic', 'py_quic')
+        
+def clean_pyquic():
+    shutil.rmtree('py_quic')
+    os.system('git submodule update --checkout --remote -f')
 
 if __name__ == "__main__":
     setup_pyquic()
