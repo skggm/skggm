@@ -20,6 +20,9 @@ This will also move the py_quic module into the top `/scikitquic` directory.
 ### To test submodule, see readme at:
     https://github.com/osdf/pyquic
 
+### Runing tests:
+    py.test tests/
+
 # TODO/Notes:
 
 1. The `py_quic` module isn't really set up in a way to be used as an included submodule.  To deal with this I've added a script that moves the compiled module directory to `/scikitquic` (this is not preferable). Make this easier to use, we might just do our own python bindings in the future.

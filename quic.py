@@ -1,4 +1,4 @@
-from sklearn.base import BaseEstimator, #RegressorMixin, MetaEstimatorMixin, DensityMixin
+from sklearn.base import BaseEstimator 
 from sklearn.utils import check_array, as_float_array
 import py_quic
 
