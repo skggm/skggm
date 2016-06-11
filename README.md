@@ -22,6 +22,7 @@ This will also move the py_quic module into the top `/scikitquic` directory.
 
 # TODO/Notes:
 
-    a. The `py_quic` module isn't really set up in a way to be used as an included submodule.  To deal with this I've added a script that moves the compiled module directory to `/scikitquic` (this is not preferable). Make this easier to use, we might just do our own python bindings in the future.
-    b. I've also submitted a PR to the original repo/author to fix the -faltivec issue https://github.com/osdf/pyquic/pull/1.  
+1. The `py_quic` module isn't really set up in a way to be used as an included submodule.  To deal with this I've added a script that moves the compiled module directory to `/scikitquic` (this is not preferable). Make this easier to use, we might just do our own python bindings in the future.
+
+2. I've also submitted a PR to the original repo/author to fix the -faltivec issue https://github.com/osdf/pyquic/pull/1.  
 
