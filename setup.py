@@ -30,5 +30,3 @@ def clean_pyquic():
 
 if __name__ == "__main__":
     setup_pyquic()
-
-# test

@@ -1,4 +1,4 @@
-# scikit-quic
+# scikitquic
 scikit-learn wrappers for various implementations QUIC
 
 
@@ -13,12 +13,15 @@ This project currently depends on the pyquic module for python QUIC bindings.  W
 ### Updating pyquic in your working branch
     git submodule update --checkout --remote
 
-### See readme at:
-    https://github.com/osdf/pyquic
+### Run setup script to compile the submodule
+    run: python setup.py (in /scikitquic)
+This will also move the py_quic module into the top `/scikitquic` directory.
 
-### After compiling pyquic
-    run: python setup.py (in /scikit-quic)
+### To test submodule, see readme at:
+    https://github.com/osdf/pyquic
 
 # TODO/Notes:
 
-The `py_quic` module isn't really set up in a way to be used as an included submodule.  To deal with this I've added a script that flattens the compiled module directory to `/pyquic` (this is not preferable). I've also submitted a PR to the original repo/author to fix the -faltivec issue https://github.com/osdf/pyquic/pull/1.  To deal with this, we might just do our own python bindings or add a script
+    a. The `py_quic` module isn't really set up in a way to be used as an included submodule.  To deal with this I've added a script that moves the compiled module directory to `/scikitquic` (this is not preferable). Make this easier to use, we might just do our own python bindings in the future.
+    b. I've also submitted a PR to the original repo/author to fix the -faltivec issue https://github.com/osdf/pyquic/pull/1.  
+
