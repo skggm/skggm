@@ -29,3 +29,6 @@ This will also move the py_quic module into the top `/scikitquic` directory.
 
 2. I've also submitted a PR to the original repo/author to fix the -faltivec issue https://github.com/osdf/pyquic/pull/1.  
 
+3. README to be cleaned up after notes collected here
+
+4. Directory structure of project tbd, right now main file is at top level.
