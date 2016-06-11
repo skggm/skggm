@@ -11,7 +11,7 @@ This project currently depends on the pyquic module for python QUIC bindings.  W
     git submodule update --checkout --remote
 
 ### Updating pyquic in your working branch
-    git submodule update --checkout --remote
+    git submodule update --checkout --remote -f
 
 ### Run setup script to compile the submodule
     run: python setup.py (in /scikitquic)
