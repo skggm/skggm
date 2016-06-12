@@ -96,7 +96,7 @@ class TestQUIC(object):
             print ('''Requires the file tests/ER_692.mat - this can be obtained in the MEX archive at http://www.cs.utexas.edu/~sustik/QUIC/''')
             assert False
 
-        data = loadmat('tests/ER_692.mat')['S']
+        data = loadmat('quic/tests/ER_692.mat')['S']
         X = np.zeros(data.shape)
         X[:] = data
 

@@ -21,7 +21,7 @@ This will also move the py_quic module into the top `/scikitquic` directory.
     https://github.com/osdf/pyquic
 
 ### Runing tests:
-    py.test tests/
+    py.test quic/tests/
 
 # TODO/Notes:
 
