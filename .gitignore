@@ -92,3 +92,4 @@ ENV/
 quic/py_quic
 .cache
 quic/tests/__pycache__
+quic/tests/ER_692.mat
