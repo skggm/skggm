@@ -13,12 +13,11 @@ This project currently depends on the pyquic module for python QUIC bindings.  W
 ### Updating pyquic in your working branch
     git submodule update --checkout --remote -f
 
-### Run setup script to compile the submodule
-    run: python setup.py (in /scikitquic)
-This will also move the py_quic module into the top `/scikitquic` directory.
+### Setting up pyquic
 
-### To test submodule, see readme at:
-    https://github.com/osdf/pyquic
+1. Run `python setup.py (from /scikitquic)`.  This will compile pyquic and copy the module into `/scikitquic/quic/`.
+
+2. Download the test data file `ER_692.mat` from `http://www.cs.utexas.edu/~sustik/QUIC/`.  The file is contained in the MEX archive.  Move this file to `/scikitquic/quic/tests`.
 
 ### Runing tests:
     py.test quic/tests/
