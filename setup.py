@@ -22,7 +22,7 @@ def setup_pyquic():
     with temp_cd('pyquic/py_quic'):
         os.system('make')
 
-    shutil.copytree('pyquic/py_quic', 'py_quic')
+    shutil.copytree('pyquic/py_quic', 'quic/py_quic')
         
 def clean_pyquic():
     shutil.rmtree('py_quic')

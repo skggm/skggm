@@ -89,6 +89,6 @@ ENV/
 .ropeproject
 
 # directories
-py_quic
+quic/py_quic
 .cache
-tests/__pycache__
+quic/tests/__pycache__
