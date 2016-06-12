@@ -88,6 +88,12 @@ class QUIC(BaseEstimator):
         X = check_array(X)
         X = as_float_array(X, copy=False, force_all_finite=False)
 
+        n_samples, n_features = X.shape
+        if n_samples != n_features:
+            raise ValueError("Input data must be square. X shape = {}".format(
+                             X.shape))
+            return
+
         if self.method == 'quic':
             (self.precision_, self.covariance_, self.opt_, self.cputime_, 
             self.iters_, self.duality_gap_) = py_quic.quic(X,
