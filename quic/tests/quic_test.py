@@ -86,13 +86,13 @@ class TestQUIC(object):
     ])
     def test_ER_692(self, params_in, expected):
         '''
-        Requires that tests/ER_692.mat exists. 
+        Requires that quic/tests/ER_692.mat exists. 
         It can be found in the MEX package archive from the [QUIC].
         http://www.cs.utexas.edu/~sustik/QUIC/
         
         Reproduces tests from pyquic: https://github.com/osdf/pyquic
         '''
-        if not os.path.exists('tests/ER_692.mat'):
+        if not os.path.exists('quic/tests/ER_692.mat'):
             print ('''Requires the file tests/ER_692.mat - this can be obtained in the MEX archive at http://www.cs.utexas.edu/~sustik/QUIC/''')
             assert False
 
