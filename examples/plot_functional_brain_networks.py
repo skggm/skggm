@@ -31,6 +31,9 @@ coords = np.vstack((
 )).T
 
 
+atlas_filename, labels = power.maps, power.labels
+
+
 # Loading the functional datasets
 abide = datasets.fetch_abide_pcp(n_subjects=1)
 abide.func = abide.func_preproc
@@ -61,25 +64,26 @@ timeseries = masker.fit_transform(abide.func[0])
 # Extract and plot covariance and sparse covariance
 
 # Compute the sparse inverse covariance
-from quic import QUIC
+from quic.quic import QUIC
 
-Shat =  np.dot(timeseries.T,timeseries)
-estimator = QUIC(mode='default')
+Shat =  np.cov(timeseries[:,:],rowvar=0)
+estimator = QUIC(lam = float(.5*np.max(np.triu(np.abs(Shat),1))), mode='default',verbose=1)
 estimator.fit(Shat)
 #estimator.fit(timeseries)
 
 # Display the sparse inverse covariance
-plt.figure(figsize=(5, 5))
-plt.imshow(estimator.precision_, interpolation="nearest",
-           vmax=1, vmin=-1, cmap=plt.cm.RdBu_r)
-# And display the labels
-x_ticks = plt.xticks(range(len(labels)), labels, rotation=90)
-y_ticks = plt.yticks(range(len(labels)), labels)
+plt.figure(figsize=(7.5, 7.5))
+plt.imshow(np.triu(-estimator.precision_,1), interpolation="nearest", vmax=1, vmin=-1, cmap=plt.cm.PRGn)
+
+# Display the labels, if available. Not available for Power's Coordinates
+# x_ticks = plt.xticks(range(len(labels)), labels, rotation=90)
+# y_ticks = plt.yticks(range(len(labels)), labels)
 plt.title('Precision (Sparse Inverse Covariance) matrix')
+plt.colorbar()
 
 # And now display the corresponding graph
 plotting.plot_connectome(estimator.precision_, coords,
-                         title='Precision connectome',
-                         edge_threshold="99.8%",
+                         title='Functional Connectivity using Precision Matrix',
+                         edge_threshold="99.2%",
                          node_size=20)
-plotting.show()      
+plotting.show()
