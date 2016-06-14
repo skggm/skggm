@@ -89,7 +89,8 @@ ENV/
 .ropeproject
 
 # directories
-quic/py_quic
 .cache
-quic/tests/__pycache__
-quic/tests/ER_692.mat
+inverse_covariance/build
+inverse_covariance/pyquic.cpp
+inverse_covariance/tests/__pycache__
+inverse_covariance/tests/ER_692.mat
