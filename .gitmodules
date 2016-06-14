@@ -1,4 +1,0 @@
-[submodule "pyquic"]
-    path = pyquic
-    url = git@github.com:jasonlaska/pyquic.git
-    branch = patch-1
