@@ -15,12 +15,12 @@ This project currently depends on the pyquic module for python QUIC bindings.  W
 
 ### Setting up pyquic
 
-1. Run `python setup.py (from /scikitquic)`.  This will compile pyquic and copy the module into `/scikitquic/quic/`.
+1. Run `python setup.py (from /scikitquic)`.  This will compile pyquic and copy the module into `/scikitquic/inverse_covariance/`.
 
-2. Download the test data file `ER_692.mat` from `http://www.cs.utexas.edu/~sustik/QUIC/`.  The file is contained in the MEX archive.  Move this file to `/scikitquic/quic/tests`.
+2. Download the test data file `ER_692.mat` from `http://www.cs.utexas.edu/~sustik/QUIC/`.  The file is contained in the MEX archive.  Move this file to `/scikitquic/inverse_covariance/tests`.
 
 ### Runing tests:
-    py.test quic/tests/
+    py.test inverse_covariance/tests/
 
 # TODO/Notes:
 

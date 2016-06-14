@@ -3,7 +3,7 @@ from sklearn.utils import check_array, as_float_array
 import py_quic
 
 
-class QUIC(BaseEstimator):
+class InverseCovariance(BaseEstimator):
     """
     Computes a sparse inverse covariance matrix estimation using quadratic 
     approximation. 
@@ -74,10 +74,10 @@ class QUIC(BaseEstimator):
         self.iters_ = None
         self.duality_gap_ = None
 
-        super(QUIC, self).__init__()
+        super(InverseCovariance, self).__init__()
 
     def fit(self, X, y=None, **fit_params):
-        """Fits the QUIC covariance model according to the given training 
+        """Fits the inverse covariance model according to the given training 
         data and parameters.
 
         Parameters
