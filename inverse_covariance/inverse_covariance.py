@@ -53,7 +53,7 @@ def kl_loss(precision_estimate, precision):
     dim, _ = precision.shape
     # T \ T_hat = T_hat^{-1} * T
     ThinvT = np.linalg.solve(precision, precision_estimate) 
-    return np.trace(ThinvT) - log(ThinvT) - dim
+    return np.trace(ThinvT) - np.log(ThinvT) - dim
 
 
 def quadratic_loss(covariance, precision):
