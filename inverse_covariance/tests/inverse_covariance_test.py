@@ -9,10 +9,10 @@ from sklearn.utils.testing import assert_allclose
 
 from sklearn import datasets
 
-from ..quic import QUIC
+from .. import InverseCovariance
 
 
-class TestQUIC(object):
+class TestInverseCovariance(object):
     @pytest.mark.parametrize("params_in, expected", [
         ({}, [10.991008328453244, 40.263495336580313, 155.05405432239957, 5.6843418860808015e-14]),
         ({
@@ -36,14 +36,14 @@ class TestQUIC(object):
         X = datasets.load_diabetes().data
         X = np.dot(X, X.T)
 
-        quic = QUIC(**params_in)
-        quic.fit(X)
+        ic = InverseCovariance(**params_in)
+        ic.fit(X)
         
         result_vec = [
-            np.linalg.norm(quic.covariance_),
-            np.linalg.norm(quic.precision_),
-            np.linalg.norm(quic.opt_),
-            np.linalg.norm(quic.duality_gap_),
+            np.linalg.norm(ic.covariance_),
+            np.linalg.norm(ic.precision_),
+            np.linalg.norm(ic.opt_),
+            np.linalg.norm(ic.duality_gap_),
         ]
         print result_vec
         assert_array_almost_equal(expected, result_vec)
@@ -55,14 +55,14 @@ class TestQUIC(object):
         '''
         X = datasets.load_diabetes().data
         X = np.dot(X, X.T)
-        quic = QUIC(method='unknownmethod')
-        assert_raises(NotImplementedError, quic.fit, X)
+        ic = InverseCovariance(method='unknownmethod')
+        assert_raises(NotImplementedError, ic.fit, X)
 
 
     def test_invalid_nonsquare(self):
         data = datasets.load_diabetes().data
-        quic = QUIC()
-        assert_raises(ValueError, quic.fit, data)
+        ic = InverseCovariance()
+        assert_raises(ValueError, ic.fit, data)
 
 
     @pytest.mark.parametrize("params_in, expected", [
@@ -86,22 +86,22 @@ class TestQUIC(object):
     ])
     def test_ER_692(self, params_in, expected):
         '''
-        Requires that quic/tests/ER_692.mat exists. 
+        Requires that inverse_covariance/tests/ER_692.mat exists. 
         It can be found in the MEX package archive from the [QUIC].
         http://www.cs.utexas.edu/~sustik/QUIC/
         
         Reproduces tests from pyquic: https://github.com/osdf/pyquic
         '''
-        if not os.path.exists('quic/tests/ER_692.mat'):
+        if not os.path.exists('inverse_covariance/tests/ER_692.mat'):
             print ('''Requires the file tests/ER_692.mat - this can be obtained in the MEX archive at http://www.cs.utexas.edu/~sustik/QUIC/''')
             assert False
 
-        data = loadmat('quic/tests/ER_692.mat')['S']
+        data = loadmat('inverse_covariance/tests/ER_692.mat')['S']
         X = np.zeros(data.shape)
         X[:] = data
 
-        quic = QUIC(**params_in)
-        quic.fit(X)
+        ic = InverseCovariance(**params_in)
+        ic.fit(X)
 
-        assert_allclose(quic.opt_, expected, rtol=1e-2)
+        assert_allclose(ic.opt_, expected, rtol=1e-2)
 

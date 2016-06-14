@@ -1,9 +1,86 @@
+import numpy as np
 from sklearn.base import BaseEstimator 
 from sklearn.utils import check_array, as_float_array
-import py_quic
+import pyquic
 
 
-class QUIC(BaseEstimator):
+def quic(S, L, mode='default', tol=1e-6, max_iter=1000, X0=None, W0=None,\
+        path=None, msg=0):
+    
+    assert mode in ['default', 'path', 'trace'],\
+            'mode = \'default\', \'path\' or \'trace\'.'
+
+    Sn, Sm = S.shape
+    assert Sn == Sm, 'Expected a square empircal covariance matrix S.'
+
+    # Regularization parameter matrix L.
+    if isinstance(L, float):
+        _L = np.empty((Sn, Sm))
+        _L[:] = L
+    else:
+        assert L.shape == S.shape, 'L, S shape mismatch.'
+        _L = as_float_array(L, copy=False, force_all_finite=False)
+ 
+    # Defaults.
+    optSize = 1
+    iterSize = 1
+    if mode is "trace":
+        optSize = max_iter
+
+    # Default X0, W0 when both are None.
+    if X0 is None and W0 is None:
+        X0 = np.eye(Sn)
+        W0 = np.eye(Sn)
+
+    assert X0 is not None, 'X0 and W0 must both be None or both specified.'
+    assert W0 is not None, 'X0 and W0 must both be None or both specified.'
+    assert X0.shape == S.shape, 'X0, S shape mismatch.'
+    assert W0.shape == S.shape, 'X0, S shape mismatch.'
+    X0 = as_float_array(X0, copy=False, force_all_finite=False)
+    W0 = as_float_array(W0, copy=False, force_all_finite=False)
+
+    if mode is 'path':
+        assert path is not None, 'Please specify the path scaling values.'
+        path_len = len(path)
+        optSize = path_len
+        iterSize = path_len
+
+        # Note here: memory layout is important:
+        # a row of X/W holds a flattened Sn x Sn matrix,
+        # one row for every element in _path_.
+        X = np.empty((path_len, Sn * Sn))
+        X[0,:] = X0.ravel()
+        W = np.empty((path_len, Sn * Sn))
+        W[0,:] = W0.ravel()
+    else:
+        path = np.empty(1)
+        path_len = len(path)
+
+        X = np.empty(X0.shape)
+        X[:] = X0
+        W = np.empty(W0.shape)
+        W[:] = W0
+                    
+    # Run QUIC.
+    opt = np.zeros(optSize)
+    cputime = np.zeros(optSize)
+    dGap = np.zeros(optSize)
+    iters = np.zeros(iterSize, dtype=np.uint32)
+    pyquic.quic(mode, Sn, S, _L, path_len, path, tol, msg, max_iter,
+                X, W, opt, cputime, iters, dGap)
+
+    if optSize == 1:
+        opt = opt[0]
+        cputime = cputime[0]
+        dGap = dGap[0]
+
+    if iterSize == 1:
+        iters = iters[0]
+
+    return X, W, opt, cputime, iters, dGap
+
+
+class InverseCovariance(BaseEstimator):
     """
     Computes a sparse inverse covariance matrix estimation using quadratic 
     approximation. 
@@ -74,10 +151,10 @@ class QUIC(BaseEstimator):
         self.iters_ = None
         self.duality_gap_ = None
 
-        super(QUIC, self).__init__()
+        super(InverseCovariance, self).__init__()
 
     def fit(self, X, y=None, **fit_params):
-        """Fits the QUIC covariance model according to the given training 
+        """Fits the inverse covariance model according to the given training 
         data and parameters.
 
         Parameters
@@ -94,17 +171,17 @@ class QUIC(BaseEstimator):
                              X.shape))
             return
 
-        if self.method == 'quic':
+        if self.method is 'quic':
             (self.precision_, self.covariance_, self.opt_, self.cputime_, 
-            self.iters_, self.duality_gap_) = py_quic.quic(X,
-                                                        self.lam,
-                                                        mode=self.mode,
-                                                        tol=self.tol,
-                                                        max_iter=self.max_iter,
-                                                        X0=self.X0,
-                                                        W0=self.W0,
-                                                        path=self.path,
-                                                        msg=self.verbose)
+            self.iters_, self.duality_gap_) = quic(X,
+                                                self.lam,
+                                                mode=self.mode,
+                                                tol=self.tol,
+                                                max_iter=self.max_iter,
+                                                X0=self.X0,
+                                                W0=self.W0,
+                                                path=self.path,
+                                                msg=self.verbose)
         else:
             raise NotImplementedError(
                 "Only method='quic' has been implemented.")

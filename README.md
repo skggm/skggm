@@ -15,12 +15,12 @@ This project currently depends on the pyquic module for python QUIC bindings.  W
 
 ### Setting up pyquic
 
-1. Run `python setup.py (from /scikitquic)`.  This will compile pyquic and copy the module into `/scikitquic/quic/`.
+1. Run `python setup.py (from /scikitquic)`.  This will compile pyquic and copy the module into `/scikitquic/inverse_covariance/`.
 
-2. Download the test data file `ER_692.mat` from `http://www.cs.utexas.edu/~sustik/QUIC/`.  The file is contained in the MEX archive.  Move this file to `/scikitquic/quic/tests`.
+2. Download the test data file `ER_692.mat` from `http://www.cs.utexas.edu/~sustik/QUIC/`.  The file is contained in the MEX archive.  Move this file to `/scikitquic/inverse_covariance/tests`.
 
 ### Runing tests:
-    py.test quic/tests/
+    py.test inverse_covariance/tests/
 
 # TODO/Notes:
 
@@ -31,3 +31,9 @@ This project currently depends on the pyquic module for python QUIC bindings.  W
 3. README to be cleaned up after notes collected here
 
 4. Directory structure of project tbd, right now main file is at top level.
+
+# Acknowledgements
+
+* [QUIC](http://www.cs.utexas.edu/~sustik/QUIC/) algorithm is explained in *Sparse Inverse Covariance Matrix Estimation Using Quadratic Approximation* by Cho-Jui Hsieh, Mátyás A. Sustik, Inderjit S. Dhillon, Pradeep Ravikumar and forked from [http://www.cs.utexas.edu/~sustik/QUIC/](http://www.cs.utexas.edu/~sustik/QUIC/).
+
+* Cython bindings for QUIC forked from [https://github.com/osdf/pyquic](https://github.com/osdf/pyquic)
