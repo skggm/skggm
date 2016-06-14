@@ -31,3 +31,9 @@ This project currently depends on the pyquic module for python QUIC bindings.  W
 3. README to be cleaned up after notes collected here
 
 4. Directory structure of project tbd, right now main file is at top level.
+
+# Acknowledgements
+
+* [QUIC](http://www.cs.utexas.edu/~sustik/QUIC/) algorithm is explained in *Sparse Inverse Covariance Matrix Estimation Using Quadratic Approximation* by Cho-Jui Hsieh, Mátyás A. Sustik, Inderjit S. Dhillon, Pradeep Ravikumar and forked from [http://www.cs.utexas.edu/~sustik/QUIC/](http://www.cs.utexas.edu/~sustik/QUIC/).
+
+* Cython bindings for QUIC forked from [https://github.com/osdf/pyquic](https://github.com/osdf/pyquic)
