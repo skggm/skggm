@@ -90,7 +90,7 @@ ENV/
 
 # directories
 .cache
-inverse_covariance/build
-inverse_covariance/pyquic.cpp
+inverse_covariance/pyquic/build
+inverse_covariance/pyquic/pyquic.cpp
 inverse_covariance/tests/__pycache__
 inverse_covariance/tests/ER_692.mat
