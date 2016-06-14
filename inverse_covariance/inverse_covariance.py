@@ -1,7 +1,79 @@
 import numpy as np
 from sklearn.base import BaseEstimator 
 from sklearn.utils import check_array, as_float_array
+from sklearn.utils.extmath import fast_logdet
+
 import pyquic
+
+
+
+def log_likelihood(covariance, precision):
+    """Computes ...
+    
+    Parameters
+    ----------
+    covariance : 2D ndarray (n_features, n_features)
+        Maximum Likelihood Estimator of covariance
+    
+    precision : 2D ndarray (n_features, n_features)
+        The precision matrix of the covariance model to be tested
+    
+    Returns
+    -------
+    log-likelihood
+    """
+    
+    # NOTE TO MANJARI: 
+    # - scikit learn version does some additional scaling and normalization
+    #   is this something we need to do?
+    # - should this just be the same one used in Empirical Covariance?
+
+    assert covariance.shape == precision.shape
+    return np.trace(covariance * precision) - fast_logdet(precision)
+
+
+def kl_loss(precision_estimate, precision):
+    """Computes ...
+    
+    # Trace(That^{-1}T) - log (That^{-1}T) - p
+
+    Parameters
+    ----------
+    covariance : 2D ndarray (n_features, n_features)
+        Maximum Likelihood Estimator of covariance
+    
+    precision : 2D ndarray (n_features, n_features)
+        The precision matrix of the covariance model to be tested
+    
+    Returns
+    -------
+    KL-divergence between precision_estimate and precision
+    """
+    assert precision_estimate.shape == precision.shape
+    dim, _ = precision.shape
+    # T \ T_hat = T_hat^{-1} * T
+    ThinvT = np.linalg.solve(precision, precision_estimate) 
+    return np.trace(ThinvT) - log(ThinvT) - dim
+
+
+def quadratic_loss(covariance, precision):
+    """Computes ...
+    
+    Parameters
+    ----------
+    covariance : 2D ndarray (n_features, n_features)
+        Maximum Likelihood Estimator of covariance
+    
+    precision : 2D ndarray (n_features, n_features)
+        The precision matrix of the covariance model to be tested
+    
+    Returns
+    -------
+    Quadratic loss
+    """
+    assert covariance.shape == precision.shape
+    dim, _ = precision.shape
+    return np.trace((covariance * precision - np.eye(dim))**2)
 
 
 def quic(S, L, mode='default', tol=1e-6, max_iter=1000, X0=None, W0=None,\
@@ -85,6 +157,11 @@ class InverseCovariance(BaseEstimator):
     Computes a sparse inverse covariance matrix estimation using quadratic 
     approximation. 
 
+    The inverse covariance is estimated the sample covariance estimate 
+    $S$ as an input such that: 
+
+    $T_hat = max_{\Theta} logdet(Theta) - Trace(ThetaS) - \lambda|\Theta|_1 $
+
     Parameters
     -----------        
     lam : scalar or 2D ndarray, shape (n_features, n_features) (default=0.5)
@@ -99,6 +176,7 @@ class InverseCovariance(BaseEstimator):
     max_iter : int (default=1000)
         Maximum number of Newton iterations.
 
+    TODO: X0 = Theta0, W0 = S0
     X0 : 2D ndarray, shape (n_features, n_features) (default=None) 
         Initial guess for the inverse covariance matrix. If not provided, the 
         diagonal identity matrix is used.
@@ -191,11 +269,87 @@ class InverseCovariance(BaseEstimator):
 
     # ADDITIONAL METHODS WE COULD PROVIDE
 
-    # def score(self, X_test, y=None):
-    #   """Computes the log-likelihood of a Gaussian data set with
-    #    `self.covariance_` as an estimator of its covariance matrix.
+    def score(self, X_test, y=None):
+        """Computes the log-likelihood 
 
-    # def error_norm(self, comp_cov, norm='frobenius', scaling=True, 
-    #                squared=True):
-    #    """Computes the Mean Squared Error between two covariance estimators.
-    #    (In the sense of the Frobenius norm).
+        # TODO: -log_likelihood instead?
+       
+        ----------
+        X_test : array-like, shape = [n_samples, n_features]
+            Test data of which we compute the likelihood, where n_samples is
+            the number of samples and n_features is the number of features.
+            X_test is assumed to be drawn from the same distribution than
+            the data used in fit (including centering).
+        
+        y : not used.
+        
+        Returns
+        -------
+        res : float
+            The likelihood of the data set with `self.covariance_` as an
+            estimator of its covariance matrix.
+        """
+        # TODO: As Manjari mentioned, we should take input data to the interface
+        #       and spit out results.  This should make this make more sense.
+
+        # compute empirical covariance of the test set
+        #test_cov = empirical_covariance(
+        #    X_test - self.location_, assume_centered=True)
+        
+        return log_likelihood(test_cov, self.precision_)
+
+
+    def error_norm(self, comp_prec, norm='frobenius', scaling=True, 
+                   squared=True):
+        """Computes the error between two inverse covariance estimators 
+        (i.e., over the precision).
+        
+        Parameters
+        ----------
+        comp_prec : array-like, shape = [n_features, n_features]
+            The precision to compare with.
+                
+        scaling : bool
+            If True (default), the squared error norm is divided by n_features.
+            If False, the squared error norm is not rescaled.
+
+        norm : str
+            The type of norm used to compute the error. Available error types:
+            - 'frobenius' (default): sqrt(tr(A^t.A))
+            - 'spectral': sqrt(max(eigenvalues(A^t.A))
+            - 'kl': kl-divergence 
+            where A is the error ``(comp_prec - self.precision_)``.
+        
+        squared : bool
+            Whether to compute the squared error norm or the error norm.
+            If True (default), the squared error norm is returned.
+            If False, the error norm is returned.
+        
+        Returns
+        -------
+        The error between `self.precision_` and `comp_prec` 
+        """
+        # compute the error
+        error = comp_prec - self.precision_
+        
+        # compute the error norm
+        if norm == "frobenius":
+            result = np.sum(error ** 2)
+        elif norm == "spectral":
+            result = np.amax(linalg.svdvals(np.dot(error.T, error)))
+        elif norm == "kl":
+            result = kl_loss(self.precision_, comp_prec)
+        else:
+            raise NotImplementedError(
+                "Only spectral and frobenius norms are implemented")
+
+        # optionally scale the error norm
+        if scaling:
+            result = result / error.shape[0]
+        
+        # finally get either the squared norm or the norm
+        if not squared:
+            result = np.sqrt(squared_norm)
+
+        return result
+
