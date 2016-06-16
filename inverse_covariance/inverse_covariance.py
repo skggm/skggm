@@ -83,12 +83,33 @@ def quadratic_loss(covariance, precision):
 
 def quic(S, lam, mode='default', tol=1e-6, max_iter=1000, 
         Theta0=None, Sigma0=None, path=None, msg=0):
-    
+    """Fits the inverse covariance model according to the given training 
+    data and parameters.
+
+    Parameters
+    -----------
+    S : 2D ndarray, shape (n_features, n_features)
+        Empirical covariance or correlation matrix.
+
+    Other parameters described in `class InverseCovariance`.
+
+    Returns
+    -------
+    Theta : 
+    Sigma : 
+    opt : 
+    cputime : 
+    iters : 
+    dGap : 
+    """
     assert mode in ['default', 'path', 'trace'],\
             'mode = \'default\', \'path\' or \'trace\'.'
 
     Sn, Sm = S.shape
-    assert Sn == Sm, 'Expected a square empircal covariance matrix S.'
+    if Sn != Sm:
+        raise ValueError("Input data must be square. S shape = {}".format(
+                         S.shape))
+        return
 
     # Regularization parameter matrix L.
     if isinstance(lam, float):
@@ -245,19 +266,21 @@ class InverseCovariance(BaseEstimator):
         -----------
         X : 2D ndarray, shape (n_features, n_features)
             Input data.
+
+        Returns
+        -------
+        self
         """
         X = check_array(X)
         X = as_float_array(X, copy=False, force_all_finite=False)
 
-        n_samples, n_features = X.shape
-        if n_samples != n_features:
-            raise ValueError("Input data must be square. X shape = {}".format(
-                             X.shape))
-            return
+        # Get correlation coefficients.
+        # Note: This could also be estimated via EmpiricalCovariance
+        S = np.corrcoef(X)
 
         if self.method is 'quic':
             (self.precision_, self.covariance_, self.opt_, self.cputime_, 
-            self.iters_, self.duality_gap_) = quic(X,
+            self.iters_, self.duality_gap_) = quic(S,
                                                 self.lam,
                                                 mode=self.mode,
                                                 tol=self.tol,
@@ -272,8 +295,6 @@ class InverseCovariance(BaseEstimator):
 
         return self
 
-
-    # ADDITIONAL METHODS WE COULD PROVIDE
 
     def score(self, X_test, y=None):
         """Computes the log-likelihood 
