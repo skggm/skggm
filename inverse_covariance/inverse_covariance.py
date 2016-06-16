@@ -295,8 +295,6 @@ class InverseCovariance(BaseEstimator):
 
     def score(self, X_test, y=None):
         """Computes the log-likelihood 
-
-        # TODO: -log_likelihood instead?
        
         ----------
         X_test : array-like, shape = [n_samples, n_features]
