@@ -183,12 +183,11 @@ class InverseCovariance(BaseEstimator):
     max_iter : int (default=1000)
         Maximum number of Newton iterations.
 
-    TODO: X0 = Theta0, W0 = S0
-    X0 : 2D ndarray, shape (n_features, n_features) (default=None) 
+    Theta0 : 2D ndarray, shape (n_features, n_features) (default=None) 
         Initial guess for the inverse covariance matrix. If not provided, the 
         diagonal identity matrix is used.
 
-    W0 : 2D ndarray, shape (n_features, n_features) (default=None)
+    Sigma0 : 2D ndarray, shape (n_features, n_features) (default=None)
         Initial guess for the covariance matrix. If not provided the diagonal 
         identity matrix is used.
 
@@ -218,13 +217,13 @@ class InverseCovariance(BaseEstimator):
 
     """
     def __init__(self, lam=0.5, mode='default', tol=1e-6, max_iter=1000,
-                 X0=None, W0=None, path=None, verbose=0, method='quic'):
+                 Theta0=None, Sigma0=None, path=None, verbose=0, method='quic'):
         self.lam = lam
         self.mode = mode
         self.tol = tol
         self.max_iter = max_iter
-        self.X0 = X0
-        self.W0 = W0
+        self.Theta0 = Theta0
+        self.Sigma0 = Sigma0
         self.path = path
         self.verbose = verbose
         self.method = method
@@ -263,8 +262,8 @@ class InverseCovariance(BaseEstimator):
                                                 mode=self.mode,
                                                 tol=self.tol,
                                                 max_iter=self.max_iter,
-                                                Theta0=self.X0,
-                                                Sigma0=self.W0,
+                                                Theta0=self.Theta0,
+                                                Sigma0=self.Sigma0,
                                                 path=self.path,
                                                 msg=self.verbose)
         else:
