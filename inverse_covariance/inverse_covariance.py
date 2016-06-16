@@ -22,12 +22,10 @@ def log_likelihood(covariance, precision):
     -------
     log-likelihood
     """
-    
-    # NOTE TO MANJARI: 
+    # QUESTION/NOTE: TO MANJARI
     # - scikit learn version does some additional scaling and normalization
     #   is this something we need to do?
     # - should this just be the same one used in Empirical Covariance?
-
     assert covariance.shape == precision.shape
     return np.trace(covariance * precision) - fast_logdet(precision)
 
@@ -258,6 +256,10 @@ class InverseCovariance(BaseEstimator):
 
         super(InverseCovariance, self).__init__()
 
+    def initial_coefficients(self, X):
+        # Note: This could also be estimated via EmpiricalCovariance
+        return np.corrcoef(X)
+
     def fit(self, X, y=None, **fit_params):
         """Fits the inverse covariance model according to the given training 
         data and parameters.
@@ -273,14 +275,9 @@ class InverseCovariance(BaseEstimator):
         """
         X = check_array(X)
         X = as_float_array(X, copy=False, force_all_finite=False)
-
-        # Get correlation coefficients.
-        # Note: This could also be estimated via EmpiricalCovariance
-        S = np.corrcoef(X)
-
         if self.method is 'quic':
             (self.precision_, self.covariance_, self.opt_, self.cputime_, 
-            self.iters_, self.duality_gap_) = quic(S,
+            self.iters_, self.duality_gap_) = quic(self.initial_coefficients(X),
                                                 self.lam,
                                                 mode=self.mode,
                                                 tol=self.tol,
@@ -315,15 +312,26 @@ class InverseCovariance(BaseEstimator):
         res : float
             The likelihood of the data set with `self.covariance_` as an
             estimator of its covariance matrix.
-        """
-        # TODO: As Manjari mentioned, we should take input data to the interface
-        #       and spit out results.  This should make this make more sense.
+        """        
+        # QUESTION/NOTE: Do we want to just use the empirical covariance here?
+        #                Or do we run the same estimator with same params on 
+        #                X_test as I'm doing below?
+        if self.method is 'quic':
+            precision_test, covariance_test, _, _, _, _ = quic(
+                    self.initial_coefficients(X_test),
+                    self.lam,
+                    mode=self.mode,
+                    tol=self.tol,
+                    max_iter=self.max_iter,
+                    Theta0=self.Theta0,
+                    Sigma0=self.Sigma0,
+                    path=self.path,
+                    msg=self.verbose)
+        else:
+            raise NotImplementedError(
+                "Only method='quic' has been implemented.")
 
-        # compute empirical covariance of the test set
-        #test_cov = empirical_covariance(
-        #    X_test - self.location_, assume_centered=True)
-        
-        return log_likelihood(test_cov, self.precision_)
+        return log_likelihood(covariance_test, self.precision_)
 
 
     def error_norm(self, comp_prec, norm='frobenius', scaling=True, 
