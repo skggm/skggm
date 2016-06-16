@@ -32,10 +32,16 @@ def log_likelihood(covariance, precision):
     return np.trace(covariance * precision) - fast_logdet(precision)
 
 
-def kl_loss(precision_estimate, precision):
-    """Computes ...
+def kl_loss(covariance, precision):
+    """Computes the KL divergence between precision estimate (T_hat) and 
+    reference precision (T).
     
-    # Trace(That^{-1}T) - log (That^{-1}T) - p
+    The loss is computed as:
+
+        Trace(T_hat^{-1} * T) - log(T_hat^{-1} * T) - dim(T)
+
+    so the function expects that the first parameter (covariance) is the 
+    covariance estimate (T_hat^{-1}). 
 
     Parameters
     ----------
@@ -49,11 +55,10 @@ def kl_loss(precision_estimate, precision):
     -------
     KL-divergence between precision_estimate and precision
     """
-    assert precision_estimate.shape == precision.shape
+    assert covariance.shape == precision.shape
     dim, _ = precision.shape
-    # T \ T_hat = T_hat^{-1} * T
-    ThinvT = np.linalg.solve(precision, precision_estimate) 
-    return np.trace(ThinvT) - np.log(ThinvT) - dim
+    mul_cov_prec = covariance * precision
+    return np.trace(mul_cov_prec) - np.log(mul_cov_prec) - dim
 
 
 def quadratic_loss(covariance, precision):
@@ -301,8 +306,8 @@ class InverseCovariance(BaseEstimator):
 
     def error_norm(self, comp_prec, norm='frobenius', scaling=True, 
                    squared=True):
-        """Computes the error between two inverse covariance estimators 
-        (i.e., over the precision).
+        """Computes the error between two inverse-covariance estimators 
+        (i.e., over precision).
         
         Parameters
         ----------
@@ -318,6 +323,7 @@ class InverseCovariance(BaseEstimator):
             - 'frobenius' (default): sqrt(tr(A^t.A))
             - 'spectral': sqrt(max(eigenvalues(A^t.A))
             - 'kl': kl-divergence 
+            - 'quadratic': qudratic loss
             where A is the error ``(comp_prec - self.precision_)``.
         
         squared : bool
@@ -338,7 +344,9 @@ class InverseCovariance(BaseEstimator):
         elif norm == "spectral":
             result = np.amax(linalg.svdvals(np.dot(error.T, error)))
         elif norm == "kl":
-            result = kl_loss(self.precision_, comp_prec)
+            result = kl_loss(self.covariance_, comp_prec)
+        elif norm == "quadratic":
+            result = quadratic_loss(self.covariance_, comp_prec)
         else:
             raise NotImplementedError(
                 "Only spectral and frobenius norms are implemented")
