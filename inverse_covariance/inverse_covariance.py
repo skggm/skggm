@@ -81,8 +81,8 @@ def quadratic_loss(covariance, precision):
     return np.trace((covariance * precision - np.eye(dim))**2)
 
 
-def quic(S, L, mode='default', tol=1e-6, max_iter=1000, X0=None, W0=None,\
-        path=None, msg=0):
+def quic(S, lam, mode='default', tol=1e-6, max_iter=1000, 
+        Theta0=None, Sigma0=None, path=None, msg=0):
     
     assert mode in ['default', 'path', 'trace'],\
             'mode = \'default\', \'path\' or \'trace\'.'
@@ -91,12 +91,12 @@ def quic(S, L, mode='default', tol=1e-6, max_iter=1000, X0=None, W0=None,\
     assert Sn == Sm, 'Expected a square empircal covariance matrix S.'
 
     # Regularization parameter matrix L.
-    if isinstance(L, float):
-        _L = np.empty((Sn, Sm))
-        _L[:] = L
+    if isinstance(lam, float):
+        _lam = np.empty((Sn, Sm))
+        _lam[:] = lam
     else:
-        assert L.shape == S.shape, 'L, S shape mismatch.'
-        _L = as_float_array(L, copy=False, force_all_finite=False)
+        assert L.shape == S.shape, 'lam, S shape mismatch.'
+        _lam = as_float_array(lam, copy=False, force_all_finite=False)
  
     # Defaults.
     optSize = 1
@@ -104,17 +104,19 @@ def quic(S, L, mode='default', tol=1e-6, max_iter=1000, X0=None, W0=None,\
     if mode is "trace":
         optSize = max_iter
 
-    # Default X0, W0 when both are None.
-    if X0 is None and W0 is None:
-        X0 = np.eye(Sn)
-        W0 = np.eye(Sn)
+    # Default Theta0, Sigma0 when both are None.
+    if Theta0 is None and Sigma0 is None:
+        Theta0 = np.eye(Sn)
+        Sigma0 = np.eye(Sn)
 
-    assert X0 is not None, 'X0 and W0 must both be None or both specified.'
-    assert W0 is not None, 'X0 and W0 must both be None or both specified.'
-    assert X0.shape == S.shape, 'X0, S shape mismatch.'
-    assert W0.shape == S.shape, 'X0, S shape mismatch.'
-    X0 = as_float_array(X0, copy=False, force_all_finite=False)
-    W0 = as_float_array(W0, copy=False, force_all_finite=False)
+    assert Theta0 is not None,\
+            'Theta0 and Sigma0 must both be None or both specified.'
+    assert Sigma0 is not None,\
+            'Theta0 and Sigma0 must both be None or both specified.'
+    assert Theta0.shape == S.shape, 'Theta0, S shape mismatch.'
+    assert Sigma0.shape == S.shape, 'Theta0, Sigma0 shape mismatch.'
+    Theta0 = as_float_array(Theta0, copy=False, force_all_finite=False)
+    Sigma0 = as_float_array(Sigma0, copy=False, force_all_finite=False)
 
     if mode is 'path':
         assert path is not None, 'Please specify the path scaling values.'
@@ -125,26 +127,26 @@ def quic(S, L, mode='default', tol=1e-6, max_iter=1000, X0=None, W0=None,\
         # Note here: memory layout is important:
         # a row of X/W holds a flattened Sn x Sn matrix,
         # one row for every element in _path_.
-        X = np.empty((path_len, Sn * Sn))
-        X[0,:] = X0.ravel()
-        W = np.empty((path_len, Sn * Sn))
-        W[0,:] = W0.ravel()
+        Theta = np.empty((path_len, Sn * Sn))
+        Theta[0,:] = Theta0.ravel()
+        Sigma = np.empty((path_len, Sn * Sn))
+        Sigma[0,:] = Sigma0.ravel()
     else:
         path = np.empty(1)
         path_len = len(path)
 
-        X = np.empty(X0.shape)
-        X[:] = X0
-        W = np.empty(W0.shape)
-        W[:] = W0
+        Theta = np.empty(Theta0.shape)
+        Theta[:] = Theta0
+        Sigma = np.empty(Sigma0.shape)
+        Sigma[:] = Sigma0
                     
     # Run QUIC.
     opt = np.zeros(optSize)
     cputime = np.zeros(optSize)
     dGap = np.zeros(optSize)
     iters = np.zeros(iterSize, dtype=np.uint32)
-    pyquic.quic(mode, Sn, S, _L, path_len, path, tol, msg, max_iter,
-                X, W, opt, cputime, iters, dGap)
+    pyquic.quic(mode, Sn, S, _lam, path_len, path, tol, msg, max_iter,
+                Theta, Sigma, opt, cputime, iters, dGap)
 
     if optSize == 1:
         opt = opt[0]
@@ -154,7 +156,7 @@ def quic(S, L, mode='default', tol=1e-6, max_iter=1000, X0=None, W0=None,\
     if iterSize == 1:
         iters = iters[0]
 
-    return X, W, opt, cputime, iters, dGap
+    return Theta, Sigma, opt, cputime, iters, dGap
 
 
 class InverseCovariance(BaseEstimator):
@@ -261,8 +263,8 @@ class InverseCovariance(BaseEstimator):
                                                 mode=self.mode,
                                                 tol=self.tol,
                                                 max_iter=self.max_iter,
-                                                X0=self.X0,
-                                                W0=self.W0,
+                                                Theta0=self.X0,
+                                                Sigma0=self.W0,
                                                 path=self.path,
                                                 msg=self.verbose)
         else:
