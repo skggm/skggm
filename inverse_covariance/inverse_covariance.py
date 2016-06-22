@@ -35,7 +35,7 @@ def kl_loss(covariance, precision):
     
     The loss is computed as:
 
-        Trace(T_hat^{-1} * T) - log(T_hat^{-1} * T) - dim(T)
+        Trace(T_hat * Sigma) - log(T_hat * Sigma) - dim(Sigma)
 
     so the function expects that the first parameter (covariance) is the 
     covariance estimate (T_hat^{-1}). 
