@@ -1,10 +1,10 @@
 from .inverse_covariance import (
-    #quic,
+    quic,
     InverseCovariance,
 )
 
 
 __all__ = [
-    #'quic',
+    'quic',
     'InverseCovariance',
 ]
