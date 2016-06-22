@@ -22,12 +22,11 @@ def log_likelihood(covariance, precision):
     -------
     log-likelihood
     """
-    # QUESTION/NOTE: TO MANJARI
-    # - scikit learn version does some additional scaling and normalization
-    #   is this something we need to do?
-    # - should this just be the same one used in Empirical Covariance?
     assert covariance.shape == precision.shape
-    return np.trace(covariance * precision) - fast_logdet(precision)
+    dim, _ = precision.shape
+    log_likelihood_ = np.trace(covariance * precision) - fast_logdet(precision)
+    log_likelihood_ -= dim * np.log(2 * np.pi)
+    return log_likelihood_
 
 
 def kl_loss(covariance, precision):
