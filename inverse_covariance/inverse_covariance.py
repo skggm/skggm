@@ -343,7 +343,7 @@ class InverseCovariance(BaseEstimator):
         return self.error_norm(
                 precision_test,
                 norm=self.metric,
-                scaling=True, 
+                scaling=False, 
                 squared=False)
 
     def error_norm(self, comp_prec, norm='frobenius', scaling=True, 
