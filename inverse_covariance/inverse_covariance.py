@@ -30,15 +30,12 @@ def log_likelihood(covariance, precision):
 
 
 def kl_loss(covariance, precision):
-    """Computes the KL divergence between precision estimate (T_hat) and 
-    reference precision (T).
+    """Computes the KL divergence between precision estimate and 
+    reference covariance.
     
     The loss is computed as:
 
-        Trace(T_hat * Sigma) - log(T_hat * Sigma) - dim(Sigma)
-
-    so the function expects that the first parameter (covariance) is the 
-    covariance estimate (T_hat^{-1}). 
+        Trace(Theta * Sigma) - log(Theta * Sigma) - dim(Sigma)
 
     Parameters
     ----------
@@ -50,7 +47,7 @@ def kl_loss(covariance, precision):
     
     Returns
     -------
-    KL-divergence between precision_estimate and precision
+    KL-divergence 
     """
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
@@ -217,6 +214,10 @@ class InverseCovariance(BaseEstimator):
 
     method : one of 'quic', 'quicanddirty', 'ETC' (default=quic)
 
+    metric : one of 'log_likelihood' (default), 'frobenius', 'spectral', 'kl', 
+             or 'quadratic'
+        Used in self.score().
+
     Attributes
     ----------
     covariance_ : 2D ndarray, shape (n_features, n_features)
@@ -235,7 +236,8 @@ class InverseCovariance(BaseEstimator):
 
     """
     def __init__(self, lam=0.5, mode='default', tol=1e-6, max_iter=1000,
-                 Theta0=None, Sigma0=None, path=None, verbose=0, method='quic'):
+                 Theta0=None, Sigma0=None, path=None, verbose=0, method='quic'
+                 metric='log_likelihood'):
         self.lam = lam
         self.mode = mode
         self.tol = tol
@@ -245,6 +247,7 @@ class InverseCovariance(BaseEstimator):
         self.path = path
         self.verbose = verbose
         self.method = method
+        self.metric = metric
 
         self.covariance_ = None
         self.precision_ = None
@@ -293,7 +296,7 @@ class InverseCovariance(BaseEstimator):
 
 
     def score(self, X_test, y=None):
-        """Computes the log-likelihood 
+        """Computes the score between cov/prec of X_test and X via 'metric'.
        
         ----------
         X_test : array-like, shape = [n_samples, n_features]
@@ -328,8 +331,11 @@ class InverseCovariance(BaseEstimator):
             raise NotImplementedError(
                 "Only method='quic' has been implemented.")
 
-        return log_likelihood(covariance_test, self.precision_)
-
+        return self.error_norm(
+                precision_test,
+                norm=self.metric,
+                scaling=True, 
+                squared=False)
 
     def error_norm(self, comp_prec, norm='frobenius', scaling=True, 
                    squared=True):
@@ -346,12 +352,18 @@ class InverseCovariance(BaseEstimator):
             If False, the squared error norm is not rescaled.
 
         norm : str
-            The type of norm used to compute the error. Available error types:
+            The type of norm used to compute the error between the estimated 
+            self.precision, self.covariance and the reference `comp_prec`. 
+            Available error types:
+            
             - 'frobenius' (default): sqrt(tr(A^t.A))
             - 'spectral': sqrt(max(eigenvalues(A^t.A))
             - 'kl': kl-divergence 
             - 'quadratic': qudratic loss
-            where A is the error ``(comp_prec - self.precision_)``.
+            - 'log_likelihood': log likelihood
+
+            The term 'norm' is retained to be compatible with EmpiricalCovariance
+            but 'metric' would be more appropriate.
         
         squared : bool
             Whether to compute the squared error norm or the error norm.
@@ -374,6 +386,8 @@ class InverseCovariance(BaseEstimator):
             result = kl_loss(self.covariance_, comp_prec)
         elif norm == "quadratic":
             result = quadratic_loss(self.covariance_, comp_prec)
+        elif norm == "log_likelihood":
+            result = log_likelihood(self.covariance, comp_prec)
         else:
             raise NotImplementedError(
                 "Only spectral and frobenius norms are implemented")
