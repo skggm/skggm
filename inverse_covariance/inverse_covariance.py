@@ -218,6 +218,8 @@ class InverseCovariance(BaseEstimator):
              or 'quadratic'
         Used in self.score().
 
+    initialize_method : one of 'corrcoef', 'cov'
+
     Attributes
     ----------
     covariance_ : 2D ndarray, shape (n_features, n_features)
@@ -237,7 +239,7 @@ class InverseCovariance(BaseEstimator):
     """
     def __init__(self, lam=0.5, mode='default', tol=1e-6, max_iter=1000,
                  Theta0=None, Sigma0=None, path=None, verbose=0, method='quic'
-                 metric='log_likelihood'):
+                 metric='log_likelihood', initialize_method='corrcoef'):
         self.lam = lam
         self.mode = mode
         self.tol = tol
@@ -248,6 +250,7 @@ class InverseCovariance(BaseEstimator):
         self.verbose = verbose
         self.method = method
         self.metric = metric
+        self.initialize_method = initialize_method
 
         self.covariance_ = None
         self.precision_ = None
@@ -258,9 +261,16 @@ class InverseCovariance(BaseEstimator):
 
         super(InverseCovariance, self).__init__()
 
-    def initial_coefficients(self, X):
-        # Note: This could also be estimated via EmpiricalCovariance
-        return np.corrcoef(X)
+
+    def initialize_coefficients(self, X):
+        if self.initialize_method == 'corrcoef':
+            return np.corrcoef(X), 1.0
+        elif self.initialize_method == 'cov':   
+            init_cov = np.cov(X)
+            return init_cov, np.max(np.triu(init_cov)
+        else:
+            raise ValueError("initialize_method must be 'corrcoeff' or 'cov'."))
+
 
     def fit(self, X, y=None, **fit_params):
         """Fits the inverse covariance model according to the given training 
@@ -277,10 +287,11 @@ class InverseCovariance(BaseEstimator):
         """
         X = check_array(X)
         X = as_float_array(X, copy=False, force_all_finite=False)
+        S, scale_lam = self.initialize_coefficients(X)
         if self.method is 'quic':
             (self.precision_, self.covariance_, self.opt_, self.cputime_, 
-            self.iters_, self.duality_gap_) = quic(self.initial_coefficients(X),
-                                                self.lam,
+            self.iters_, self.duality_gap_) = quic(S,
+                                                self.lam * scale_lam,
                                                 mode=self.mode,
                                                 tol=self.tol,
                                                 max_iter=self.max_iter,
@@ -313,13 +324,11 @@ class InverseCovariance(BaseEstimator):
             The likelihood of the data set with `self.covariance_` as an
             estimator of its covariance matrix.
         """        
-        # QUESTION/NOTE: Do we want to just use the empirical covariance here?
-        #                Or do we run the same estimator with same params on 
-        #                X_test as I'm doing below?
+        S, scale_lam = self.initialize_coefficients(X_test)
         if self.method is 'quic':
             precision_test, covariance_test, _, _, _, _ = quic(
-                    self.initial_coefficients(X_test),
-                    self.lam,
+                    S,
+                    self.lam * scale_lam,
                     mode=self.mode,
                     tol=self.tol,
                     max_iter=self.max_iter,
