@@ -238,7 +238,7 @@ class InverseCovariance(BaseEstimator):
 
     """
     def __init__(self, lam=0.5, mode='default', tol=1e-6, max_iter=1000,
-                 Theta0=None, Sigma0=None, path=None, verbose=0, method='quic'
+                 Theta0=None, Sigma0=None, path=None, verbose=0, method='quic',
                  metric='log_likelihood', initialize_method='corrcoef'):
         self.lam = lam
         self.mode = mode
@@ -263,13 +263,13 @@ class InverseCovariance(BaseEstimator):
 
 
     def initialize_coefficients(self, X):
-        if self.initialize_method == 'corrcoef':
+        if self.initialize_method is 'corrcoef':
             return np.corrcoef(X), 1.0
-        elif self.initialize_method == 'cov':   
+        elif self.initialize_method is 'cov':   
             init_cov = np.cov(X)
-            return init_cov, np.max(np.triu(init_cov)
+            return init_cov, np.max(np.triu(init_cov))
         else:
-            raise ValueError("initialize_method must be 'corrcoeff' or 'cov'."))
+            raise ValueError("initialize_method must be 'corrcoeff' or 'cov'.")
 
 
     def fit(self, X, y=None, **fit_params):
