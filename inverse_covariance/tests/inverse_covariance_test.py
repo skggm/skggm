@@ -9,44 +9,48 @@ from sklearn.utils.testing import assert_allclose
 
 from sklearn import datasets
 
-from ..quic import QUIC
+from .. import InverseCovariance, quic
 
 
-class TestQUIC(object):
+class TestInverseCovariance(object):
     @pytest.mark.parametrize("params_in, expected", [
-        ({}, [10.991008328453244, 40.263495336580313, 155.05405432239957, 5.6843418860808015e-14]),
+        ({}, [65.22614889456429, 18.704554180634613, 534.23790896400169, 5.2531441951941815e-07]),
         ({
             'lam': 1.0,
             'max_iter': 100,
-        }, [21.501215410022848, 20.563604939391684, 451.8527039199829, 1.1368683772161603e-13]),
+        }, [42.047592083257278, 10.511898020814318, 748.37105380749654, 0.0]),
         ({
             'lam': 0.5,
             'mode': 'trace',
-        }, [10.991008328453244, 40.263495336580313, 385.83756982219262, 13.677672436402311]),
+        }, [65.22614889456429, 18.704554180634613, 1890.485640010804, 1414213562372882.5]),
         ({
             'lam': 0.5,
             'mode': 'path',
             'path': np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5]),
-        }, [20.954440685849391, 139.75270122775521, 247.20884813107077, 5.2407042729174049e-13]),
+        }, [234.42034955185895, 66.11208447360967, 1020.7602391074518, 2.830908902050909e-06]),
+        ({
+            'lam': 1.0,
+            'max_iter': 100,
+            'initialize_method': 'cov',
+        }, [0.1970391140171365, 2293.1446244904191, 1627.4311369722218, 6.2527760746888816e-13]),
+
     ])
     def test_fit(self, params_in, expected):
         '''
         Just tests inputs/outputs (not validity of result).
         '''
         X = datasets.load_diabetes().data
-        X = np.dot(X, X.T)
-
-        quic = QUIC(**params_in)
-        quic.fit(X)
+        ic = InverseCovariance(**params_in)
+        ic.fit(X)
         
         result_vec = [
-            np.linalg.norm(quic.covariance_),
-            np.linalg.norm(quic.precision_),
-            np.linalg.norm(quic.opt_),
-            np.linalg.norm(quic.duality_gap_),
+            np.linalg.norm(ic.covariance_),
+            np.linalg.norm(ic.precision_),
+            np.linalg.norm(ic.opt_),
+            np.linalg.norm(ic.duality_gap_),
         ]
         print result_vec
-        assert_array_almost_equal(expected, result_vec)
+        assert_allclose(expected, result_vec)
 
 
     def test_invalid_method(self):
@@ -54,15 +58,8 @@ class TestQUIC(object):
         Test behavior of invalid inputs.
         '''
         X = datasets.load_diabetes().data
-        X = np.dot(X, X.T)
-        quic = QUIC(method='unknownmethod')
-        assert_raises(NotImplementedError, quic.fit, X)
-
-
-    def test_invalid_nonsquare(self):
-        data = datasets.load_diabetes().data
-        quic = QUIC()
-        assert_raises(ValueError, quic.fit, data)
+        ic = InverseCovariance(method='unknownmethod')
+        assert_raises(NotImplementedError, ic.fit, X)
 
 
     @pytest.mark.parametrize("params_in, expected", [
@@ -86,22 +83,19 @@ class TestQUIC(object):
     ])
     def test_ER_692(self, params_in, expected):
         '''
-        Requires that quic/tests/ER_692.mat exists. 
+        Requires that inverse_covariance/tests/ER_692.mat exists. 
         It can be found in the MEX package archive from the [QUIC].
         http://www.cs.utexas.edu/~sustik/QUIC/
         
         Reproduces tests from pyquic: https://github.com/osdf/pyquic
         '''
-        if not os.path.exists('quic/tests/ER_692.mat'):
+        if not os.path.exists('inverse_covariance/tests/ER_692.mat'):
             print ('''Requires the file tests/ER_692.mat - this can be obtained in the MEX archive at http://www.cs.utexas.edu/~sustik/QUIC/''')
             assert False
 
-        data = loadmat('quic/tests/ER_692.mat')['S']
+        data = loadmat('inverse_covariance/tests/ER_692.mat')['S']
         X = np.zeros(data.shape)
         X[:] = data
-
-        quic = QUIC(**params_in)
-        quic.fit(X)
-
-        assert_allclose(quic.opt_, expected, rtol=1e-2)
+        Theta, Sigma, opt, cputime, iters, dGap = quic(X, **params_in)
+        assert_allclose(opt, expected, rtol=1e-2)
 

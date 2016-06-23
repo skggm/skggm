@@ -19,13 +19,8 @@ class temp_cd():
         os.chdir(self._return_dir)
 
 def setup_pyquic():
-    with temp_cd('pyquic/py_quic'):
+    with temp_cd('inverse_covariance/pyquic'):
         os.system('make')
-
-    if os.path.exists('quic/py_quic'):
-        shutil.rmtree('quic/py_quic')
-    
-    shutil.copytree('pyquic/py_quic', 'quic/py_quic')
         
 def clean_pyquic():
     shutil.rmtree('py_quic')

@@ -11,8 +11,6 @@ human brain." Neuron 72.4 (2011): 665-678.
 Then we estimate separate inverse covariance matrices for one subject
 
 """
-
-
 ##############################################################################
 
 import numpy as np
@@ -31,8 +29,6 @@ coords = np.vstack((
 )).T
 
 
-atlas_filename, labels = power.maps, power.labels
-
 
 # Loading the functional datasets
 abide = datasets.fetch_abide_pcp(n_subjects=1)
@@ -41,9 +37,7 @@ abide.func = abide.func_preproc
 # print basic information on the dataset
 print('First subject functional nifti images (4D) are at: %s' %
       abide.func[0])  # 4D data
-      
-      
-      
+
 ###############################################################################
 # Masking: taking the signal in a sphere of radius 5mm around Power coords
 
@@ -64,12 +58,15 @@ timeseries = masker.fit_transform(abide.func[0])
 # Extract and plot covariance and sparse covariance
 
 # Compute the sparse inverse covariance
-from quic.quic import QUIC
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir)
+from inverse_covariance import InverseCovariance,pyquic
 
 Shat =  np.cov(timeseries[:,:],rowvar=0)
-estimator = QUIC(lam = float(.5*np.max(np.triu(np.abs(Shat),1))), mode='default',verbose=1)
+estimator = InverseCovariance(lam = float(.5*np.max(np.triu(np.abs(Shat),1))), mode='default',verbose=1)
 estimator.fit(Shat)
-#estimator.fit(timeseries)
 
 # Display the sparse inverse covariance
 plt.figure(figsize=(7.5, 7.5))
