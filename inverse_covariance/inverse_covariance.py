@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.base import BaseEstimator 
 from sklearn.utils import check_array, as_float_array
-from sklearn.utils.extmath import fast_logdet
+from sklearn.utils.extmath import fast_logdet, pinvh
 
 import pyquic
 
@@ -51,7 +51,7 @@ def kl_loss(covariance, precision):
     """
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
-    logdet = np.log(np.linalg.det(covariance) / np.linalg.det(precision))
+    logdet = np.log(np.linalg.det(covariance) * np.linalg.det(precision))
     mul_cov_prec = covariance * precision
     return np.trace(mul_cov_prec) - logdet - dim
 
@@ -262,6 +262,7 @@ class InverseCovariance(BaseEstimator):
         self.iters_ = None
         self.duality_gap_ = None
         self.score_best_path_scale_ = None
+        self.score_best_path_scale_index_ = None
 
         super(InverseCovariance, self).__init__()
 
@@ -311,7 +312,8 @@ class InverseCovariance(BaseEstimator):
 
 
     def score(self, X_test, y=None):
-        """Computes the score between cov/prec of X_test and X via 'metric'.
+        """Computes the score between cov/prec of sample covariance of X_test 
+        and X via 'metric'.
        
         ----------
         X_test : array-like, shape = [n_samples, n_features]
@@ -329,21 +331,7 @@ class InverseCovariance(BaseEstimator):
             estimator of its covariance matrix.
         """        
         S, scale_lam = self.initialize_coefficients(X_test)
-        if self.method is 'quic':
-            precision_test, covariance_test, _, _, _, _ = quic(
-                    S,
-                    self.lam * scale_lam,
-                    mode=self.mode,
-                    tol=self.tol,
-                    max_iter=self.max_iter,
-                    Theta0=self.Theta0,
-                    Sigma0=self.Sigma0,
-                    path=self.path,
-                    msg=self.verbose)
-        else:
-            raise NotImplementedError(
-                "Only method='quic' has been implemented.")
-
+        precision_test = pinvh(S)
         return self.error_norm(
                 precision_test,
                 norm=self.metric,
@@ -359,7 +347,7 @@ class InverseCovariance(BaseEstimator):
         ----------
         comp_prec : array-like, shape = (n_features, n_features)
             The precision to compare with.
-            If mode='path', 2D ndarray, shape = (len(path), n_features ** 2)
+            This should normally be the test sample covariance/precision.
                 
         scaling : bool
             If True, the squared error norm is divided by n_features.
@@ -390,33 +378,38 @@ class InverseCovariance(BaseEstimator):
         If mode='path', this will also set self.score_best_path_scale_ with the 
         best lambda for the current min error.
         """
-        def _compute_error(test_comp_prec, self_prec=None, self_cov=None):
+        def _compute_error(comp_prec, self_prec=None, self_cov=None):
             if norm == "frobenius":
-                error = test_comp_prec - self_prec
+                error = comp_prec - self_prec
                 result = np.sum(error ** 2)
+                
                 if not squared:
                     result = np.sqrt(result)
+
+                if scaling:
+                    result = result / error.shape[0]
+            
             elif norm == "spectral":
-                error = test_comp_prec - self_prec
+                error = comp_prec - self_prec
                 result = np.amax(linalg.svdvals(np.dot(error.T, error)))
+                
                 if not squared:
                     result = np.sqrt(result)
+
+                if scaling:
+                    result = result / error.shape[0]
+            
             elif norm == "kl":
-                result = kl_loss(self_cov, test_comp_prec)
+                return kl_loss(self_cov, comp_prec)
             elif norm == "quadratic":
-                result = quadratic_loss(self_cov, test_comp_prec)
+                return quadratic_loss(self_cov, comp_prec)
             elif norm == "log_likelihood":
-                result = log_likelihood(self_cov, test_comp_prec)
+                return log_likelihood(self_cov, comp_prec)
             else:
                 raise NotImplementedError(
                     "Must be frobenius, spectral, kl, quadratic, or\
                     log_likelihood")
-
-            # optionally scale the error norm
-            if scaling:
-                result = result / error.shape[0]
-            
-            return result
+  
 
         if self.mode is not 'path':
             return _compute_error(comp_prec,
@@ -425,18 +418,17 @@ class InverseCovariance(BaseEstimator):
 
         path_errors = []
         for lidx, lam_scale in enumerate(self.path):
-            dim = int(np.sqrt(self.precision_.shape[1]))
+            dim, _ = comp_prec.shape
             self_prec = np.reshape(self.precision_[lidx, :], (dim, dim))
             self_cov = np.reshape(self.covariance_[lidx, :], (dim, dim))
-            test_comp_prec = np.reshape(comp_prec[lidx, :], (dim, dim))
-
-            path_errors.append(_compute_error(test_comp_prec,
+            path_errors.append(_compute_error(comp_prec,
                                             self_prec=self_prec,
                                             self_cov=self_cov))
 
         min_lidx = np.argmin(path_errors)
+        self.score_best_path_scale_index_ = min_lidx
         self.score_best_path_scale_ = self.path[min_lidx]
-        print 'Score: {}, Best path scale: {}'.format(
-                path_errors[min_lidx], self.score_best_path_scale_)
+        #print 'Score: {}, Best path scale: {}'.format(
+        #        path_errors[min_lidx], self.score_best_path_scale_)
         return path_errors[min_lidx]
 

@@ -2,25 +2,44 @@ import sys
 import pprint
 import numpy as np
 from sklearn.grid_search import GridSearchCV
+from sklearn.datasets import make_sparse_spd_matrix
+from sklearn.covariance import GraphLassoCV, ledoit_wolf
+import matplotlib.pyplot as plt
+
 sys.path.append('../inverse_covariance')
 from inverse_covariance import InverseCovariance 
 
 
 '''
 Example of brute-force parameter search with InverseCovariance
+
+Mimic example from:    
+http://scikit-learn.org/stable/auto_examples/covariance/plot_sparse_cov.html
 '''
+plt.ion()
 
-def estimate_parameters(n, p, num_folds, metric='log_likelihood'):
-    # random normal matrix as input example
-    X = np.random.randn(n, p)
+def make_data(n_samples, n_features):
+    prng = np.random.RandomState(1)
+    prec = make_sparse_spd_matrix(n_features, alpha=.98,
+                              smallest_coef=.4,
+                              largest_coef=.7,
+                              random_state=prng)
+    cov = np.linalg.inv(prec)
+    d = np.sqrt(np.diag(cov))
+    cov /= d
+    cov /= d[:, np.newaxis]
+    prec *= d
+    prec *= d[:, np.newaxis]
+    X = prng.multivariate_normal(np.zeros(n_features), cov, size=n_samples)
+    X -= X.mean(axis=0)
+    X /= X.std(axis=0)
+    return X, cov, prec
 
-    # define a cross-validation search grid 
-    # lambda should vary from .01 or .001 to max off-diagonal value
-    # note that when using initializ_method='cov', lambda will be scaled by max
-    # off-diagonal value, so we use lam max = 1.0.
+
+def estimate_via_quic(X, num_folds, metric='log_likelihood'):
     search_grid = {
-      'lam': np.logspace(np.log10(0.001), np.log10(1.0), num=5, endpoint=True),
-      'path': [np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5])],
+      'lam': np.logspace(np.log10(0.001), np.log10(1.0), num=50, endpoint=True),
+      'path': [np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3])],
       'mode': ['path'],
       'initialize_method': ['cov'],
       'metric': [metric],
@@ -34,19 +53,107 @@ def estimate_parameters(n, p, num_folds, metric='log_likelihood'):
                             verbose=1)
     estimator.fit(X)
 
-    #print 'Best lambda path scale {}'.format(estimator.best_estimator_.score_best_path_scale_)
     print 'Best parameters:'
     pprint.pprint(estimator.best_params_)
+    print 'Best lambda path scale (pre-score) {}'.format(
+        estimator.best_estimator_.score_best_path_scale_)
     print 'Best score: {}'.format(estimator.score(X))
+    print 'Best lambda path scale {}'.format(
+        estimator.best_estimator_.score_best_path_scale_)
+
+    # get best covariance from QUIC
+    best_path_index = estimator.best_estimator_.score_best_path_scale_index_
+    cov = np.reshape(
+            estimator.best_estimator_.covariance_[best_path_index, :],
+            (n_features, n_features))
+    prec = np.reshape(
+            estimator.best_estimator_.precision_[best_path_index, :],
+            (n_features, n_features))
+
+    return cov, prec
+
+
+def estimate_via_empirical(X):
+    cov = np.dot(X.T, X) / n_samples
+    return cov, np.linalg.inv(cov)
+
+
+def estimate_via_graph_lasso(X):
+    model = GraphLassoCV()
+    model.fit(X)
+    return model.covariance_, model.precision_
+
+
+def estimate_via_ledoit_wolf(X):
+    lw_cov_, _ = ledoit_wolf(X)
+    lw_prec_ = np.linalg.inv(lw_cov_)
+    return lw_cov_, lw_prec_
+
+
+def show_results(covs, precs):
+    # plot the covariances
+    plt.figure(figsize=(10, 6))
+    plt.subplots_adjust(left=0.02, right=0.98)
+    for i, (name, this_cov) in enumerate(covs):
+        vmax = this_cov.max()
+        plt.subplot(2, 4, i + 1)
+        plt.imshow(this_cov, interpolation='nearest', vmin=-vmax, vmax=vmax,
+                   cmap=plt.cm.RdBu_r)
+        plt.xticks(())
+        plt.yticks(())
+        plt.title('%s covariance' % name)
+
+    plt.show()
+
+    # plot the precisions
+    plt.figure(figsize=(10, 6))
+    plt.subplots_adjust(left=0.02, right=0.98)
+    for i, (name, this_prec) in enumerate(precs):
+        vmax = this_prec.max()
+        ax = plt.subplot(2, 4, i + 1)
+        plt.imshow(np.ma.masked_equal(this_prec, 0),
+                   interpolation='nearest', vmin=-vmax, vmax=vmax,
+                   cmap=plt.cm.RdBu_r)
+        plt.xticks(())
+        plt.yticks(())
+        plt.title('%s precision' % name)
+        ax.set_axis_bgcolor('.7')
+
+    plt.show()
+
+    raw_input('Press any key to exit...')
 
 
 if __name__ == "__main__":
-    p = 20 #200
-    n = 10 #100
-    num_folds = 2
+    n_samples = 60
+    n_features = 20
+    num_quic_cv_folds = 2
 
-    # fit with log_likelihood
-    estimate_parameters(n, p, num_folds, metric='log_likelihood')
+    # make data
+    X, cov, prec = make_data(n_samples, n_features)
+    
+    # run estimators
+    emp_cov, emp_prec = estimate_via_empirical(X)
+    gl_cov, gl_prec = estimate_via_graph_lasso(X)
+    lw_cov, lw_prec = estimate_via_ledoit_wolf(X)
+    quic_ll_cov, quic_ll_prec = estimate_via_quic(X,
+            num_quic_cv_folds, metric='log_likelihood')
+    quic_kl_cov, quic_kl_prec = estimate_via_quic(X,
+            num_quic_cv_folds, metric='kl')
 
-    # fit with kl-divergence
-    estimate_parameters(n, p, num_folds, metric='kl')    
+    # Show results
+    covs = [('True', cov),
+            ('Empirical', emp_cov),
+            ('Quic (ll)', quic_ll_cov),
+            ('Quic (kl)', quic_kl_cov),
+            ('GraphLasso', gl_cov),
+            ('Ledoit-Wolf', lw_cov)]
+    precs = [('True', prec),
+            ('Empirical', emp_prec),
+            ('Quic (ll)', quic_ll_prec),
+            ('Quic (kl)', quic_kl_prec),
+            ('GraphLasso', gl_prec),
+            ('Ledoit-Wolf', lw_prec)]
+    show_results(covs, precs)
+
+  
