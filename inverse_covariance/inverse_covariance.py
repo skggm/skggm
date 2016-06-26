@@ -390,7 +390,7 @@ class InverseCovariance(BaseEstimator):
             
             elif norm == "spectral":
                 error = comp_prec - self_prec
-                result = np.amax(linalg.svdvals(np.dot(error.T, error)))
+                result = np.amax(np.linalg.svdvals(np.dot(error.T, error)))
                 
                 if not squared:
                     result = np.sqrt(result)
