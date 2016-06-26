@@ -53,7 +53,7 @@ def estimate_via_quic(X, num_folds, metric='log_likelihood'):
                             verbose=1)
     estimator.fit(X)
     ic_estimator = estimator.best_estimator_
-    ic_score = ic_estimator.score(X) # must score() to find out best lambda index
+    ic_score = ic_estimator.score(X) # must score() to find best lambda index
     ic_path_index = ic_estimator.score_best_path_scale_index_
 
     print 'Best parameters:'

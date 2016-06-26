@@ -427,7 +427,5 @@ class InverseCovariance(BaseEstimator):
         min_lidx = np.argmin(path_errors)
         self.score_best_path_scale_index_ = min_lidx
         self.score_best_path_scale_ = self.path[min_lidx]
-        #print 'Score: {}, Best path scale: {}'.format(
-        #        path_errors[min_lidx], self.score_best_path_scale_)
         return path_errors[min_lidx]
 
