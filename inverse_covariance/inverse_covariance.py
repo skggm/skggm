@@ -51,9 +51,8 @@ def kl_loss(covariance, precision):
     """
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
-    logdet = np.log(np.linalg.det(covariance) * np.linalg.det(precision))
     mul_cov_prec = covariance * precision
-    return np.trace(mul_cov_prec) - logdet - dim
+    return np.trace(mul_cov_prec) - fast_logdet(mul_cov_prec) - dim
 
 
 def quadratic_loss(covariance, precision):
