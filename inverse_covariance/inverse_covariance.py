@@ -266,7 +266,7 @@ class InverseCovariance(BaseEstimator):
         if self.initialize_method is 'corrcoef':
             return np.corrcoef(X), 1.0
         elif self.initialize_method is 'cov':   
-            init_cov = np.cov(X)
+            init_cov = np.cov(X, rowvar=False)
             return init_cov, np.max(np.triu(init_cov))
         else:
             raise ValueError("initialize_method must be 'corrcoeff' or 'cov'.")
@@ -396,7 +396,7 @@ class InverseCovariance(BaseEstimator):
         elif norm == "quadratic":
             result = quadratic_loss(self.covariance_, comp_prec)
         elif norm == "log_likelihood":
-            result = log_likelihood(self.covariance, comp_prec)
+            result = log_likelihood(self.covariance_, comp_prec)
         else:
             raise NotImplementedError(
                 "Only spectral and frobenius norms are implemented")
