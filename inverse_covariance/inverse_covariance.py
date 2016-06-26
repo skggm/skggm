@@ -51,8 +51,9 @@ def kl_loss(covariance, precision):
     """
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
+    logdet = np.log(np.linalg.det(covariance) / np.linalg.det(precision))
     mul_cov_prec = covariance * precision
-    return np.trace(mul_cov_prec) - np.log(mul_cov_prec) - dim
+    return np.trace(mul_cov_prec) - logdet - dim
 
 
 def quadratic_loss(covariance, precision):
@@ -212,7 +213,7 @@ class InverseCovariance(BaseEstimator):
     verbose : int (default=0)
         Verbosity level.
 
-    method : one of 'quic', 'quicanddirty', 'ETC' (default=quic)
+    method : one of 'quic'... (default=quic)
 
     metric : one of 'log_likelihood' (default), 'frobenius', 'spectral', 'kl', 
              or 'quadratic'
@@ -224,9 +225,11 @@ class InverseCovariance(BaseEstimator):
     ----------
     covariance_ : 2D ndarray, shape (n_features, n_features)
         Estimated covariance matrix
+        If mode='path', this is 2D ndarray, shape (len(path), n_features ** 2)
 
     precision_ : 2D ndarray, shape (n_features, n_features)
         Estimated pseudo-inverse matrix.
+        If mode='path', this is 2D ndarray, shape (len(path), n_features ** 2)
 
     opt_ :
 
@@ -258,6 +261,7 @@ class InverseCovariance(BaseEstimator):
         self.cputime_ = None
         self.iters_ = None
         self.duality_gap_ = None
+        self.score_best_path_scale_ = None
 
         super(InverseCovariance, self).__init__()
 
@@ -346,19 +350,20 @@ class InverseCovariance(BaseEstimator):
                 scaling=False, 
                 squared=False)
 
-    def error_norm(self, comp_prec, norm='frobenius', scaling=True, 
+    def error_norm(self, comp_prec, norm='frobenius', scaling=False, 
                    squared=True):
         """Computes the error between two inverse-covariance estimators 
         (i.e., over precision).
         
         Parameters
         ----------
-        comp_prec : array-like, shape = [n_features, n_features]
+        comp_prec : array-like, shape = (n_features, n_features)
             The precision to compare with.
+            If mode='path', 2D ndarray, shape = (len(path), n_features ** 2)
                 
         scaling : bool
-            If True (default), the squared error norm is divided by n_features.
-            If False, the squared error norm is not rescaled.
+            If True, the squared error norm is divided by n_features.
+            If False (default), the squared error norm is not rescaled.
 
         norm : str
             The type of norm used to compute the error between the estimated 
@@ -381,33 +386,57 @@ class InverseCovariance(BaseEstimator):
         
         Returns
         -------
-        The error between `self.precision_` and `comp_prec` 
+        The min error between `self.precision_` and `comp_prec` 
+        If mode='path', this will also set self.score_best_path_scale_ with the 
+        best lambda for the current min error.
         """
-        # compute the error
-        error = comp_prec - self.precision_
-        
-        # compute the error norm
-        if norm == "frobenius":
-            result = np.sum(error ** 2)
-        elif norm == "spectral":
-            result = np.amax(linalg.svdvals(np.dot(error.T, error)))
-        elif norm == "kl":
-            result = kl_loss(self.covariance_, comp_prec)
-        elif norm == "quadratic":
-            result = quadratic_loss(self.covariance_, comp_prec)
-        elif norm == "log_likelihood":
-            result = log_likelihood(self.covariance_, comp_prec)
-        else:
-            raise NotImplementedError(
-                "Only spectral and frobenius norms are implemented")
+        def _compute_error(test_comp_prec, self_prec=None, self_cov=None):
+            if norm == "frobenius":
+                error = test_comp_prec - self_prec
+                result = np.sum(error ** 2)
+                if not squared:
+                    result = np.sqrt(result)
+            elif norm == "spectral":
+                error = test_comp_prec - self_prec
+                result = np.amax(linalg.svdvals(np.dot(error.T, error)))
+                if not squared:
+                    result = np.sqrt(result)
+            elif norm == "kl":
+                result = kl_loss(self_cov, test_comp_prec)
+            elif norm == "quadratic":
+                result = quadratic_loss(self_cov, test_comp_prec)
+            elif norm == "log_likelihood":
+                result = log_likelihood(self_cov, test_comp_prec)
+            else:
+                raise NotImplementedError(
+                    "Must be frobenius, spectral, kl, quadratic, or\
+                    log_likelihood")
 
-        # optionally scale the error norm
-        if scaling:
-            result = result / error.shape[0]
-        
-        # finally get either the squared norm or the norm
-        if not squared:
-            result = np.sqrt(squared_norm)
+            # optionally scale the error norm
+            if scaling:
+                result = result / error.shape[0]
+            
+            return result
 
-        return result
+        if self.mode is not 'path':
+            return _compute_error(comp_prec,
+                                self_prec=self.precision_,
+                                self_cov=self.covariance_)
+
+        path_errors = []
+        for lidx, lam_scale in enumerate(self.path):
+            dim = int(np.sqrt(self.precision_.shape[1]))
+            self_prec = np.reshape(self.precision_[lidx, :], (dim, dim))
+            self_cov = np.reshape(self.covariance_[lidx, :], (dim, dim))
+            test_comp_prec = np.reshape(comp_prec[lidx, :], (dim, dim))
+
+            path_errors.append(_compute_error(test_comp_prec,
+                                            self_prec=self_prec,
+                                            self_cov=self_cov))
+
+        min_lidx = np.argmin(path_errors)
+        self.score_best_path_scale_ = self.path[min_lidx]
+        print 'Score: {}, Best path scale: {}'.format(
+                path_errors[min_lidx], self.score_best_path_scale_)
+        return path_errors[min_lidx]
 

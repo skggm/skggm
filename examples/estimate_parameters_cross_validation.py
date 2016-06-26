@@ -19,7 +19,7 @@ def estimate_parameters(n, p, num_folds, metric='log_likelihood'):
     # note that when using initializ_method='cov', lambda will be scaled by max
     # off-diagonal value, so we use lam max = 1.0.
     search_grid = {
-      'lam': np.logspace(np.log10(0.001), np.log10(1.0), num=50, endpoint=True),
+      'lam': np.logspace(np.log10(0.001), np.log10(1.0), num=5, endpoint=True),
       'path': [np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5])],
       'mode': ['path'],
       'initialize_method': ['cov'],
@@ -34,15 +34,16 @@ def estimate_parameters(n, p, num_folds, metric='log_likelihood'):
                             verbose=1)
     estimator.fit(X)
 
-    print 'Best score: {}'.format(estimator.score)
+    #print 'Best lambda path scale {}'.format(estimator.best_estimator_.score_best_path_scale_)
     print 'Best parameters:'
     pprint.pprint(estimator.best_params_)
+    print 'Best score: {}'.format(estimator.score(X))
 
 
 if __name__ == "__main__":
     p = 20 #200
     n = 10 #100
-    num_folds = 4
+    num_folds = 2
 
     # fit with log_likelihood
     estimate_parameters(n, p, num_folds, metric='log_likelihood')
