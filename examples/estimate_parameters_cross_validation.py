@@ -77,8 +77,8 @@ def estimate_via_empirical(X):
     return cov, np.linalg.inv(cov)
 
 
-def estimate_via_graph_lasso(X):
-    model = GraphLassoCV()
+def estimate_via_graph_lasso(X, num_folds):
+    model = GraphLassoCV(cv=num_folds) # default 3
     model.fit(X)
     return model.covariance_, model.precision_
 
@@ -126,19 +126,19 @@ def show_results(covs, precs):
 if __name__ == "__main__":
     n_samples = 60
     n_features = 20
-    num_quic_cv_folds = 2
+    cv_folds = 2
 
     # make data
     X, cov, prec = make_data(n_samples, n_features)
     
     # run estimators
     emp_cov, emp_prec = estimate_via_empirical(X)
-    gl_cov, gl_prec = estimate_via_graph_lasso(X)
+    gl_cov, gl_prec = estimate_via_graph_lasso(X, cv_folds)
     lw_cov, lw_prec = estimate_via_ledoit_wolf(X)
     quic_ll_cov, quic_ll_prec = estimate_via_quic(X,
-            num_quic_cv_folds, metric='log_likelihood')
+            cv_folds, metric='log_likelihood')
     quic_kl_cov, quic_kl_prec = estimate_via_quic(X,
-            num_quic_cv_folds, metric='kl')
+            cv_folds, metric='kl')
 
     # Show results
     covs = [('True', cov),
