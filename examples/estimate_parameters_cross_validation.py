@@ -52,23 +52,22 @@ def estimate_via_quic(X, num_folds, metric='log_likelihood'):
                             refit=True,
                             verbose=1)
     estimator.fit(X)
+    ic_estimator = estimator.best_estimator_
+    ic_score = ic_estimator.score(X) # must score() to find out best lambda index
+    ic_path_index = ic_estimator.score_best_path_scale_index_
 
     print 'Best parameters:'
     pprint.pprint(estimator.best_params_)
-    print 'Best lambda path scale (pre-score) {}'.format(
-        estimator.best_estimator_.score_best_path_scale_)
-    print 'Best score: {}'.format(estimator.score(X))
-    print 'Best lambda path scale {}'.format(
-        estimator.best_estimator_.score_best_path_scale_)
+    print 'Best score: {}'.format(ic_score)
+    print 'Best lambda path scale {} (index= {})'.format(
+        ic_estimator.score_best_path_scale_,
+        ic_estimator.score_best_path_scale_index_)
 
     # get best covariance from QUIC
-    best_path_index = estimator.best_estimator_.score_best_path_scale_index_
-    cov = np.reshape(
-            estimator.best_estimator_.covariance_[best_path_index, :],
-            (n_features, n_features))
-    prec = np.reshape(
-            estimator.best_estimator_.precision_[best_path_index, :],
-            (n_features, n_features))
+    cov = np.reshape(ic_estimator.covariance_[ic_path_index, :],
+                    (n_features, n_features))
+    prec = np.reshape(ic_estimator.precision_[ic_path_index, :],
+                    (n_features, n_features))
 
     return cov, prec
 
