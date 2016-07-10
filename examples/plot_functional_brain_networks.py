@@ -38,11 +38,10 @@ coords = np.vstack((
 
 # Loading the functional datasets
 abide = datasets.fetch_abide_pcp(n_subjects=1)
-abide.func = abide.func_preproc
+abide.func=abide.func_preproc
 
 # print basic information on the dataset
-print('First subject functional nifti images (4D) are at: %s' %
-      abide.func[0])  # 4D data
+print('First subject functional nifti images (4D) are at: %s' %abide.func[0])  # 4D data
 
 ###############################################################################
 # Masking: taking the signal in a sphere of radius 5mm around Power coords
@@ -59,14 +58,12 @@ masker = input_data.NiftiSpheresMasker(seeds=coords,
 timeseries = masker.fit_transform(abide.func[0])
 
 
-
 ###############################################################################
-# Extract and plot covariance and sparse covariance
+# Extract and plot sparse inverse covariance
 
 # Compute the sparse inverse covariance
-Shat =  np.cov(timeseries[:,:],rowvar=0)
-estimator = InverseCovariance(lam = float(.5*np.max(np.triu(np.abs(Shat),1))), mode='default',verbose=1)
-estimator.fit(Shat)
+estimator = InverseCovariance(initialize_method='cov',lam=0.5, mode='default',verbose=1)
+estimator.fit(np.transpose(timeseries))
 
 # Display the sparse inverse covariance
 plt.figure(figsize=(7.5, 7.5))
