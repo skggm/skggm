@@ -16,6 +16,12 @@ Then we estimate separate inverse covariance matrices for one subject
 import numpy as np
 import matplotlib.pyplot as plt
 from nilearn import datasets, connectome, plotting, input_data
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir)
+from inverse_covariance import InverseCovariance,pyquic
+
 
 # Retrieve the atlas and the data
 from nilearn import datasets
@@ -58,12 +64,6 @@ timeseries = masker.fit_transform(abide.func[0])
 # Extract and plot covariance and sparse covariance
 
 # Compute the sparse inverse covariance
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
-from inverse_covariance import InverseCovariance,pyquic
-
 Shat =  np.cov(timeseries[:,:],rowvar=0)
 estimator = InverseCovariance(lam = float(.5*np.max(np.triu(np.abs(Shat),1))), mode='default',verbose=1)
 estimator.fit(Shat)
@@ -71,10 +71,6 @@ estimator.fit(Shat)
 # Display the sparse inverse covariance
 plt.figure(figsize=(7.5, 7.5))
 plt.imshow(np.triu(-estimator.precision_,1), interpolation="nearest", vmax=1, vmin=-1, cmap=plt.cm.PRGn)
-
-# Display the labels, if available. Not available for Power's Coordinates
-# x_ticks = plt.xticks(range(len(labels)), labels, rotation=90)
-# y_ticks = plt.yticks(range(len(labels)), labels)
 plt.title('Precision (Sparse Inverse Covariance) matrix')
 plt.colorbar()
 
