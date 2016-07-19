@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.base import BaseEstimator 
 from sklearn.utils import check_array, as_float_array
-from sklearn.utils.extmath import fast_logdet
+from sklearn.utils.extmath import fast_logdet, pinvh
 
 import pyquic
 
@@ -24,18 +24,22 @@ def log_likelihood(covariance, precision):
     """
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
-    log_likelihood_ = np.trace(covariance * precision) - fast_logdet(precision)
+    log_likelihood_ = - np.trace(np.dot(covariance, precision)) + fast_logdet(precision)
     log_likelihood_ -= dim * np.log(2 * np.pi)
+    log_likelihood_ /= 2.
     return log_likelihood_
 
 
-def kl_loss(covariance, precision):
+def kl_loss(test_covariance, covariance, precision):
     """Computes the KL divergence between precision estimate and 
     reference covariance.
     
     The loss is computed as:
 
-        Trace(Theta * Sigma) - log(Theta * Sigma) - dim(Sigma)
+        Trace(Theta_1 * Sigma_0) - log(Theta_0 * Sigma_1) - dim(Sigma)
+
+    Reference implementation: 
+    http://pythonhosted.org/pyriemann/_modules/pyriemann/utils/distance.html
 
     Parameters
     ----------
@@ -49,10 +53,10 @@ def kl_loss(covariance, precision):
     -------
     KL-divergence 
     """
-    assert covariance.shape == precision.shape
+    assert test_covariance.shape == precision.shape
     dim, _ = precision.shape
-    mul_cov_prec = covariance * precision
-    return np.trace(mul_cov_prec) - np.log(mul_cov_prec) - dim
+    logdet = np.log(np.linalg.det(covariance) / np.linalg.det(test_covariance))
+    return 0.5 * (np.trace(np.dot(precision, test_covariance)) - dim + logdet)
 
 
 def quadratic_loss(covariance, precision):
@@ -212,7 +216,7 @@ class InverseCovariance(BaseEstimator):
     verbose : int (default=0)
         Verbosity level.
 
-    method : one of 'quic', 'quicanddirty', 'ETC' (default=quic)
+    method : one of 'quic'... (default=quic)
 
     metric : one of 'log_likelihood' (default), 'frobenius', 'spectral', 'kl', 
              or 'quadratic'
@@ -224,9 +228,11 @@ class InverseCovariance(BaseEstimator):
     ----------
     covariance_ : 2D ndarray, shape (n_features, n_features)
         Estimated covariance matrix
+        If mode='path', this is 2D ndarray, shape (len(path), n_features ** 2)
 
     precision_ : 2D ndarray, shape (n_features, n_features)
         Estimated pseudo-inverse matrix.
+        If mode='path', this is 2D ndarray, shape (len(path), n_features ** 2)
 
     opt_ :
 
@@ -258,6 +264,8 @@ class InverseCovariance(BaseEstimator):
         self.cputime_ = None
         self.iters_ = None
         self.duality_gap_ = None
+        self.score_best_path_scale_ = None
+        self.score_best_path_scale_index_ = None
 
         super(InverseCovariance, self).__init__()
 
@@ -266,7 +274,7 @@ class InverseCovariance(BaseEstimator):
         if self.initialize_method is 'corrcoef':
             return np.corrcoef(X), 1.0
         elif self.initialize_method is 'cov':   
-            init_cov = np.cov(X)
+            init_cov = np.cov(X, rowvar=False)
             return init_cov, np.max(np.triu(init_cov))
         else:
             raise ValueError("initialize_method must be 'corrcoeff' or 'cov'.")
@@ -307,7 +315,11 @@ class InverseCovariance(BaseEstimator):
 
 
     def score(self, X_test, y=None):
-        """Computes the score between cov/prec of X_test and X via 'metric'.
+        """Computes the score between cov/prec of sample covariance of X_test 
+        and X via 'metric'.
+
+        Note: We want to maximize score so we return the negative error 
+              (or the max negative error). 
        
         ----------
         X_test : array-like, shape = [n_samples, n_features]
@@ -324,52 +336,48 @@ class InverseCovariance(BaseEstimator):
             The likelihood of the data set with `self.covariance_` as an
             estimator of its covariance matrix.
         """        
-        S, scale_lam = self.initialize_coefficients(X_test)
-        if self.method is 'quic':
-            precision_test, covariance_test, _, _, _, _ = quic(
-                    S,
-                    self.lam * scale_lam,
-                    mode=self.mode,
-                    tol=self.tol,
-                    max_iter=self.max_iter,
-                    Theta0=self.Theta0,
-                    Sigma0=self.Sigma0,
-                    path=self.path,
-                    msg=self.verbose)
-        else:
-            raise NotImplementedError(
-                "Only method='quic' has been implemented.")
-
-        return self.error_norm(
-                precision_test,
+        S_test, scale_lam = self.initialize_coefficients(X_test)
+        error = self.error_norm(
+                S_test,
                 norm=self.metric,
                 scaling=False, 
                 squared=False)
 
-    def error_norm(self, comp_prec, norm='frobenius', scaling=True, 
+        if self.mode is not 'path':
+            return -error
+
+        path_errors = [-e for e in error]
+        min_lidx = np.argmin(path_errors)
+        self.score_best_path_scale_index_ = min_lidx
+        self.score_best_path_scale_ = self.path[min_lidx]
+        return path_errors[min_lidx]
+
+
+    def error_norm(self, comp_cov, norm='frobenius', scaling=False, 
                    squared=True):
         """Computes the error between two inverse-covariance estimators 
-        (i.e., over precision).
+        (i.e., via covariance).
         
         Parameters
         ----------
-        comp_prec : array-like, shape = [n_features, n_features]
+        comp_cov : array-like, shape = (n_features, n_features)
             The precision to compare with.
+            This should normally be the test sample covariance/precision.
                 
         scaling : bool
-            If True (default), the squared error norm is divided by n_features.
-            If False, the squared error norm is not rescaled.
+            If True, the squared error norm is divided by n_features.
+            If False (default), the squared error norm is not rescaled.
 
         norm : str
             The type of norm used to compute the error between the estimated 
-            self.precision, self.covariance and the reference `comp_prec`. 
+            self.precision, self.covariance and the reference `comp_cov`. 
             Available error types:
             
             - 'frobenius' (default): sqrt(tr(A^t.A))
             - 'spectral': sqrt(max(eigenvalues(A^t.A))
             - 'kl': kl-divergence 
-            - 'quadratic': qudratic loss
-            - 'log_likelihood': log likelihood
+            - 'quadratic': quadratic loss
+            - 'log_likelihood': negative log likelihood
 
             The term 'norm' is retained to be compatible with EmpiricalCovariance
             but 'metric' would be more appropriate.
@@ -381,33 +389,60 @@ class InverseCovariance(BaseEstimator):
         
         Returns
         -------
-        The error between `self.precision_` and `comp_prec` 
+        The min error between `self.covariance_` and `comp_cov` 
+        If mode='path', this will also set self.score_best_path_scale_ with the 
+        best lambda for the current min error.
         """
-        # compute the error
-        error = comp_prec - self.precision_
-        
-        # compute the error norm
-        if norm == "frobenius":
-            result = np.sum(error ** 2)
-        elif norm == "spectral":
-            result = np.amax(linalg.svdvals(np.dot(error.T, error)))
-        elif norm == "kl":
-            result = kl_loss(self.covariance_, comp_prec)
-        elif norm == "quadratic":
-            result = quadratic_loss(self.covariance_, comp_prec)
-        elif norm == "log_likelihood":
-            result = log_likelihood(self.covariance, comp_prec)
-        else:
-            raise NotImplementedError(
-                "Only spectral and frobenius norms are implemented")
+        def _compute_error(comp_cov, self_prec=None, self_cov=None):
+            if norm == "frobenius":
+                error = comp_cov - self_cov
+                result = np.sum(error ** 2)
+                
+                if not squared:
+                    result = np.sqrt(result)
 
-        # optionally scale the error norm
-        if scaling:
-            result = result / error.shape[0]
-        
-        # finally get either the squared norm or the norm
-        if not squared:
-            result = np.sqrt(squared_norm)
+                if scaling:
+                    result = result / error.shape[0]
 
-        return result
+                return result
+            
+            elif norm == "spectral":
+                error = comp_cov - self_cov
+                result = np.amax(np.linalg.svdvals(np.dot(error.T, error)))
+                
+                if not squared:
+                    result = np.sqrt(result)
+
+                if scaling:
+                    result = result / error.shape[0]
+
+                return result
+            
+            elif norm == "kl":
+                return kl_loss(comp_cov, self_cov, self_prec)
+            elif norm == "quadratic":
+                return quadratic_loss(comp_cov, self_prec)
+            elif norm == "log_likelihood":
+                return -log_likelihood(comp_cov, self_prec)
+            else:
+                raise NotImplementedError(
+                    "Must be frobenius, spectral, kl, quadratic, or\
+                    log_likelihood")
+  
+
+        if self.mode is not 'path':
+            return _compute_error(comp_cov,
+                                self_prec=self.precision_,
+                                self_cov=self.covariance_)
+
+        path_errors = []
+        for lidx, lam_scale in enumerate(self.path):
+            dim, _ = comp_cov.shape
+            self_prec = np.reshape(self.precision_[lidx, :], (dim, dim))
+            self_cov = np.reshape(self.covariance_[lidx, :], (dim, dim))
+            path_errors.append(_compute_error(comp_cov,
+                                            self_prec=self_prec,
+                                            self_cov=self_cov))
+
+        return path_errors
 
