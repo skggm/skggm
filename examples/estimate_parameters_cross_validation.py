@@ -139,18 +139,22 @@ if __name__ == "__main__":
             cv_folds, metric='log_likelihood')
     quic_kl_cov, quic_kl_prec = estimate_via_quic(X,
             cv_folds, metric='kl')
+    quic_fro_cov, quic_fro_prec = estimate_via_quic(X,
+            cv_folds, metric='frobenius')
 
     # Show results
     covs = [('True', cov),
             ('Empirical', emp_cov),
             ('Quic (ll)', quic_ll_cov),
             ('Quic (kl)', quic_kl_cov),
+            ('Quic (fro)', quic_fro_cov),
             ('GraphLasso', gl_cov),
             ('Ledoit-Wolf', lw_cov)]
     precs = [('True', prec),
             ('Empirical', emp_prec),
             ('Quic (ll)', quic_ll_prec),
             ('Quic (kl)', quic_kl_prec),
+            ('Quic (fro)', quic_fro_prec),
             ('GraphLasso', gl_prec),
             ('Ledoit-Wolf', lw_prec)]
     show_results(covs, precs)
