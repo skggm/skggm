@@ -115,7 +115,7 @@ def ebic(covariance, precision, n_samples, n_features, lam, gamma=0):
     # threshold precision matrix (precision_t)
     precision_t = np.empty(precision.shape)
     precision_t[:] = precision
-    precision_t[precision_t <= lam] = 0
+    precision_t[np.abs(precision_t) < lam] = 0
 
     # compute ebic between covariance and precision_t
     l_theta = log_likelihood(covariance, precision_t) 
@@ -487,7 +487,7 @@ class InverseCovariance(BaseEstimator):
                                 self_cov=self.covariance_)
 
         path_errors = []
-        for lidx, lam_scale in enumerate(self.path):
+        for lidx, lam in enumerate(self.path):
             dim, _ = comp_cov.shape
             self_prec = np.reshape(self.precision_[lidx, :], (dim, dim))
             self_cov = np.reshape(self.covariance_[lidx, :], (dim, dim))
