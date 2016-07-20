@@ -30,16 +30,13 @@ def log_likelihood(covariance, precision):
     return log_likelihood_
 
 
-def kl_loss(test_covariance, covariance, precision):
+def kl_loss(covariance, precision):
     """Computes the KL divergence between precision estimate and 
     reference covariance.
     
     The loss is computed as:
 
         Trace(Theta_1 * Sigma_0) - log(Theta_0 * Sigma_1) - dim(Sigma)
-
-    Reference implementation: 
-    http://pythonhosted.org/pyriemann/_modules/pyriemann/utils/distance.html
 
     Parameters
     ----------
@@ -53,10 +50,10 @@ def kl_loss(test_covariance, covariance, precision):
     -------
     KL-divergence 
     """
-    assert test_covariance.shape == precision.shape
+    assert covariance.shape == precision.shape
     dim, _ = precision.shape
-    logdet = np.log(np.linalg.det(covariance) / np.linalg.det(test_covariance))
-    return 0.5 * (np.trace(np.dot(precision, test_covariance)) - dim + logdet)
+    p_dot_c = np.dot(precision, covariance)
+    return 0.5 * (np.trace(p_dot_c) - fast_logdet(p_dot_c) - dim)
 
 
 def quadratic_loss(covariance, precision):
@@ -419,7 +416,7 @@ class InverseCovariance(BaseEstimator):
                 return result
             
             elif norm == "kl":
-                return kl_loss(comp_cov, self_cov, self_prec)
+                return kl_loss(comp_cov, self_prec)
             elif norm == "quadratic":
                 return quadratic_loss(comp_cov, self_prec)
             elif norm == "log_likelihood":
