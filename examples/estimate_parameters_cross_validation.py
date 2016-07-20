@@ -118,9 +118,10 @@ def show_results(covs, precs):
     plt.figure(figsize=(10, 6))
     plt.subplots_adjust(left=0.02, right=0.98)
     for i, (name, this_cov) in enumerate(covs):
-        vmax = this_cov.max()
+        vmax = np.abs(this_cov).max()
         plt.subplot(3, 4, i + 1)
-        plt.imshow(this_cov, interpolation='nearest', vmin=-vmax, vmax=vmax,
+        plt.imshow(this_cov, 
+                   interpolation='nearest', vmin=-vmax, vmax=vmax,
                    cmap=plt.cm.RdBu_r)
         plt.xticks(())
         plt.yticks(())
@@ -132,10 +133,10 @@ def show_results(covs, precs):
     plt.figure(figsize=(10, 6))
     plt.subplots_adjust(left=0.02, right=0.98)
     for i, (name, this_prec) in enumerate(precs):
-        vmax = this_prec.max()
+        vmax = np.abs(this_prec).max()
         ax = plt.subplot(3, 4, i + 1)
-        plt.imshow(np.ma.masked_equal(this_prec, 0),
-                   interpolation='nearest', vmin=-vmax, vmax=vmax,
+        plt.imshow(np.abs(this_prec),  #np.ma.masked_values(this_prec, 0)
+                   interpolation='nearest', vmin=0, vmax=vmax,
                    cmap=plt.cm.RdBu_r)
         plt.xticks(())
         plt.yticks(())
@@ -171,22 +172,22 @@ if __name__ == "__main__":
     # Show results
     covs = [('True', cov),
             ('Empirical', emp_cov),
-            ('Quic (ll)', quic_ll_cov),
-            ('Quic (kl)', quic_kl_cov),
-            ('Quic (fro)', quic_fro_cov),
-            ('Quic (bic)', quic_bic_cov),
-            ('Quic (ebic gamma = 0.1)', quic_ebic_cov),
             ('GraphLasso', gl_cov),
-            ('Ledoit-Wolf', lw_cov)]
+            ('Ledoit-Wolf', lw_cov),
+            ('Quic (cv-ll)', quic_ll_cov),
+            ('Quic (cv-kl)', quic_kl_cov),
+            ('Quic (cv-fro)', quic_fro_cov),
+            ('Quic (bic)', quic_bic_cov),
+            ('Quic (ebic gamma = 0.1)', quic_ebic_cov)]
     precs = [('True', prec),
             ('Empirical', emp_prec),
-            ('Quic (ll)', quic_ll_prec),
-            ('Quic (kl)', quic_kl_prec),
-            ('Quic (fro)', quic_fro_prec),
-            ('Quic (bic)', quic_bic_prec),
-            ('Quic (ebic gamma = 0.1)', quic_ebic_prec),
             ('GraphLasso', gl_prec),
-            ('Ledoit-Wolf', lw_prec)]
+            ('Ledoit-Wolf', lw_prec),
+            ('Quic (cv-ll)', quic_ll_prec),
+            ('Quic (cv-kl)', quic_kl_prec),
+            ('Quic (cv-fro)', quic_fro_prec),
+            ('Quic (bic)', quic_bic_prec),
+            ('Quic (ebic gamma = 0.1)', quic_ebic_prec)]
     show_results(covs, precs)
 
   
