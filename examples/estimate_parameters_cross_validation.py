@@ -60,9 +60,10 @@ def estimate_via_quic(X, num_folds, metric='log_likelihood'):
     print 'Best parameters:'
     pprint.pprint(estimator.best_params_)
     print 'Best score: {}'.format(ic_score)
-    print 'Best lambda path scale {} (index= {})'.format(
-        ic_estimator.score_best_path_scale_,
-        ic_estimator.score_best_path_scale_index_)
+    print 'Best lambda path scale {} (index= {}), lam = {}'.format(
+        ic_estimator.path[ic_path_index],
+        ic_path_index,
+        ic_estimator.best_lam)
 
     # get best covariance from QUIC
     cov = np.reshape(ic_estimator.covariance_[ic_path_index, :],
@@ -82,8 +83,11 @@ def estimate_via_quic_ebic(X, gamma=0):
     ic_estimator.fit(X)
 
     # ebic model selection
-    best_lam, ic_path_index = ic_estimator.model_select(gamma=gamma)
-    print 'Best lambda path scale {} (index= {})'.format(best_lam, ic_path_index)
+    ic_path_index = ic_estimator.model_select(gamma=gamma)
+    print 'Best lambda path scale {} (index= {}), lam = {}'.format(
+        ic_estimator.path[ic_path_index],
+        ic_path_index,
+        ic_estimator.best_lam)
 
     cov = np.reshape(ic_estimator.covariance_[ic_path_index, :],
                     (n_features, n_features))

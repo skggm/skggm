@@ -24,8 +24,8 @@ def log_likelihood(covariance, precision):
     """
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
-    log_likelihood_ = - np.trace(np.dot(covariance, precision)) + fast_logdet(precision)
-    log_likelihood_ -= dim * np.log(2 * np.pi)
+    log_likelihood_ = -np.trace(np.dot(covariance, precision)) +\
+                      fast_logdet(precision) - dim * np.log(2 * np.pi)
     log_likelihood_ /= 2.
     return log_likelihood_
 
@@ -76,7 +76,7 @@ def quadratic_loss(covariance, precision):
     return np.trace((covariance * precision - np.eye(dim))**2)
 
 
-def ebic(covariance, precision, n_samples, n_features, gamma=0):
+def ebic(covariance, precision, n_samples, n_features, lam, gamma=0):
     '''
     Extended Bayesian Information Criteria for model selection.
 
@@ -96,6 +96,14 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     precision : 2D ndarray (n_features, n_features)
         The precision matrix of the model to be tested
 
+    n_samples
+
+    n_features
+
+    lam: (float)
+        Threshold value for precision matrix. This should be lambda scaling
+        used to obtain this estimate.
+
     gamma : (float) \in (0, 1)
         Choice of gamma=0 leads to classical BIC
         Positive gamma leads to stronger penalization of large graphs.
@@ -104,10 +112,13 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     -------
     ebic score (float).  Caller should minimized this score.
     '''
-    l_theta = log_likelihood(covariance, precision)
+    # threshold precision matrix (precision_t)
     precision_t = np.empty(precision.shape)
     precision_t[:] = precision
-    precision_t[precision_t < 1e-1] = 0
+    precision_t[precision_t <= lam] = 0
+
+    # compue ebic between covariance and precision_t
+    l_theta = log_likelihood(covariance, precision_t) 
     precision_nnz = np.count_nonzero(precision_t)
     return -2.0 * l_theta +\
             precision_nnz * np.log(n_samples) +\
@@ -299,11 +310,11 @@ class InverseCovariance(BaseEstimator):
         self.cputime_ = None
         self.iters_ = None
         self.duality_gap_ = None
-        self.score_best_path_scale_ = None
         self.score_best_path_scale_index_ = None
 
         # these must be updated upon self.fit()
         self.sample_covariance_ = None
+        self.lam_scale_ = None
         self.n_samples = None
         self.n_features = None
         self.is_fitted = False
@@ -337,11 +348,11 @@ class InverseCovariance(BaseEstimator):
         X = check_array(X)
         X = as_float_array(X, copy=False, force_all_finite=False)
         self.n_samples, self.n_features = np.shape(X)
-        self.sample_covariance_, scale_lam = self.initialize_coefficients(X)
+        self.sample_covariance_, self.lam_scale_ = self.initialize_coefficients(X)
         if self.method is 'quic':
             (self.precision_, self.covariance_, self.opt_, self.cputime_, 
             self.iters_, self.duality_gap_) = quic(self.sample_covariance_,
-                                                self.lam * scale_lam,
+                                                self.lam * self.lam_scale_,
                                                 mode=self.mode,
                                                 tol=self.tol,
                                                 max_iter=self.max_iter,
@@ -392,7 +403,6 @@ class InverseCovariance(BaseEstimator):
         path_errors = [-e for e in error]
         min_lidx = np.argmin(path_errors)
         self.score_best_path_scale_index_ = min_lidx
-        self.score_best_path_scale_ = self.path[min_lidx]
         return path_errors[min_lidx]
 
 
@@ -433,8 +443,6 @@ class InverseCovariance(BaseEstimator):
         Returns
         -------
         The min error between `self.covariance_` and `comp_cov` 
-        If mode='path', this will also set self.score_best_path_scale_ with the 
-        best lambda for the current min error.
         """
         def _compute_error(comp_cov, self_prec=None, self_cov=None):
             if norm == "frobenius":
@@ -489,6 +497,7 @@ class InverseCovariance(BaseEstimator):
 
         return path_errors
 
+
     def model_select(self, gamma=0):
         '''
         Uses Extended Bayesian Information Criteria for model selection.
@@ -521,16 +530,26 @@ class InverseCovariance(BaseEstimator):
             return
 
         ebic_scores = []
-        for lidx, lam_scale in enumerate(self.path):
+        for lidx, lam in enumerate(self.path):
             dim, _ = self.sample_covariance_.shape
             prec = np.reshape(self.precision_[lidx, :], (dim, dim))
-            #cov = np.reshape(self.covariance_[lidx, :], (dim, dim))
             ebic_scores.append(ebic(
                     self.sample_covariance_,
                     prec,
                     self.n_samples,
                     self.n_features,
+                    self.lam * self.lam_scale_ * lam,
                     gamma=gamma))
 
-        min_lidx = np.argmin(ebic_scores)
-        return self.path[min_lidx], min_lidx
+        self.score_best_path_scale_index_ = np.argmin(ebic_scores)
+        return self.score_best_path_scale_index_
+
+
+    @property
+    def best_lam(self):
+        if not self.is_fitted:
+            return 0.0
+
+        return self.lam * self.lam_scale_ *\
+                self.path[self.score_best_path_scale_index_]
+    
