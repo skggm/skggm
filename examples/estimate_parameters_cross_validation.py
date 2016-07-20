@@ -37,6 +37,7 @@ def make_data(n_samples, n_features):
 
 
 def estimate_via_quic(X, num_folds, metric='log_likelihood'):
+    print '\n-- QUIC CV'
     search_grid = {
       'lam': np.logspace(np.log10(0.001), np.log10(1.0), num=50, endpoint=True),
       'path': [np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3])],
@@ -71,6 +72,25 @@ def estimate_via_quic(X, num_folds, metric='log_likelihood'):
 
     return cov, prec
 
+def estimate_via_quic_ebic(X, gamma=0):
+    print '\n-- QUIC EBIC'
+    ic_estimator = InverseCovariance(
+        lam=1.0,
+        mode='path',
+        initialize_method='cov',
+        path=np.logspace(np.log10(0.001), np.log10(1.0), num=50, endpoint=True))
+    ic_estimator.fit(X)
+
+    # ebic model selection
+    best_lam, ic_path_index = ic_estimator.model_select(gamma=gamma)
+    print 'Best lambda path scale {} (index= {})'.format(best_lam, ic_path_index)
+
+    cov = np.reshape(ic_estimator.covariance_[ic_path_index, :],
+                    (n_features, n_features))
+    prec = np.reshape(ic_estimator.precision_[ic_path_index, :],
+                    (n_features, n_features))
+
+    return cov, prec
 
 def estimate_via_empirical(X):
     cov = np.dot(X.T, X) / n_samples
@@ -95,7 +115,7 @@ def show_results(covs, precs):
     plt.subplots_adjust(left=0.02, right=0.98)
     for i, (name, this_cov) in enumerate(covs):
         vmax = this_cov.max()
-        plt.subplot(2, 4, i + 1)
+        plt.subplot(3, 4, i + 1)
         plt.imshow(this_cov, interpolation='nearest', vmin=-vmax, vmax=vmax,
                    cmap=plt.cm.RdBu_r)
         plt.xticks(())
@@ -109,7 +129,7 @@ def show_results(covs, precs):
     plt.subplots_adjust(left=0.02, right=0.98)
     for i, (name, this_prec) in enumerate(precs):
         vmax = this_prec.max()
-        ax = plt.subplot(2, 4, i + 1)
+        ax = plt.subplot(3, 4, i + 1)
         plt.imshow(np.ma.masked_equal(this_prec, 0),
                    interpolation='nearest', vmin=-vmax, vmax=vmax,
                    cmap=plt.cm.RdBu_r)
@@ -141,6 +161,8 @@ if __name__ == "__main__":
             cv_folds, metric='kl')
     quic_fro_cov, quic_fro_prec = estimate_via_quic(X,
             cv_folds, metric='frobenius')
+    quic_bic_cov, quic_bic_prec = estimate_via_quic_ebic(X, gamma=0)
+    quic_ebic_cov, quic_ebic_prec = estimate_via_quic_ebic(X, gamma=0.1)
 
     # Show results
     covs = [('True', cov),
@@ -148,6 +170,8 @@ if __name__ == "__main__":
             ('Quic (ll)', quic_ll_cov),
             ('Quic (kl)', quic_kl_cov),
             ('Quic (fro)', quic_fro_cov),
+            ('Quic (bic)', quic_bic_cov),
+            ('Quic (ebic gamma = 0.1)', quic_ebic_cov),
             ('GraphLasso', gl_cov),
             ('Ledoit-Wolf', lw_cov)]
     precs = [('True', prec),
@@ -155,6 +179,8 @@ if __name__ == "__main__":
             ('Quic (ll)', quic_ll_prec),
             ('Quic (kl)', quic_kl_prec),
             ('Quic (fro)', quic_fro_prec),
+            ('Quic (bic)', quic_bic_prec),
+            ('Quic (ebic gamma = 0.1)', quic_ebic_prec),
             ('GraphLasso', gl_prec),
             ('Ledoit-Wolf', lw_prec)]
     show_results(covs, precs)

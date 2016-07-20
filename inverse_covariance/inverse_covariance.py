@@ -65,7 +65,7 @@ def quadratic_loss(covariance, precision):
         Maximum Likelihood Estimator of covariance
     
     precision : 2D ndarray (n_features, n_features)
-        The precision matrix of the covariance model to be tested
+        The precision matrix of the model to be tested
     
     Returns
     -------
@@ -75,6 +75,45 @@ def quadratic_loss(covariance, precision):
     dim, _ = precision.shape
     return np.trace((covariance * precision - np.eye(dim))**2)
 
+
+def ebic(covariance, precision, n_samples, n_features, gamma=0):
+    '''
+    Extended Bayesian Information Criteria for model selection.
+
+    When using path mode, use this as an alternative to cross-validation for
+    finding lambda.
+
+    See:
+        Extended Bayesian Information Criteria for Gaussian Graphical Models
+        R. Foygel and M. Drton
+        NIPS 2010
+
+    Parameters
+    ----------
+    covariance : 2D ndarray (n_features, n_features)
+        Maximum Likelihood Estimator of covariance (sample covariance)
+    
+    precision : 2D ndarray (n_features, n_features)
+        The precision matrix of the model to be tested
+
+    gamma : (float) \in (0, 1)
+        Choice of gamma=0 leads to classical BIC
+        Positive gamma leads to stronger penalization of large graphs.
+
+    Returns
+    -------
+    ebic score (float).  Caller should minimized this score.
+    '''
+    l_theta = log_likelihood(covariance, precision)
+    precision_t = np.empty(precision.shape)
+    precision_t[:] = precision
+    precision_t[precision_t < 1e-1] = 0
+    precision_nnz = np.count_nonzero(precision_t)
+    print precision_nnz
+    return -2.0 * l_theta +\
+            precision_nnz * np.log(n_samples) +\
+            4.0 * precision_nnz * np.log(n_features) * gamma
+    
 
 def quic(S, lam, mode='default', tol=1e-6, max_iter=1000, 
         Theta0=None, Sigma0=None, path=None, msg=0):
@@ -264,6 +303,12 @@ class InverseCovariance(BaseEstimator):
         self.score_best_path_scale_ = None
         self.score_best_path_scale_index_ = None
 
+        # these must be updated upon self.fit()
+        self.sample_covariance_ = None
+        self.n_samples = None
+        self.n_features = None
+        self.is_fitted = False
+
         super(InverseCovariance, self).__init__()
 
 
@@ -292,10 +337,11 @@ class InverseCovariance(BaseEstimator):
         """
         X = check_array(X)
         X = as_float_array(X, copy=False, force_all_finite=False)
-        S, scale_lam = self.initialize_coefficients(X)
+        self.n_samples, self.n_features = np.shape(X)
+        self.sample_covariance_, scale_lam = self.initialize_coefficients(X)
         if self.method is 'quic':
             (self.precision_, self.covariance_, self.opt_, self.cputime_, 
-            self.iters_, self.duality_gap_) = quic(S,
+            self.iters_, self.duality_gap_) = quic(self.sample_covariance_,
                                                 self.lam * scale_lam,
                                                 mode=self.mode,
                                                 tol=self.tol,
@@ -308,6 +354,7 @@ class InverseCovariance(BaseEstimator):
             raise NotImplementedError(
                 "Only method='quic' has been implemented.")
 
+        self.is_fitted = True
         return self
 
 
@@ -443,3 +490,49 @@ class InverseCovariance(BaseEstimator):
 
         return path_errors
 
+    def model_select(self, gamma=0):
+        '''
+        Uses Extended Bayesian Information Criteria for model selection.
+
+        Can only be used in path mode.
+
+        See:
+            Extended Bayesian Information Criteria for Gaussian Graphical Models
+            R. Foygel and M. Drton
+            NIPS 2010
+
+        Parameters
+        ----------
+        gamma : (float) \in (0, 1)
+            Choice of gamma=0 leads to classical BIC
+            Positive gamma leads to stronger penalization of large graphs.
+
+        Returns
+        -------
+        Lambda and lambda-index that minimizes ebic score (float).
+        '''
+        # must be path mode
+        if self.mode is not 'path':
+            raise NotImplementedError("Model selection only implemented for\
+                                      mode=path")
+            return
+
+        # model must be fitted
+        if not self.is_fitted:
+            return
+
+        ebic_scores = []
+        for lidx, lam_scale in enumerate(self.path):
+            dim, _ = self.sample_covariance_.shape
+            prec = np.reshape(self.precision_[lidx, :], (dim, dim))
+            #cov = np.reshape(self.covariance_[lidx, :], (dim, dim))
+            ebic_scores.append(ebic(
+                    self.sample_covariance_,
+                    prec,
+                    self.n_samples,
+                    self.n_features,
+                    gamma=gamma))
+
+        print ebic_scores
+        min_lidx = np.argmin(ebic_scores)
+        return self.path[min_lidx], min_lidx
