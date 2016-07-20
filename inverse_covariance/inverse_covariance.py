@@ -109,7 +109,6 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     precision_t[:] = precision
     precision_t[precision_t < 1e-1] = 0
     precision_nnz = np.count_nonzero(precision_t)
-    print precision_nnz
     return -2.0 * l_theta +\
             precision_nnz * np.log(n_samples) +\
             4.0 * precision_nnz * np.log(n_features) * gamma
@@ -533,6 +532,5 @@ class InverseCovariance(BaseEstimator):
                     self.n_features,
                     gamma=gamma))
 
-        print ebic_scores
         min_lidx = np.argmin(ebic_scores)
         return self.path[min_lidx], min_lidx
