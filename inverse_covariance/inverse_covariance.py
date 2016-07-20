@@ -117,7 +117,7 @@ def ebic(covariance, precision, n_samples, n_features, lam, gamma=0):
     precision_t[:] = precision
     precision_t[precision_t <= lam] = 0
 
-    # compue ebic between covariance and precision_t
+    # compute ebic between covariance and precision_t
     l_theta = log_likelihood(covariance, precision_t) 
     precision_nnz = np.count_nonzero(precision_t)
     return -2.0 * l_theta +\
