@@ -517,7 +517,7 @@ class InverseCovariance(BaseEstimator):
 
         Returns
         -------
-        Lambda and lambda-index that minimizes ebic score (float).
+        self.score_best_path_scale_index_ that minimizes ebic score (float).
         '''
         # must be path mode
         if self.mode is not 'path':
