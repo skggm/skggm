@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.base import BaseEstimator 
 from sklearn.utils import check_array, as_float_array
 from sklearn.utils.extmath import fast_logdet, pinvh
+from sklearn.utils.testing import assert_array_almost_equal
 
 import pyquic
 
@@ -76,7 +77,7 @@ def quadratic_loss(covariance, precision):
     return np.trace((covariance * precision - np.eye(dim))**2)
 
 
-def ebic(covariance, precision, n_samples, n_features, lam, gamma=0):
+def ebic(covariance, precision, n_samples, n_features, gamma=0):
     '''
     Extended Bayesian Information Criteria for model selection.
 
@@ -112,14 +113,9 @@ def ebic(covariance, precision, n_samples, n_features, lam, gamma=0):
     -------
     ebic score (float).  Caller should minimized this score.
     '''
-    # threshold precision matrix (precision_t)
-    precision_t = np.empty(precision.shape)
-    precision_t[:] = precision
-    precision_t[np.abs(precision_t) < lam] = 0
-
-    # compute ebic between covariance and precision_t
-    l_theta = log_likelihood(covariance, precision_t) 
-    precision_nnz = np.count_nonzero(precision_t)
+    l_theta = log_likelihood(covariance, precision) 
+    precision_nnz = np.count_nonzero(precision)
+    print precision_nnz
     return -2.0 * l_theta +\
             precision_nnz * np.log(n_samples) +\
             4.0 * precision_nnz * np.log(n_features) * gamma
@@ -185,6 +181,11 @@ def quic(S, lam, mode='default', tol=1e-6, max_iter=1000,
 
     if mode is 'path':
         assert path is not None, 'Please specify the path scaling values.'
+
+        # path must be sorted from largest to smallest and have unique values
+        check_path = sorted(set(path), reverse=True)
+        assert_array_almost_equal(check_path, path)
+
         path_len = len(path)
         optSize = path_len
         iterSize = path_len
@@ -298,11 +299,12 @@ class InverseCovariance(BaseEstimator):
         self.max_iter = max_iter
         self.Theta0 = Theta0
         self.Sigma0 = Sigma0
-        self.path = path
         self.verbose = verbose
         self.method = method
         self.metric = metric
         self.initialize_method = initialize_method
+        if mode == 'path':
+            self.set_path(path)
 
         self.covariance_ = None
         self.precision_ = None
@@ -324,13 +326,18 @@ class InverseCovariance(BaseEstimator):
 
     def initialize_coefficients(self, X):
         if self.initialize_method is 'corrcoef':
-            return np.corrcoef(X), 1.0
+            return np.corrcoef(X, rowvar=False), 1.0
         elif self.initialize_method is 'cov':   
             init_cov = np.cov(X, rowvar=False)
-            return init_cov, np.max(np.triu(init_cov))
+            return init_cov, np.max(np.abs(np.triu(init_cov)))
         else:
-            raise ValueError("initialize_method must be 'corrcoeff' or 'cov'.")
+            raise ValueError("initialize_method must be 'corrcoef' or 'cov'.")
 
+
+    def set_path(self, path):
+        self.path = np.array(sorted(set(path), reverse=True))
+        if self.path[0] != path[0]:
+            print 'Warning: Path must be sorted largest to smallest. Use self.path.'
 
     def fit(self, X, y=None, **fit_params):
         """Fits the inverse covariance model according to the given training 
@@ -538,7 +545,6 @@ class InverseCovariance(BaseEstimator):
                     prec,
                     self.n_samples,
                     self.n_features,
-                    self.lam * self.lam_scale_ * lam,
                     gamma=gamma))
 
         self.score_best_path_scale_index_ = np.argmin(ebic_scores)
