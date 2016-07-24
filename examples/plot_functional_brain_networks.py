@@ -16,10 +16,9 @@ Then we estimate separate inverse covariance matrices for one subject
 import numpy as np
 import matplotlib.pyplot as plt
 from nilearn import datasets, plotting, input_data
-import os, sys, inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
+
+import sys
+sys.path.append('..')
 from inverse_covariance import QuicGraphLasso
 
 

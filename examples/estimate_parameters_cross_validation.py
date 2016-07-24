@@ -40,7 +40,7 @@ def estimate_via_quic(X, num_folds, metric='log_likelihood'):
     print '\n-- QUIC CV'
     search_grid = {
       'lam': np.logspace(np.log10(0.001), np.log10(1.0), num=100, endpoint=True),
-      'initialize_method': ['cov'],
+      'initialize_method': ['cov', 'corrcoef'],
       'score_metric': [metric],
     }
 
@@ -69,7 +69,7 @@ def estimate_via_quic_ebic(X, gamma=0):
     ic_estimator = QuicGraphLasso(
         lam=1.0,
         mode='path',
-        initialize_method='cov',
+        initialize_method='corrcoef',
         path=np.logspace(np.log10(0.001), np.log10(1.0), num=100, endpoint=True))
     ic_estimator.fit(X)
 
@@ -138,8 +138,8 @@ def show_results(covs, precs):
 
 
 if __name__ == "__main__":
-    n_samples = 60 * 2 
-    n_features = 20 * 2
+    n_samples = 60  
+    n_features = 20 
     cv_folds = 3
 
     # make data

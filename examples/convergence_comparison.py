@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../inverse_covariance')
+sys.path.append('..')
 
 from sklearn.covariance import graph_lasso
 from inverse_covariance import quic
