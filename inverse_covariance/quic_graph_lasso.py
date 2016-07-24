@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.covariance import EmpiricalCovariance
 from sklearn.utils import check_array, as_float_array
 from sklearn.utils.testing import assert_array_almost_equal
-#from sklearn.externals.joblib import Parallel, delayed
+from sklearn.externals.joblib import Parallel, delayed
 #from sklearn.model_selection import check_cv, cross_val_score # >= 0.18
 from sklearn.cross_validation import check_cv, cross_val_score # < 0.18
 
@@ -14,6 +14,7 @@ import pyquic
 from inverse_covariance import (
     InverseCovarianceEstimator,
     _initialize_coefficients,
+    _compute_error,
 )
 
 
@@ -273,6 +274,49 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         return self
 
 
+def _quic_path(X, path, X_test=None, tol=1e-6,
+         max_iter=1000, Theta0=None, Sigma0=None, method='quic', 
+         verbose=0, score_metric='log_likelihood',
+         initialize_method='corrcoef'):
+    """Wrapper to compute path for example X.
+    """
+    S, lam_scale_ = _initialize_coefficients(
+            X,
+            method=initialize_method)
+
+    path = path.copy(order='C')
+    if method is 'quic':
+        (precisions_, covariances_, opt_, cputime_, 
+        iters_, duality_gap_) = quic(S,
+                                    1.0,
+                                    mode='path',
+                                    tol=tol,
+                                    max_iter=max_iter,
+                                    Theta0=Theta0,
+                                    Sigma0=Sigma0,
+                                    path=path,
+                                    msg=verbose)
+    else:
+        raise NotImplementedError(
+            "Only method='quic' has been implemented.")
+
+    if X_test is not None:
+        S_test, lam_scale_test = _initialize_coefficients(
+            X_test,
+            method=initialize_method)
+        
+        path_errors = []
+        for lidx, lam in enumerate(path):
+            path_errors.append(_compute_error(S_test,
+                                            covariances_[lidx],
+                                            precisions_[lidx],
+                                            score_metric=score_metric))
+        scores_ = [-e for e in path_errors]
+
+        return covariances_, precisions_, scores_
+    
+    return covariances_, precisions_
+
 class QuicGraphLassoCV(InverseCovarianceEstimator):
     """Sparse inverse covariance w/ cross-validated choice of the l1 penalty
     via quadratic approximation.  
@@ -384,51 +428,6 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         X : ndarray, shape (n_samples, n_features)
             Data from which to compute the covariance estimate
         """
-        def _quic_path(X, path, X_test=None):
-            """Compute path for example X.
-
-            Note: The way this is currently written, cannot be used in parallel.
-                  To fix this, change interface to self.cov_error to take
-                  covariance, precision as parameters.
-            """
-            S, lam_scale_ = _initialize_coefficients(
-                    X,
-                    method=self.initialize_method)
-
-            path = path.copy(order='C')
-            if self.method is 'quic':
-                (precisions_, covariances_, opt_, cputime_, 
-                iters_, duality_gap_) = quic(S,
-                                            1.0,
-                                            mode='path',
-                                            tol=self.tol,
-                                            max_iter=self.max_iter,
-                                            Theta0=self.Theta0,
-                                            Sigma0=self.Sigma0,
-                                            path=path,
-                                            msg=self.verbose)
-            else:
-                raise NotImplementedError(
-                    "Only method='quic' has been implemented.")
-
-            if X_test is not None:
-                self.covariance_ = covariances_
-                self.precision_ = precisions_
-                self.path = path
-                self.lam = 1.0
-                S_test, lam_scale_test = _initialize_coefficients(
-                    X_test,
-                    method=self.initialize_method)
-                
-                path_errors = self.cov_error(S_test, 
-                                            score_metric=self.score_metric)
-                scores_ = [-e for e in path_errors]
-
-                return covariances_, precisions_, scores_
-            
-            return covariances_, precisions_
-
-
         # initialize
         cv = check_cv(self.cv, X, y, classifier=False)
         X = check_array(X, ensure_min_features=2, estimator=self)
@@ -450,19 +449,19 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         t0 = time.time()
         for rr in range(n_refinements):
             # parallel version
-            #this_result = Parallel(
-            #    n_jobs=self.n_jobs,
-            #    verbose=self.verbose,
-            #)(
-            #    delayed(_quic_path)(
-            #        X[train],
-            #        path,
-            #        X_test=X[test])
-            #    for train, test in cv)
-
-            # non-parallel version
-            this_result = [_quic_path(X[train], path, X_test=X[test])
-                for train, test in cv]
+            this_result = Parallel(
+                n_jobs=self.n_jobs,
+                verbose=self.verbose,
+            )(
+                delayed(_quic_path)(
+                    X[train],
+                    path,
+                    X_test=X[test],
+                    tol=self.tol, max_iter=self.max_iter, Theta0=self.Theta0,
+                    Sigma0=self.Sigma0, method=self.method, verbose=self.verbose,
+                    score_metric=self.score_metric,
+                    initialize_method=self.initialize_method)
+                for train, test in cv)
 
             # Little dance to transform the list in what we need
             covs, _, scores = zip(*this_result)

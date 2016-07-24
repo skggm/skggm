@@ -13,6 +13,51 @@ def _initialize_coefficients(X, method='corrcoef'):
     else:
         raise ValueError("initialize_method must be 'corrcoef' or 'cov'.")
 
+
+def _compute_error(comp_cov, covariance_, precision_, score_metric='frobenius'):
+    """Computes the covariance error vs. comp_cov.
+        
+    Parameters
+    ----------
+    comp_cov : array-like, shape = (n_features, n_features)
+        The precision to compare with.
+        This should normally be the test sample covariance/precision.
+            
+    scaling : bool
+        If True, the squared error norm is divided by n_features.
+        If False (default), the squared error norm is not rescaled.
+
+    score_metric : str
+        The type of norm used to compute the error between the estimated 
+        self.precision, self.covariance and the reference `comp_cov`. 
+        Available error types:
+        
+        - 'frobenius' (default): sqrt(tr(A^t.A))
+        - 'spectral': sqrt(max(eigenvalues(A^t.A))
+        - 'kl': kl-divergence 
+        - 'quadratic': quadratic loss
+        - 'log_likelihood': negative log likelihood
+    
+    squared : bool
+        Whether to compute the squared error norm or the error norm.
+        If True (default), the squared error norm is returned.
+        If False, the error norm is returned.
+    """
+    if score_metric == "frobenius":
+        error = comp_cov - covariance_
+        return np.sum(error ** 2)                        
+    elif score_metric == "spectral":
+        error = comp_cov - covariance_
+        return np.amax(np.linalg.svdvals(np.dot(error.T, error)))
+    elif score_metric == "kl":
+        return metrics.kl_loss(comp_cov, precision_)
+    elif score_metric == "quadratic":
+        return metrics.quadratic_loss(comp_cov, precision_)
+    elif score_metric == "log_likelihood":
+        return -metrics.log_likelihood(comp_cov, precision_)
+    else:
+        raise NotImplementedError(("Must be frobenius, spectral, kl, "
+                                   "quadratic, or log_likelihood"))
     
 class InverseCovarianceEstimator(BaseEstimator):
     """
@@ -192,35 +237,19 @@ class InverseCovarianceEstimator(BaseEstimator):
         Returns
         -------
         The min error between `self.covariance_` and `comp_cov` 
-        """
-        def _compute_error(comp_cov, self_cov=None, self_prec=None):
-            if score_metric == "frobenius":
-                error = comp_cov - self_cov
-                return np.sum(error ** 2)                        
-            elif score_metric == "spectral":
-                error = comp_cov - self_cov
-                return np.amax(np.linalg.svdvals(np.dot(error.T, error)))
-            elif score_metric == "kl":
-                return metrics.kl_loss(comp_cov, self_prec)
-            elif score_metric == "quadratic":
-                return metrics.quadratic_loss(comp_cov, self_prec)
-            elif score_metric == "log_likelihood":
-                return -metrics.log_likelihood(comp_cov, self_prec)
-            else:
-                raise NotImplementedError(("Must be frobenius, spectral, kl, "
-                                           "quadratic, or log_likelihood"))
-  
-
+        """  
         if self.mode is not 'path':
             return _compute_error(comp_cov,
-                                self_cov=self.covariance_,
-                                self_prec=self.precision_)
+                                self.covariance_,
+                                self.precision_,
+                                score_metric)
 
         path_errors = []
         for lidx, lam in enumerate(self.path):
             path_errors.append(_compute_error(comp_cov,
-                                            self_cov=self.covariance_[lidx],
-                                            self_prec=self.precision_[lidx]))
+                                            self.covariance_[lidx],
+                                            self.precision_[lidx],
+                                            score_metric))
 
         return path_errors
 

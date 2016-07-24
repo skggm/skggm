@@ -63,7 +63,10 @@ def estimate_via_quic(X, num_folds, metric='log_likelihood'):
 
 def estimate_via_quic_cv(X, num_folds, metric='log_likelihood'):
     print '\n-- QUIC QuicGraphLassoCV'
-    model = QuicGraphLassoCV(cv=num_folds, initialize_method='cov')
+    model = QuicGraphLassoCV(
+            cv=num_folds,
+            n_refinements=6,
+            initialize_method='cov')
     model.fit(X)
 
     print 'Best parameters:'
