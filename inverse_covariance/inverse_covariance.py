@@ -163,8 +163,7 @@ class InverseCovarianceEstimator(BaseEstimator):
         return -error
 
 
-    def cov_error(self, comp_cov, score_metric='frobenius', scaling=False, 
-                   squared=True):
+    def cov_error(self, comp_cov, score_metric='frobenius'):
         """Computes the covariance error vs. comp_cov.
         
         Parameters
@@ -187,9 +186,6 @@ class InverseCovarianceEstimator(BaseEstimator):
             - 'kl': kl-divergence 
             - 'quadratic': quadratic loss
             - 'log_likelihood': negative log likelihood
-
-            The term 'norm' is retained to be compatible with EmpiricalCovariance
-            but 'metric' would be more appropriate.
         
         squared : bool
             Whether to compute the squared error norm or the error norm.
