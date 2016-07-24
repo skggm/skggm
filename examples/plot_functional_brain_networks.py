@@ -15,16 +15,13 @@ Then we estimate separate inverse covariance matrices for one subject
 
 import numpy as np
 import matplotlib.pyplot as plt
-from nilearn import datasets, connectome, plotting, input_data
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
-from inverse_covariance import InverseCovariance,pyquic
+from nilearn import datasets, plotting, input_data
+
+import sys
+sys.path.append('..')
+from inverse_covariance import QuicGraphLasso
 
 
-# Retrieve the atlas and the data
-from nilearn import datasets
 
 # Fetch the coordinates of power atlas
 power = datasets.fetch_coords_power_2011()
@@ -41,7 +38,8 @@ abide = datasets.fetch_abide_pcp(n_subjects=1)
 abide.func=abide.func_preproc
 
 # print basic information on the dataset
-print('First subject functional nifti images (4D) are at: %s' %abide.func[0])  # 4D data
+# 4D data
+print('First subject functional nifti images (4D) are at: %s' %abide.func[0])  
 
 ###############################################################################
 # Masking: taking the signal in a sphere of radius 5mm around Power coords
@@ -62,12 +60,21 @@ timeseries = masker.fit_transform(abide.func[0])
 # Extract and plot sparse inverse covariance
 
 # Compute the sparse inverse covariance
-estimator = InverseCovariance(initialize_method='cov',lam=0.5, mode='default',verbose=1)
+estimator = QuicGraphLasso(
+    initialize_method='cov',
+    lam=0.5,
+    mode='default',
+    verbose=1)
 estimator.fit(np.transpose(timeseries))
 
 # Display the sparse inverse covariance
 plt.figure(figsize=(7.5, 7.5))
-plt.imshow(np.triu(-estimator.precision_,1), interpolation="nearest", vmax=1, vmin=-1, cmap=plt.cm.PRGn)
+plt.imshow(
+    np.triu(-estimator.precision_,1),
+    interpolation="nearest",
+    vmax=1,
+    vmin=-1,
+    cmap=plt.cm.PRGn)
 plt.title('Precision (Sparse Inverse Covariance) matrix')
 plt.colorbar()
 

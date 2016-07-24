@@ -1,189 +1,71 @@
 import numpy as np
 from sklearn.base import BaseEstimator 
-from sklearn.utils import check_array, as_float_array
-from sklearn.utils.extmath import fast_logdet, pinvh
 
-import pyquic
+import metrics
 
 
-
-def log_likelihood(covariance, precision):
-    """Computes ...
-    
-    Parameters
-    ----------
-    covariance : 2D ndarray (n_features, n_features)
-        Maximum Likelihood Estimator of covariance
-    
-    precision : 2D ndarray (n_features, n_features)
-        The precision matrix of the covariance model to be tested
-    
-    Returns
-    -------
-    log-likelihood
-    """
-    assert covariance.shape == precision.shape
-    dim, _ = precision.shape
-    log_likelihood_ = - np.trace(np.dot(covariance, precision)) + fast_logdet(precision)
-    log_likelihood_ -= dim * np.log(2 * np.pi)
-    log_likelihood_ /= 2.
-    return log_likelihood_
-
-
-def kl_loss(covariance, precision):
-    """Computes the KL divergence between precision estimate and 
-    reference covariance.
-    
-    The loss is computed as:
-
-        Trace(Theta_1 * Sigma_0) - log(Theta_0 * Sigma_1) - dim(Sigma)
-
-    Parameters
-    ----------
-    covariance : 2D ndarray (n_features, n_features)
-        Maximum Likelihood Estimator of covariance
-    
-    precision : 2D ndarray (n_features, n_features)
-        The precision matrix of the covariance model to be tested
-    
-    Returns
-    -------
-    KL-divergence 
-    """
-    assert covariance.shape == precision.shape
-    dim, _ = precision.shape
-    p_dot_c = np.dot(precision, covariance)
-    return 0.5 * (np.trace(p_dot_c) - fast_logdet(p_dot_c) - dim)
-
-
-def quadratic_loss(covariance, precision):
-    """Computes ...
-    
-    Parameters
-    ----------
-    covariance : 2D ndarray (n_features, n_features)
-        Maximum Likelihood Estimator of covariance
-    
-    precision : 2D ndarray (n_features, n_features)
-        The precision matrix of the covariance model to be tested
-    
-    Returns
-    -------
-    Quadratic loss
-    """
-    assert covariance.shape == precision.shape
-    dim, _ = precision.shape
-    return np.trace((covariance * precision - np.eye(dim))**2)
-
-
-def quic(S, lam, mode='default', tol=1e-6, max_iter=1000, 
-        Theta0=None, Sigma0=None, path=None, msg=0):
-    """Fits the inverse covariance model according to the given training 
-    data and parameters.
-
-    Parameters
-    -----------
-    S : 2D ndarray, shape (n_features, n_features)
-        Empirical covariance or correlation matrix.
-
-    Other parameters described in `class InverseCovariance`.
-
-    Returns
-    -------
-    Theta : 
-    Sigma : 
-    opt : 
-    cputime : 
-    iters : 
-    dGap : 
-    """
-    assert mode in ['default', 'path', 'trace'],\
-            'mode = \'default\', \'path\' or \'trace\'.'
-
-    Sn, Sm = S.shape
-    if Sn != Sm:
-        raise ValueError("Input data must be square. S shape = {}".format(
-                         S.shape))
-        return
-
-    # Regularization parameter matrix L.
-    if isinstance(lam, float):
-        _lam = np.empty((Sn, Sm))
-        _lam[:] = lam
+def _initialize_coefficients(X, method='corrcoef'):
+    if method == 'corrcoef':
+        return np.corrcoef(X, rowvar=False), 1.0
+    elif method == 'cov':   
+        init_cov = np.cov(X, rowvar=False)
+        return init_cov, np.max(np.abs(np.triu(init_cov)))
     else:
-        assert L.shape == S.shape, 'lam, S shape mismatch.'
-        _lam = as_float_array(lam, copy=False, force_all_finite=False)
- 
-    # Defaults.
-    optSize = 1
-    iterSize = 1
-    if mode is "trace":
-        optSize = max_iter
-
-    # Default Theta0, Sigma0 when both are None.
-    if Theta0 is None and Sigma0 is None:
-        Theta0 = np.eye(Sn)
-        Sigma0 = np.eye(Sn)
-
-    assert Theta0 is not None,\
-            'Theta0 and Sigma0 must both be None or both specified.'
-    assert Sigma0 is not None,\
-            'Theta0 and Sigma0 must both be None or both specified.'
-    assert Theta0.shape == S.shape, 'Theta0, S shape mismatch.'
-    assert Sigma0.shape == S.shape, 'Theta0, Sigma0 shape mismatch.'
-    Theta0 = as_float_array(Theta0, copy=False, force_all_finite=False)
-    Sigma0 = as_float_array(Sigma0, copy=False, force_all_finite=False)
-
-    if mode is 'path':
-        assert path is not None, 'Please specify the path scaling values.'
-        path_len = len(path)
-        optSize = path_len
-        iterSize = path_len
-
-        # Note here: memory layout is important:
-        # a row of X/W holds a flattened Sn x Sn matrix,
-        # one row for every element in _path_.
-        Theta = np.empty((path_len, Sn * Sn))
-        Theta[0,:] = Theta0.ravel()
-        Sigma = np.empty((path_len, Sn * Sn))
-        Sigma[0,:] = Sigma0.ravel()
-    else:
-        path = np.empty(1)
-        path_len = len(path)
-
-        Theta = np.empty(Theta0.shape)
-        Theta[:] = Theta0
-        Sigma = np.empty(Sigma0.shape)
-        Sigma[:] = Sigma0
-                    
-    # Run QUIC.
-    opt = np.zeros(optSize)
-    cputime = np.zeros(optSize)
-    dGap = np.zeros(optSize)
-    iters = np.zeros(iterSize, dtype=np.uint32)
-    pyquic.quic(mode, Sn, S, _lam, path_len, path, tol, msg, max_iter,
-                Theta, Sigma, opt, cputime, iters, dGap)
-
-    if optSize == 1:
-        opt = opt[0]
-        cputime = cputime[0]
-        dGap = dGap[0]
-
-    if iterSize == 1:
-        iters = iters[0]
-
-    return Theta, Sigma, opt, cputime, iters, dGap
+        raise ValueError(("initialize_method must be 'corrcoef' or 'cov', "
+            "passed \'{}\' .".format(method)))
 
 
-class InverseCovariance(BaseEstimator):
+def _compute_error(comp_cov, covariance_, precision_, score_metric='frobenius'):
+    """Computes the covariance error vs. comp_cov.
+        
+    Parameters
+    ----------
+    comp_cov : array-like, shape = (n_features, n_features)
+        The precision to compare with.
+        This should normally be the test sample covariance/precision.
+            
+    scaling : bool
+        If True, the squared error norm is divided by n_features.
+        If False (default), the squared error norm is not rescaled.
+
+    score_metric : str
+        The type of norm used to compute the error between the estimated 
+        self.precision, self.covariance and the reference `comp_cov`. 
+        Available error types:
+        
+        - 'frobenius' (default): sqrt(tr(A^t.A))
+        - 'spectral': sqrt(max(eigenvalues(A^t.A))
+        - 'kl': kl-divergence 
+        - 'quadratic': quadratic loss
+        - 'log_likelihood': negative log likelihood
+    
+    squared : bool
+        Whether to compute the squared error norm or the error norm.
+        If True (default), the squared error norm is returned.
+        If False, the error norm is returned.
     """
-    Computes a sparse inverse covariance matrix estimation using quadratic 
-    approximation. 
+    if score_metric == "frobenius":
+        error = comp_cov - covariance_
+        return np.sum(error ** 2)                        
+    elif score_metric == "spectral":
+        error = comp_cov - covariance_
+        return np.amax(np.linalg.svdvals(np.dot(error.T, error)))
+    elif score_metric == "kl":
+        return metrics.kl_loss(comp_cov, precision_)
+    elif score_metric == "quadratic":
+        return metrics.quadratic_loss(comp_cov, precision_)
+    elif score_metric == "log_likelihood":
+        return -metrics.log_likelihood(comp_cov, precision_)
+    else:
+        raise NotImplementedError(("Must be frobenius, spectral, kl, "
+                                   "quadratic, or log_likelihood"))
+    
+class InverseCovarianceEstimator(BaseEstimator):
+    """
+    Base class for inverse covariance estimators.
 
-    The inverse covariance is estimated the sample covariance estimate 
-    $S$ as an input such that: 
-
-    $T_hat = max_{\Theta} logdet(Theta) - Trace(ThetaS) - \lambda|\Theta|_1 $
+    Provides initialization method, metrics, scoring function, 
+    and ebic model selection.
 
     Parameters
     -----------        
@@ -193,131 +75,109 @@ class InverseCovariance(BaseEstimator):
     mode : one of 'default', 'path', or 'trace'
         Computation mode.
 
-    tol : float (default=1e-6)
-        Convergence threshold.
-
-    max_iter : int (default=1000)
-        Maximum number of Newton iterations.
-
-    Theta0 : 2D ndarray, shape (n_features, n_features) (default=None) 
-        Initial guess for the inverse covariance matrix. If not provided, the 
-        diagonal identity matrix is used.
-
-    Sigma0 : 2D ndarray, shape (n_features, n_features) (default=None)
-        Initial guess for the covariance matrix. If not provided the diagonal 
-        identity matrix is used.
-
     path : array of floats (default=None)
-        In "path" mode, an array of float values for scaling L.
+        In "path" mode, an array of float values for scaling lam.
+        The path must be sorted largest to smallest.  This class will auto sort
+        this, in which case indices correspond to self.path_
 
-    verbose : int (default=0)
-        Verbosity level.
-
-    method : one of 'quic'... (default=quic)
-
-    metric : one of 'log_likelihood' (default), 'frobenius', 'spectral', 'kl', 
-             or 'quadratic'
-        Used in self.score().
+    score_metric : one of 'log_likelihood' (default), 'frobenius', 'spectral',
+                  'kl', or 'quadratic'
+        Used for computing self.score().
 
     initialize_method : one of 'corrcoef', 'cov'
+        Computes initial covariance and scales lambda appropriately.
 
     Attributes
     ----------
     covariance_ : 2D ndarray, shape (n_features, n_features)
         Estimated covariance matrix
-        If mode='path', this is 2D ndarray, shape (len(path), n_features ** 2)
+        
+        If mode='path', this is a len(path) list of
+        2D ndarray, shape (n_features, n_features)
+
 
     precision_ : 2D ndarray, shape (n_features, n_features)
         Estimated pseudo-inverse matrix.
-        If mode='path', this is 2D ndarray, shape (len(path), n_features ** 2)
+        
+        If mode='path', this is a len(path) list of
+        2D ndarray, shape (n_features, n_features)
 
-    opt_ :
+    sample_covariance_ : 2D ndarray, shape (n_features, n_features)
+        Estimated sample covariance matrix
 
-    cputime_ :
+    lam_scale_ : (float)
+        Additional scaling factor on lambda (due to magnitude of 
+        sample_covariance_ values).
 
-    iters_ :    
-
-    duality_gap_ :
-
+    path_ : None or array of floats
+        Sorted (largest to smallest) path.  This will be None if not in path
+        mode.
     """
-    def __init__(self, lam=0.5, mode='default', tol=1e-6, max_iter=1000,
-                 Theta0=None, Sigma0=None, path=None, verbose=0, method='quic',
-                 metric='log_likelihood', initialize_method='corrcoef'):
+    def __init__(self, lam=0.5, mode='default', score_metric='log_likelihood',
+                 path=None, initialize_method='corrcoef'):
         self.lam = lam
         self.mode = mode
-        self.tol = tol
-        self.max_iter = max_iter
-        self.Theta0 = Theta0
-        self.Sigma0 = Sigma0
-        self.path = path
-        self.verbose = verbose
-        self.method = method
-        self.metric = metric
+        self.score_metric = score_metric
         self.initialize_method = initialize_method
+        self.set_path(path)
 
         self.covariance_ = None
         self.precision_ = None
-        self.opt_ = None
-        self.cputime_ = None
-        self.iters_ = None
-        self.duality_gap_ = None
-        self.score_best_path_scale_ = None
-        self.score_best_path_scale_index_ = None
 
-        super(InverseCovariance, self).__init__()
+        # these must be updated upon self.fit()
+        self.sample_covariance_ = None
+        self.lam_scale_ = None
+        self.n_samples = None
+        self.n_features = None
+        self.is_fitted = False 
+
+        super(InverseCovarianceEstimator, self).__init__()
+
+
+    def lam_select_(self, lam_index):
+        return self.lam * self.lam_scale_ * self.path[lam_index]
 
 
     def initialize_coefficients(self, X):
-        if self.initialize_method is 'corrcoef':
-            return np.corrcoef(X), 1.0
-        elif self.initialize_method is 'cov':   
-            init_cov = np.cov(X, rowvar=False)
-            return init_cov, np.max(np.triu(init_cov))
-        else:
-            raise ValueError("initialize_method must be 'corrcoeff' or 'cov'.")
+        """Computes ...
 
-
-    def fit(self, X, y=None, **fit_params):
-        """Fits the inverse covariance model according to the given training 
-        data and parameters.
-
-        Parameters
-        -----------
-        X : 2D ndarray, shape (n_features, n_features)
-            Input data.
-
-        Returns
-        -------
-        self
+        Initialize the following values:
+            self.n_samples
+            self.n_features
+            self.sample_covariance_
+            self.lam_scale_
         """
-        X = check_array(X)
-        X = as_float_array(X, copy=False, force_all_finite=False)
-        S, scale_lam = self.initialize_coefficients(X)
-        if self.method is 'quic':
-            (self.precision_, self.covariance_, self.opt_, self.cputime_, 
-            self.iters_, self.duality_gap_) = quic(S,
-                                                self.lam * scale_lam,
-                                                mode=self.mode,
-                                                tol=self.tol,
-                                                max_iter=self.max_iter,
-                                                Theta0=self.Theta0,
-                                                Sigma0=self.Sigma0,
-                                                path=self.path,
-                                                msg=self.verbose)
-        else:
-            raise NotImplementedError(
-                "Only method='quic' has been implemented.")
+        self.n_samples, self.n_features = X.shape
+        self.sample_covariance_, self.lam_scale_ = _initialize_coefficients(
+                X,
+                method=self.initialize_method)
 
-        return self
+    def set_path(self, path):
+        """Sorts path values from largest to smallest.
+
+        Will warn if path parameter was not already sorted.
+        """
+        if self.mode is 'path' and path is None:
+            raise ValueError("path required in path mode.")
+            return
+
+        if path is None:
+            self.path = None
+            return
+
+        self.path = np.array(sorted(set(path), reverse=True))
+        if self.path[0] != path[0]:
+            print 'Warning: Path must be sorted largest to smallest.'
 
 
     def score(self, X_test, y=None):
         """Computes the score between cov/prec of sample covariance of X_test 
-        and X via 'metric'.
+        and X via 'score_metric'.
 
         Note: We want to maximize score so we return the negative error 
               (or the max negative error). 
        
+        Parameters
         ----------
         X_test : array-like, shape = [n_samples, n_features]
             Test data of which we compute the likelihood, where n_samples is
@@ -329,31 +189,25 @@ class InverseCovariance(BaseEstimator):
         
         Returns
         -------
-        res : float
-            The likelihood of the data set with `self.covariance_` as an
-            estimator of its covariance matrix.
+        result : float
+            #The likelihood of the data set with `self.covariance_` as an
+            #estimator of its covariance matrix.
         """        
-        S_test, scale_lam = self.initialize_coefficients(X_test)
-        error = self.error_norm(
-                S_test,
-                norm=self.metric,
-                scaling=False, 
-                squared=False)
+        if self.mode is 'path':
+            raise NotImplementedError(("self.score is not implemented for path "
+                                        "mode.  Use QuicGraphLassoCV."))
 
-        if self.mode is not 'path':
-            return -error
+        S_test, lam_scale_test = _initialize_coefficients(
+                X_test,
+                method=self.initialize_method)
+        error = self.cov_error(S_test, score_metric=self.score_metric)
 
-        path_errors = [-e for e in error]
-        min_lidx = np.argmin(path_errors)
-        self.score_best_path_scale_index_ = min_lidx
-        self.score_best_path_scale_ = self.path[min_lidx]
-        return path_errors[min_lidx]
+        # maximize score with -error
+        return -error
 
 
-    def error_norm(self, comp_cov, norm='frobenius', scaling=False, 
-                   squared=True):
-        """Computes the error between two inverse-covariance estimators 
-        (i.e., via covariance).
+    def cov_error(self, comp_cov, score_metric='frobenius'):
+        """Computes the covariance error vs. comp_cov.
         
         Parameters
         ----------
@@ -365,7 +219,7 @@ class InverseCovariance(BaseEstimator):
             If True, the squared error norm is divided by n_features.
             If False (default), the squared error norm is not rescaled.
 
-        norm : str
+        score_metric : str
             The type of norm used to compute the error between the estimated 
             self.precision, self.covariance and the reference `comp_cov`. 
             Available error types:
@@ -375,9 +229,6 @@ class InverseCovariance(BaseEstimator):
             - 'kl': kl-divergence 
             - 'quadratic': quadratic loss
             - 'log_likelihood': negative log likelihood
-
-            The term 'norm' is retained to be compatible with EmpiricalCovariance
-            but 'metric' would be more appropriate.
         
         squared : bool
             Whether to compute the squared error norm or the error norm.
@@ -387,59 +238,63 @@ class InverseCovariance(BaseEstimator):
         Returns
         -------
         The min error between `self.covariance_` and `comp_cov` 
-        If mode='path', this will also set self.score_best_path_scale_ with the 
-        best lambda for the current min error.
-        """
-        def _compute_error(comp_cov, self_prec=None, self_cov=None):
-            if norm == "frobenius":
-                error = comp_cov - self_cov
-                result = np.sum(error ** 2)
-                
-                if not squared:
-                    result = np.sqrt(result)
-
-                if scaling:
-                    result = result / error.shape[0]
-
-                return result
-            
-            elif norm == "spectral":
-                error = comp_cov - self_cov
-                result = np.amax(np.linalg.svdvals(np.dot(error.T, error)))
-                
-                if not squared:
-                    result = np.sqrt(result)
-
-                if scaling:
-                    result = result / error.shape[0]
-
-                return result
-            
-            elif norm == "kl":
-                return kl_loss(comp_cov, self_prec)
-            elif norm == "quadratic":
-                return quadratic_loss(comp_cov, self_prec)
-            elif norm == "log_likelihood":
-                return -log_likelihood(comp_cov, self_prec)
-            else:
-                raise NotImplementedError(
-                    "Must be frobenius, spectral, kl, quadratic, or\
-                    log_likelihood")
-  
-
+        """  
         if self.mode is not 'path':
             return _compute_error(comp_cov,
-                                self_prec=self.precision_,
-                                self_cov=self.covariance_)
+                                self.covariance_,
+                                self.precision_,
+                                score_metric)
 
         path_errors = []
-        for lidx, lam_scale in enumerate(self.path):
-            dim, _ = comp_cov.shape
-            self_prec = np.reshape(self.precision_[lidx, :], (dim, dim))
-            self_cov = np.reshape(self.covariance_[lidx, :], (dim, dim))
+        for lidx, lam in enumerate(self.path):
             path_errors.append(_compute_error(comp_cov,
-                                            self_prec=self_prec,
-                                            self_cov=self_cov))
+                                            self.covariance_[lidx],
+                                            self.precision_[lidx],
+                                            score_metric))
 
         return path_errors
 
+
+    def ebic_select(self, gamma=0):
+        '''
+        Uses Extended Bayesian Information Criteria for model selection.
+
+        Can only be used in path mode.
+
+        See:
+            Extended Bayesian Information Criteria for Gaussian Graphical Models
+            R. Foygel and M. Drton
+            NIPS 2010
+
+        Parameters
+        ----------
+        gamma : (float) \in (0, 1)
+            Choice of gamma=0 leads to classical BIC
+            Positive gamma leads to stronger penalization of large graphs.
+
+        Returns
+        -------
+        Lambda index with best ebic score.
+        '''
+        # must be path mode
+        if self.mode is not 'path':
+            raise NotImplementedError(("Model selection only implemented for " 
+                                      "mode=path"))
+            return
+
+        # model must be fitted
+        if not self.is_fitted:
+            return
+
+        ebic_scores = []
+        for lidx, lam in enumerate(self.path):
+            ebic_scores.append(metrics.ebic(
+                    self.sample_covariance_,
+                    self.precision_[lidx],
+                    self.n_samples,
+                    self.n_features,
+                    gamma=gamma))
+
+        return np.argmin(ebic_scores)
+
+    
