@@ -69,7 +69,7 @@ def estimate_via_quic_ebic(X, gamma=0):
     ic_estimator = QuicGraphLasso(
         lam=1.0,
         mode='path',
-        initialize_method='corrcoef',
+        initialize_method='cov',
         path=np.logspace(np.log10(0.001), np.log10(1.0), num=100, endpoint=True))
     ic_estimator.fit(X)
 
