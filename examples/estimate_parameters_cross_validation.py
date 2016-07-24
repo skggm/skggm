@@ -39,7 +39,7 @@ def make_data(n_samples, n_features):
 def estimate_via_quic(X, num_folds, metric='log_likelihood'):
     print '\n-- QUIC CV'
     search_grid = {
-      'lam': np.logspace(np.log10(0.001), np.log10(0.5), num=100, endpoint=True),
+      'lam': np.logspace(np.log10(0.01), np.log10(1.0), num=100, endpoint=True),
       'initialize_method': ['cov', 'corrcoef'],
       'score_metric': [metric], # note: score_metrics are not comparable
     }
@@ -58,7 +58,7 @@ def estimate_via_quic(X, num_folds, metric='log_likelihood'):
     pprint.pprint(estimator.best_params_)
     print 'Best score: {}'.format(ic_score)
 
-    return ic_estimator.covariance_, ic_estimator.precision_
+    return ic_estimator.covariance_, ic_estimator.precision_, estimator.best_params_['lam']
 
 
 def estimate_via_quic_cv(X, num_folds, metric='log_likelihood'):
@@ -67,14 +67,15 @@ def estimate_via_quic_cv(X, num_folds, metric='log_likelihood'):
             cv=num_folds,
             n_refinements=6,
             n_jobs=1,
-            initialize_method='cov')
+            initialize_method='cov',
+            score_metric=metric)
     model.fit(X)
 
     print 'Best parameters:'
     print 'Best lambda: {}'.format(model.lam_)
     print 'CV lams: {}'.format(model.cv_lams_)
 
-    return model.covariance_, model.precision_
+    return model.covariance_, model.precision_, model.lam_
 
 
 def estimate_via_quic_ebic(X, gamma=0):
@@ -83,7 +84,7 @@ def estimate_via_quic_ebic(X, gamma=0):
         lam=1.0,
         mode='path',
         initialize_method='cov',
-        path=np.logspace(np.log10(0.001), np.log10(0.5), num=100, endpoint=True))
+        path=np.logspace(np.log10(0.01), np.log10(0.5), num=100, endpoint=True))
     ic_estimator.fit(X)
 
     # ebic model selection
@@ -96,7 +97,7 @@ def estimate_via_quic_ebic(X, gamma=0):
     cov = ic_estimator.covariance_[ebic_index]
     prec = ic_estimator.precision_[ebic_index]
 
-    return cov, prec
+    return cov, prec, ic_estimator.lam_select_(ebic_index)
 
 
 def estimate_via_empirical(X):
@@ -105,7 +106,7 @@ def estimate_via_empirical(X):
 
 
 def estimate_via_graph_lasso(X, num_folds):
-    model = GraphLassoCV(cv=num_folds) # default 3
+    model = GraphLassoCV(cv=num_folds)
     model.fit(X)
     return model.covariance_, model.precision_
 
@@ -135,7 +136,7 @@ def show_results(covs, precs):
     # plot the precisions
     plt.figure(figsize=(10, 6))
     plt.subplots_adjust(left=0.02, right=0.98)
-    for i, (name, this_prec) in enumerate(precs):
+    for i, (name, this_prec, lam) in enumerate(precs):
         vmax = np.abs(this_prec).max()
         ax = plt.subplot(4, 4, i + 1)
         plt.imshow(np.ma.masked_values(this_prec, 0),
@@ -143,7 +144,10 @@ def show_results(covs, precs):
                    cmap=plt.cm.RdBu_r)
         plt.xticks(())
         plt.yticks(())
-        plt.title('%s precision' % name)
+        if lam == '':
+            plt.title('{}'.format(name))
+        else:
+            plt.title('{} (lam={:.2f})'.format(name, lam))
         ax.set_axis_bgcolor('.7')
 
     plt.show()
@@ -163,25 +167,25 @@ if __name__ == "__main__":
     emp_cov, emp_prec = estimate_via_empirical(X)
     gl_cov, gl_prec = estimate_via_graph_lasso(X, cv_folds)
     lw_cov, lw_prec = estimate_via_ledoit_wolf(X)
-    quic_ll_cov, quic_ll_prec = estimate_via_quic(X,
+    quic_ll_cov, quic_ll_prec, quic_ll_lam = estimate_via_quic(X,
             cv_folds, metric='log_likelihood')
-    quic_kl_cov, quic_kl_prec = estimate_via_quic(X,
+    quic_kl_cov, quic_kl_prec, quic_kl_lam = estimate_via_quic(X,
             cv_folds, metric='kl')
-    quic_fro_cov, quic_fro_prec = estimate_via_quic(X,
+    quic_fro_cov, quic_fro_prec, quic_fro_lam = estimate_via_quic(X,
             cv_folds, metric='frobenius')
-    quic_cv_ll_cov, quic_cv_ll_prec = estimate_via_quic_cv(X,
+    quic_cv_ll_cov, quic_cv_ll_prec, quic_cv_ll_lam = estimate_via_quic_cv(X,
             cv_folds, metric='log_likelihood')
-    quic_cv_kl_cov, quic_cv_kl_prec = estimate_via_quic_cv(X,
+    quic_cv_kl_cov, quic_cv_kl_prec, quic_cv_kl_lam = estimate_via_quic_cv(X,
             cv_folds, metric='kl')
-    quic_cv_fro_cov, quic_cv_fro_prec = estimate_via_quic_cv(X,
+    quic_cv_fro_cov, quic_cv_fro_prec, quic_cv_fro_lam = estimate_via_quic_cv(X,
             cv_folds, metric='frobenius')
-    quic_bic_cov, quic_bic_prec = estimate_via_quic_ebic(X, gamma=0)
-    quic_ebic_cov, quic_ebic_prec = estimate_via_quic_ebic(X, gamma=0.1)
+    quic_bic_cov, quic_bic_prec, quic_bic_lam = estimate_via_quic_ebic(X, gamma=0)
+    quic_ebic_cov, quic_ebic_prec, quic_ebic_lam = estimate_via_quic_ebic(X, gamma=0.1)
 
     # Show results
     covs = [('True', cov),
             ('Empirical', emp_cov),
-            ('GraphLasso', gl_cov),
+            ('GraphLassoCV', gl_cov),
             ('Ledoit-Wolf', lw_cov),
             ('Quic (cv-ll)', quic_ll_cov),
             ('Quic (cv-kl)', quic_kl_cov),
@@ -193,20 +197,20 @@ if __name__ == "__main__":
             ('True', cov),
             ('Quic (bic)', quic_bic_cov),
             ('Quic (ebic gamma = 0.1)', quic_ebic_cov)]
-    precs = [('True', prec),
-            ('Empirical', emp_prec),
-            ('GraphLasso', gl_prec),
-            ('Ledoit-Wolf', lw_prec),
-            ('Quic (cv-ll)', quic_ll_prec),
-            ('Quic (cv-kl)', quic_kl_prec),
-            ('Quic (cv-fro)', quic_fro_prec),
-            ('True', prec),
-            ('QuicCV (ll)', quic_cv_ll_prec),
-            ('QuicCV (kl)', quic_cv_kl_prec),
-            ('QuicCV (fro)', quic_cv_fro_prec),
-            ('True', prec),
-            ('Quic (bic)', quic_bic_prec),
-            ('Quic (ebic gamma = 0.1)', quic_ebic_prec)]
+    precs = [('True', prec, ''),
+            ('Empirical', emp_prec, ''),
+            ('GraphLassoCV', gl_prec, ''),
+            ('Ledoit-Wolf', lw_prec, ''),
+            ('Quic (cv-ll)', quic_ll_prec, quic_ll_lam),
+            ('Quic (cv-kl)', quic_kl_prec, quic_kl_lam),
+            ('Quic (cv-fro)', quic_fro_prec, quic_fro_lam),
+            ('True', prec, ''),
+            ('QuicCV (ll)', quic_cv_ll_prec, quic_cv_ll_lam),
+            ('QuicCV (kl)', quic_cv_kl_prec, quic_cv_kl_lam),
+            ('QuicCV (fro)', quic_cv_fro_prec, quic_cv_fro_lam),
+            ('True', prec, ''),
+            ('Quic (bic)', quic_bic_prec, quic_bic_lam),
+            ('Quic (ebic gamma = 0.1)', quic_ebic_prec, quic_ebic_lam)]
     show_results(covs, precs)
 
   

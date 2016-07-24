@@ -19,7 +19,8 @@ def log_likelihood(covariance, precision):
     """
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
-    log_likelihood_ = -np.trace(np.dot(covariance, precision)) +\
+    # np.dot(covariance, precision) # ?
+    log_likelihood_ = -np.trace(covariance * precision) +\
                       fast_logdet(precision) - dim * np.log(2 * np.pi)
     log_likelihood_ /= 2.
     return log_likelihood_
@@ -47,7 +48,8 @@ def kl_loss(covariance, precision):
     """
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
-    p_dot_c = np.dot(covariance, precision)
+    #p_dot_c = np.dot(precision, covariance)  # this often results in fast_logdet(p_dot_c) = np.inf or np.nan, ?
+    p_dot_c = precision * covariance
     return 0.5 * (np.trace(p_dot_c) - fast_logdet(p_dot_c) - dim)
 
 
