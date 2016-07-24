@@ -3,6 +3,7 @@ import collections
 import operator
 import numpy as np
 
+from sklearn.covariance import EmpiricalCovariance
 from sklearn.utils import check_array, as_float_array
 from sklearn.utils.testing import assert_array_almost_equal
 #from sklearn.externals.joblib import Parallel, delayed
@@ -413,6 +414,8 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
             if X_test is not None:
                 self.covariance_ = covariances_
                 self.precision_ = precisions_
+                self.path = path
+                self.lam = 1.0
                 S_test, lam_scale_test = _initialize_coefficients(
                     X_test,
                     method=self.initialize_method)
@@ -458,24 +461,15 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
             #    for train, test in cv)
 
             # non-parallel version
-            this_result = (_quic_path(X[train], path, X_test=X[test])
-                for train, test in cv)
+            this_result = [_quic_path(X[train], path, X_test=X[test])
+                for train, test in cv]
 
             # Little dance to transform the list in what we need
             covs, _, scores = zip(*this_result)
-            print len(covs)
-            print len(scores)
-            print len(path)
             covs = zip(*covs)
             scores = zip(*scores)
-            print '--'
-            print len(covs)
-            print len(scores)
-            print len(path)
             results.extend(zip(path, scores, covs))
             results = sorted(results, key=operator.itemgetter(0), reverse=True)
-
-            #print results
 
             # Find the maximum (avoid using built in 'max' function to
             # have a fully-reproducible selection of the smallest alpha
@@ -532,7 +526,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         
         # Finally, compute the score with lambda = 0
         lams.append(0)
-        grid_scores.append(cross_val_score(self.sample_covariance_, X,
+        grid_scores.append(cross_val_score(EmpiricalCovariance(), X,
                                            cv=cv, n_jobs=self.n_jobs))
         self.grid_scores = np.array(grid_scores)
         self.lam_ = lams[best_index]
