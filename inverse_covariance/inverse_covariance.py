@@ -5,13 +5,14 @@ import metrics
 
 
 def _initialize_coefficients(X, method='corrcoef'):
-    if method is 'corrcoef':
+    if method == 'corrcoef':
         return np.corrcoef(X, rowvar=False), 1.0
-    elif method is 'cov':   
+    elif method == 'cov':   
         init_cov = np.cov(X, rowvar=False)
         return init_cov, np.max(np.abs(np.triu(init_cov)))
     else:
-        raise ValueError("initialize_method must be 'corrcoef' or 'cov'.")
+        raise ValueError(("initialize_method must be 'corrcoef' or 'cov', "
+            "passed \'{}\' .".format(method)))
 
 
 def _compute_error(comp_cov, covariance_, precision_, score_metric='frobenius'):

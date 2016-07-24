@@ -285,7 +285,7 @@ def _quic_path(X, path, X_test=None, tol=1e-6,
             method=initialize_method)
 
     path = path.copy(order='C')
-    if method is 'quic':
+    if method == 'quic':
         (precisions_, covariances_, opt_, cputime_, 
         iters_, duality_gap_) = quic(S,
                                     1.0,
