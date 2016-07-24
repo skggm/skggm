@@ -140,7 +140,7 @@ def show_results(covs, precs):
 
 
 if __name__ == "__main__":
-    n_samples = 60  
+    n_samples = 60 
     n_features = 20 
     cv_folds = 3
 
