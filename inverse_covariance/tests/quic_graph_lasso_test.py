@@ -3,31 +3,30 @@ import numpy as np
 import pytest
 from scipy.io import loadmat
 
-from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.utils.testing import assert_raises
 from sklearn.utils.testing import assert_allclose
 
 from sklearn import datasets
 
-from .. import InverseCovariance, quic
+from .. import QuicGraphLasso, quic
 
 
 class TestInverseCovariance(object):
     @pytest.mark.parametrize("params_in, expected", [
-        ({}, [65.22614889456429, 18.704554180634613, 534.23790896400169, 5.2531441951941815e-07]),
+        ({}, [4.7973002082865275, 2.1849691442858554, 13.938876329200646, 4.7809889380800996e-10]),
         ({
             'lam': 1.0,
             'max_iter': 100,
-        }, [42.047592083257278, 10.511898020814318, 748.37105380749654, 0.0]),
+        }, [6.3245553203367599, 1.5811388300841893, 16.931471805599454, 1.7763568394002505e-15]),
         ({
             'lam': 0.5,
             'mode': 'trace',
-        }, [65.22614889456429, 18.704554180634613, 1890.485640010804, 1414213562372882.5]),
+        }, [4.7973002082865275, 2.1849691442858554, 47.669199462053712, 12.382778386518567]),
         ({
             'lam': 0.5,
             'mode': 'path',
             'path': np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5]),
-        }, [234.42034955185895, 66.11208447360967, 1020.7602391074518, 2.830908902050909e-06]),
+        }, [11.085316489394547, 6.4455217296796823, 31.35533727044356, 1.7042279940093894e-08]),
         ({
             'lam': 1.0,
             'max_iter': 100,
@@ -40,7 +39,7 @@ class TestInverseCovariance(object):
         Just tests inputs/outputs (not validity of result).
         '''
         X = datasets.load_diabetes().data
-        ic = InverseCovariance(**params_in)
+        ic = QuicGraphLasso(**params_in)
         ic.fit(X)
         
         result_vec = [
@@ -58,7 +57,7 @@ class TestInverseCovariance(object):
         Test behavior of invalid inputs.
         '''
         X = datasets.load_diabetes().data
-        ic = InverseCovariance(method='unknownmethod')
+        ic = QuicGraphLasso(method='unknownmethod')
         assert_raises(NotImplementedError, ic.fit, X)
 
 
