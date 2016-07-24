@@ -1,10 +1,19 @@
+import time
+import collections
+import operator
 import numpy as np
+
 from sklearn.utils import check_array, as_float_array
 from sklearn.utils.testing import assert_array_almost_equal
+#from sklearn.externals.joblib import Parallel, delayed
+#from sklearn.model_selection import check_cv, cross_val_score # >= 0.18
+from sklearn.cross_validation import check_cv, cross_val_score # < 0.18
 
 import pyquic
-from inverse_covariance import InverseCovarianceEstimator
-
+from inverse_covariance import (
+    InverseCovarianceEstimator,
+    _initialize_coefficients,
+)
 
 
 def quic(S, lam, mode='default', tol=1e-6, max_iter=1000, 
@@ -158,6 +167,9 @@ class QuicGraphLasso(InverseCovarianceEstimator):
 
     method : one of 'quic'... (default=quic)
 
+    verbose : integer
+        Used in quic routine.
+
     score_metric : one of 'log_likelihood' (default), 'frobenius', 'spectral',
                   'kl', or 'quadratic'
         Used for computing self.score().
@@ -197,7 +209,7 @@ class QuicGraphLasso(InverseCovarianceEstimator):
 
     """
     def __init__(self, lam=0.5, mode='default', tol=1e-6, max_iter=1000,
-                 Theta0=None, Sigma0=None, path=None, method='quic',
+                 Theta0=None, Sigma0=None, path=None, method='quic', verbose=0,
                  score_metric='log_likelihood', initialize_method='corrcoef'):
         # quic-specific params
         self.tol = tol
@@ -205,6 +217,7 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         self.Theta0 = Theta0
         self.Sigma0 = Sigma0
         self.method = method
+        self.verbose = verbose
 
         # quic-specific outputs
         self.opt_ = None
@@ -237,7 +250,7 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         -------
         self
         """
-        X = check_array(X)
+        X = check_array(X, ensure_min_features=2, estimator=self)
         X = as_float_array(X, copy=False, force_all_finite=False)
         self.initialize_coefficients(X)
         if self.method is 'quic':
@@ -259,7 +272,7 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         return self
 
 
-class QuicGraphLassoCV(QuicGraphLasso):
+class QuicGraphLassoCV(InverseCovarianceEstimator):
     """Sparse inverse covariance w/ cross-validated choice of the l1 penalty
     via quadratic approximation.  
 
@@ -277,6 +290,9 @@ class QuicGraphLassoCV(QuicGraphLasso):
     n_refinements: strictly positive integer
         The number of times the grid is refined. Not used if explicit
         values of alphas are passed.
+
+    n_jobs: int, optional
+        number of jobs to run in parallel (default 1).
 
     tol : float (default=1e-6)
         Convergence threshold.
@@ -326,14 +342,39 @@ class QuicGraphLassoCV(QuicGraphLasso):
     """
     def __init__(self, lams=4, n_refinements=4, cv=None, tol=1e-6,
                  max_iter=1000, Theta0=None, Sigma0=None, method='quic', 
-                 score_metric='log_likelihood', initialize_method='corrcoef'):
+                 verbose=0, n_jobs=1, score_metric='log_likelihood',
+                 initialize_method='corrcoef'):
+        # GridCV params
+        self.n_jobs = n_jobs
+        self.cv = cv
         self.lams = lams
         self.n_refinements = n_refinements
 
-        super(QuicGraphLasso, self).__init__(self, 
-                lam=1.0, mode='path', tol=tol, max_iter=max_iter,
-                Theta0=Theta0, Sigma0=Sigma0, path=[], method=method,
-                score_metric=score_metric, initialize_method=initialize_method)
+        # quic-specific params
+        self.tol = tol
+        self.max_iter = max_iter
+        self.Theta0 = Theta0
+        self.Sigma0 = Sigma0
+        self.method = method
+        self.verbose = verbose
+
+        # quic-specific outputs
+        self.opt_ = None
+        self.cputime_ = None
+        self.iters_ = None
+        self.duality_gap_ = None
+
+        # these must be updated upon self.fit()
+        self.sample_covariance_ = None
+        self.lam_scale_ = None
+        self.n_samples = None
+        self.n_features = None
+        self.is_fitted = False
+
+        super(QuicGraphLassoCV, self).__init__(lam=1.0, mode='path',
+                score_metric=score_metric, path=[1.0], 
+                initialize_method=initialize_method)
+
 
     def fit(self, X, y=None):
         """Fits the GraphLasso covariance model to X.
@@ -342,74 +383,113 @@ class QuicGraphLassoCV(QuicGraphLasso):
         X : ndarray, shape (n_samples, n_features)
             Data from which to compute the covariance estimate
         """
-        '''
-        # Covariance does not make sense for a single feature
+        def _quic_path(X, path, X_test=None):
+            """Compute path for example X.
+
+            Note: The way this is currently written, cannot be used in parallel.
+                  To fix this, change interface to self.cov_error to take
+                  covariance, precision as parameters.
+            """
+            S, lam_scale_ = _initialize_coefficients(
+                    X,
+                    method=self.initialize_method)
+
+            path = path.copy(order='C')
+            if self.method is 'quic':
+                (precisions_, covariances_, opt_, cputime_, 
+                iters_, duality_gap_) = quic(S,
+                                            1.0,
+                                            mode='path',
+                                            tol=self.tol,
+                                            max_iter=self.max_iter,
+                                            Theta0=self.Theta0,
+                                            Sigma0=self.Sigma0,
+                                            path=path,
+                                            msg=self.verbose)
+            else:
+                raise NotImplementedError(
+                    "Only method='quic' has been implemented.")
+
+            if X_test is not None:
+                self.covariance_ = covariances_
+                self.precision_ = precisions_
+                S_test, lam_scale_test = _initialize_coefficients(
+                    X_test,
+                    method=self.initialize_method)
+                
+                path_errors = self.cov_error(S_test, 
+                                            score_metric=self.score_metric)
+                scores_ = [-e for e in path_errors]
+
+                return covariances_, precisions_, scores_
+            
+            return covariances_, precisions_
+
+
+        # initialize
+        cv = check_cv(self.cv, X, y, classifier=False)
         X = check_array(X, ensure_min_features=2, estimator=self)
-        if self.assume_centered:
-            self.location_ = np.zeros(X.shape[1])
-        else:
-            self.location_ = X.mean(0)
-        emp_cov = empirical_covariance(
-            X, assume_centered=self.assume_centered)
+        X = as_float_array(X, copy=False, force_all_finite=False)
+        self.initialize_coefficients(X)
 
-        cv = check_cv(self.cv, y, classifier=False)
-
-        # List of (alpha, scores, covs)
-        path = list()
-        n_alphas = self.alphas
-        inner_verbose = max(0, self.verbose - 1)
-
-        if isinstance(n_alphas, collections.Sequence):
-            alphas = self.alphas
+        # get path
+        if isinstance(self.lams, collections.Sequence):
+            path = self.lams
             n_refinements = 1
         else:
             n_refinements = self.n_refinements
-            alpha_1 = alpha_max(emp_cov)
-            alpha_0 = 1e-2 * alpha_1
-            alphas = np.logspace(np.log10(alpha_0), np.log10(alpha_1),
-                                 n_alphas)[::-1]
+            lam_1 = np.max(np.abs(self.sample_covariance_.flat)) #self.lam_scale_
+            lam_0 = 1e-2 * lam_1
+            path = np.logspace(np.log10(lam_0), np.log10(lam_1), self.lams)[::-1]
 
+        # run this thing a bunch
+        results = list()
         t0 = time.time()
-        for i in range(n_refinements):
-            with warnings.catch_warnings():
-                # No need to see the convergence warnings on this grid:
-                # they will always be points that will not converge
-                # during the cross-validation
-                warnings.simplefilter('ignore', ConvergenceWarning)
-                # Compute the cross-validated loss on the current grid
+        for rr in range(n_refinements):
+            # parallel version
+            #this_result = Parallel(
+            #    n_jobs=self.n_jobs,
+            #    verbose=self.verbose,
+            #)(
+            #    delayed(_quic_path)(
+            #        X[train],
+            #        path,
+            #        X_test=X[test])
+            #    for train, test in cv)
 
-                # NOTE: Warm-restarting graph_lasso_path has been tried, and
-                # this did not allow to gain anything (same execution time with
-                # or without).
-                this_path = Parallel(
-                    n_jobs=self.n_jobs,
-                    verbose=self.verbose
-                )(delayed(graph_lasso_path)(X[train], alphas=alphas,
-                                            X_test=X[test], mode=self.mode,
-                                            tol=self.tol,
-                                            enet_tol=self.enet_tol,
-                                            max_iter=int(.1 * self.max_iter),
-                                            verbose=inner_verbose)
-                  for train, test in cv.split(X, y))
+            # non-parallel version
+            this_result = (_quic_path(X[train], path, X_test=X[test])
+                for train, test in cv)
 
-            # Little danse to transform the list in what we need
-            covs, _, scores = zip(*this_path)
+            # Little dance to transform the list in what we need
+            covs, _, scores = zip(*this_result)
+            print len(covs)
+            print len(scores)
+            print len(path)
             covs = zip(*covs)
             scores = zip(*scores)
-            path.extend(zip(alphas, scores, covs))
-            path = sorted(path, key=operator.itemgetter(0), reverse=True)
+            print '--'
+            print len(covs)
+            print len(scores)
+            print len(path)
+            results.extend(zip(path, scores, covs))
+            results = sorted(results, key=operator.itemgetter(0), reverse=True)
+
+            #print results
 
             # Find the maximum (avoid using built in 'max' function to
             # have a fully-reproducible selection of the smallest alpha
             # in case of equality)
             best_score = -np.inf
             last_finite_idx = 0
-            for index, (alpha, scores, _) in enumerate(path):
+            for index, (lam, scores, _) in enumerate(results):
                 this_score = np.mean(scores)
                 if this_score >= .1 / np.finfo(np.float64).eps:
                     this_score = np.nan
+                
                 if np.isfinite(this_score):
                     last_finite_idx = index
+                
                 if this_score >= best_score:
                     best_score = this_score
                     best_index = index
@@ -417,49 +497,62 @@ class QuicGraphLassoCV(QuicGraphLasso):
             # Refine the grid
             if best_index == 0:
                 # We do not need to go back: we have chosen
-                # the highest value of alpha for which there are
+                # the highest value of lambda for which there are
                 # non-zero coefficients
-                alpha_1 = path[0][0]
-                alpha_0 = path[1][0]
+                lam_1 = results[0][0]
+                lam_0 = results[1][0]
+            
             elif (best_index == last_finite_idx
-                    and not best_index == len(path) - 1):
+                    and not best_index == len(results) - 1):
                 # We have non-converged models on the upper bound of the
                 # grid, we need to refine the grid there
-                alpha_1 = path[best_index][0]
-                alpha_0 = path[best_index + 1][0]
-            elif best_index == len(path) - 1:
-                alpha_1 = path[best_index][0]
-                alpha_0 = 0.01 * path[best_index][0]
+                lam_1 = results[best_index][0]
+                lam_0 = results[best_index + 1][0]
+            
+            elif best_index == len(results) - 1:
+                lam_1 = results[best_index][0]
+                lam_0 = 0.01 * results[best_index][0]
+            
             else:
-                alpha_1 = path[best_index - 1][0]
-                alpha_0 = path[best_index + 1][0]
+                lam_1 = results[best_index - 1][0]
+                lam_0 = results[best_index + 1][0]
 
-            if not isinstance(n_alphas, collections.Sequence):
-                alphas = np.logspace(np.log10(alpha_1), np.log10(alpha_0),
-                                     n_alphas + 2)
-                alphas = alphas[1:-1]
+            if not isinstance(self.lams, collections.Sequence):
+                path = np.logspace(np.log10(lam_1), np.log10(lam_0),
+                                     self.lams + 2)
+                path = path[1:-1]
 
             if self.verbose and n_refinements > 1:
                 print('[GraphLassoCV] Done refinement % 2i out of %i: % 3is'
-                      % (i + 1, n_refinements, time.time() - t0))
+                      % (rr + 1, n_refinements, time.time() - t0))
 
-        path = list(zip(*path))
-        grid_scores = list(path[1])
-        alphas = list(path[0])
-        # Finally, compute the score with alpha = 0
-        alphas.append(0)
-        grid_scores.append(cross_val_score(EmpiricalCovariance(), X,
-                                           cv=cv, n_jobs=self.n_jobs,
-                                           verbose=inner_verbose))
+        results = list(zip(*results))
+        grid_scores = list(results[1])
+        lams = list(results[0])
+        
+        # Finally, compute the score with lambda = 0
+        lams.append(0)
+        grid_scores.append(cross_val_score(self.sample_covariance_, X,
+                                           cv=cv, n_jobs=self.n_jobs))
         self.grid_scores = np.array(grid_scores)
-        best_alpha = alphas[best_index]
-        self.alpha_ = best_alpha
-        self.cv_alphas_ = alphas
+        self.lam_ = lams[best_index]
+        self.cv_lams_ = lams
 
-        # Finally fit the model with the selected alpha
-        self.covariance_, self.precision_, self.n_iter_ = graph_lasso(
-            emp_cov, alpha=best_alpha, mode=self.mode, tol=self.tol,
-            enet_tol=self.enet_tol, max_iter=self.max_iter,
-            verbose=inner_verbose, return_n_iter=True)
+        # Finally fit the model with the selected lambda
+        if self.method is 'quic':
+            (self.precision_, self.covariance_, self.opt_, self.cputime_, 
+            self.iters_, self.duality_gap_) = quic(self.sample_covariance_,
+                                                self.lam_,
+                                                mode='default',
+                                                tol=self.tol,
+                                                max_iter=self.max_iter,
+                                                Theta0=self.Theta0,
+                                                Sigma0=self.Sigma0,
+                                                path=None,
+                                                msg=self.verbose)
+        else:
+            raise NotImplementedError(
+                "Only method='quic' has been implemented.")
+
+        self.is_fitted = True
         return self
-        '''

@@ -7,7 +7,7 @@ from sklearn.covariance import GraphLassoCV, ledoit_wolf
 import matplotlib.pyplot as plt
 
 sys.path.append('..')
-from inverse_covariance import QuicGraphLasso 
+from inverse_covariance import QuicGraphLasso, QuicGraphLassoCV
 
 
 '''
@@ -58,11 +58,19 @@ def estimate_via_quic(X, num_folds, metric='log_likelihood'):
     pprint.pprint(estimator.best_params_)
     print 'Best score: {}'.format(ic_score)
 
-    # get best covariance from QUIC
-    cov = ic_estimator.covariance_
-    prec = ic_estimator.precision_
+    return ic_estimator.covariance_, ic_estimator.precision_
 
-    return cov, prec
+
+def estimate_via_quic_cv(X, num_folds, metric='log_likelihood'):
+    print '\n-- QUIC QuicGraphLassoCV'
+    model = QuicGraphLassoCV(cv=num_folds)
+    model.fit(X)
+
+    print 'Best parameters:'
+    print 'Best lambda: {}'.format(model.lam_)
+    print 'CV lams: {}'.format(model.cv_lams_)
+
+    return model.covariance_, model.precision_
 
 
 def estimate_via_quic_ebic(X, gamma=0):
@@ -148,15 +156,17 @@ if __name__ == "__main__":
     X, cov, prec = make_data(n_samples, n_features)
     
     # run estimators
-    emp_cov, emp_prec = estimate_via_empirical(X)
-    gl_cov, gl_prec = estimate_via_graph_lasso(X, cv_folds)
-    lw_cov, lw_prec = estimate_via_ledoit_wolf(X)
-    quic_ll_cov, quic_ll_prec = estimate_via_quic(X,
+    #emp_cov, emp_prec = estimate_via_empirical(X)
+    #gl_cov, gl_prec = estimate_via_graph_lasso(X, cv_folds)
+    #lw_cov, lw_prec = estimate_via_ledoit_wolf(X)
+    #quic_ll_cov, quic_ll_prec = estimate_via_quic(X,
+    #        cv_folds, metric='log_likelihood')
+    #quic_kl_cov, quic_kl_prec = estimate_via_quic(X,
+    #        cv_folds, metric='kl')
+    #quic_fro_cov, quic_fro_prec = estimate_via_quic(X,
+    #        cv_folds, metric='frobenius')
+    quic_cv_ll_cov, quic_cv_ll_prec = estimate_via_quic_cv(X,
             cv_folds, metric='log_likelihood')
-    quic_kl_cov, quic_kl_prec = estimate_via_quic(X,
-            cv_folds, metric='kl')
-    quic_fro_cov, quic_fro_prec = estimate_via_quic(X,
-            cv_folds, metric='frobenius')
     quic_bic_cov, quic_bic_prec = estimate_via_quic_ebic(X, gamma=0)
     quic_ebic_cov, quic_ebic_prec = estimate_via_quic_ebic(X, gamma=0.1)
 
@@ -168,6 +178,7 @@ if __name__ == "__main__":
             ('Quic (cv-ll)', quic_ll_cov),
             ('Quic (cv-kl)', quic_kl_cov),
             ('Quic (cv-fro)', quic_fro_cov),
+            ('QuicCV (cv-ll)', quic_cv_ll_cov),
             ('Quic (bic)', quic_bic_cov),
             ('Quic (ebic gamma = 0.1)', quic_ebic_cov)]
     precs = [('True', prec),
@@ -177,6 +188,7 @@ if __name__ == "__main__":
             ('Quic (cv-ll)', quic_ll_prec),
             ('Quic (cv-kl)', quic_kl_prec),
             ('Quic (cv-fro)', quic_fro_prec),
+            ('QuicCV (cv-ll)', quic_cv_ll_prec),
             ('Quic (bic)', quic_bic_prec),
             ('Quic (ebic gamma = 0.1)', quic_ebic_prec)]
     show_results(covs, precs)

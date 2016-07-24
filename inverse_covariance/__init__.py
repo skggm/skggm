@@ -4,8 +4,8 @@ from .inverse_covariance import (
 from .quic_graph_lasso import (
     quic,
     QuicGraphLasso,
+    QuicGraphLassoCV,
 )
-#QuicGraphLassoCV,
 from .metrics import (
     log_likelihood,
     kl_loss,
@@ -13,11 +13,11 @@ from .metrics import (
     ebic,
 )
 
-#'QuicGraphLassoCV',
 __all__ = [
     'InverseCovarianceEstimator',
     'quic',
     'QuicGraphLasso',
+    'QuicGraphLassoCV',
     'log_likelihood',
     'kl_loss',
     'quadratic_loss',

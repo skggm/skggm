@@ -265,7 +265,6 @@ class InverseCovarianceEstimator(BaseEstimator):
                     self.n_features,
                     gamma=gamma))
 
-        print ebic_scores
         return np.argmin(ebic_scores)
 
     
