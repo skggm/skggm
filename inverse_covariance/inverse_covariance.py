@@ -66,9 +66,6 @@ class InverseCovarianceEstimator(BaseEstimator):
     path_ : None or array of floats
         Sorted (largest to smallest) path.  This will be None if not in path
         mode.
-
-    ebic_lam_: (float)
-        Best lambda selected via ebic.
     """
     def __init__(self, lam=0.5, mode='default', score_metric='log_likelihood',
                  path=None, initialize_method='corrcoef'):
@@ -104,7 +101,7 @@ class InverseCovarianceEstimator(BaseEstimator):
             self.sample_covariance_
             self.lam_scale_
         """
-        self.n_samples, self.n_features = np.shape(X)
+        self.n_samples, self.n_features = X.shape
         self.sample_covariance_, self.lam_scale_ = _initialize_coefficients(
                 X,
                 method=self.initialize_method)
@@ -268,6 +265,7 @@ class InverseCovarianceEstimator(BaseEstimator):
                     self.n_features,
                     gamma=gamma))
 
+        print ebic_scores
         return np.argmin(ebic_scores)
 
     

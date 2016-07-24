@@ -47,7 +47,7 @@ def kl_loss(covariance, precision):
     """
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
-    p_dot_c = np.dot(precision, covariance)
+    p_dot_c = np.dot(covariance, precision)
     return 0.5 * (np.trace(p_dot_c) - fast_logdet(p_dot_c) - dim)
 
 
@@ -68,7 +68,7 @@ def quadratic_loss(covariance, precision):
     """
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
-    return np.trace((covariance * precision - np.eye(dim))**2)
+    return np.trace((np.dot(covariance, precision) - np.eye(dim))**2)
 
 
 def ebic(covariance, precision, n_samples, n_features, gamma=0):
@@ -108,7 +108,7 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     ebic score (float).  Caller should minimized this score.
     '''
     l_theta = log_likelihood(covariance, precision) 
-    precision_nnz = np.count_nonzero(precision)
+    precision_nnz = np.count_nonzero(precision) 
     return -2.0 * l_theta +\
             precision_nnz * np.log(n_samples) +\
             4.0 * precision_nnz * np.log(n_features) * gamma

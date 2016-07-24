@@ -190,9 +190,6 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         Sorted (largest to smallest) path.  This will be None if not in path
         mode.
 
-    ebic_lam_: (float)
-        Best lambda selected via ebic.
-
     opt_ :
 
     cputime_ :
@@ -205,25 +202,19 @@ class QuicGraphLasso(InverseCovarianceEstimator):
     def __init__(self, lam=0.5, mode='default', tol=1e-6, max_iter=1000,
                  Theta0=None, Sigma0=None, path=None, verbose=0, method='quic',
                  score_metric='log_likelihood', initialize_method='corrcoef'):
-        self.lam = lam
-        self.mode = mode
+        # quic-specific params
         self.tol = tol
         self.max_iter = max_iter
         self.Theta0 = Theta0
         self.Sigma0 = Sigma0
         self.verbose = verbose
         self.method = method
-        self.score_metric = score_metric
-        self.initialize_method = initialize_method
-        self.set_path(path)
 
-        self.covariance_ = None
-        self.precision_ = None
+        # quic-specific outputs
         self.opt_ = None
         self.cputime_ = None
         self.iters_ = None
         self.duality_gap_ = None
-        self.score_best_path_scale_index_ = None
 
         # these must be updated upon self.fit()
         self.sample_covariance_ = None
@@ -231,6 +222,10 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         self.n_samples = None
         self.n_features = None
         self.is_fitted = False
+
+        super(QuicGraphLasso, self).__init__(lam=lam, mode=mode,
+                score_metric=score_metric, path=path, 
+                initialize_method=initialize_method)
 
 
     def fit(self, X, y=None, **fit_params):
