@@ -126,8 +126,8 @@ def show_results(covs, precs):
     for i, (name, this_prec) in enumerate(precs):
         vmax = np.abs(this_prec).max()
         ax = plt.subplot(3, 4, i + 1)
-        plt.imshow(np.abs(this_prec),  #np.ma.masked_values(this_prec, 0)
-                   interpolation='nearest', vmin=0, vmax=vmax,
+        plt.imshow(np.ma.masked_values(this_prec, 0),
+                   interpolation='nearest', vmin=-vmax, vmax=vmax,
                    cmap=plt.cm.RdBu_r)
         plt.xticks(())
         plt.yticks(())
