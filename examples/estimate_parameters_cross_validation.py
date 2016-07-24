@@ -39,9 +39,9 @@ def make_data(n_samples, n_features):
 def estimate_via_quic(X, num_folds, metric='log_likelihood'):
     print '\n-- QUIC CV'
     search_grid = {
-      'lam': np.logspace(np.log10(0.001), np.log10(1.0), num=100, endpoint=True),
+      'lam': np.logspace(np.log10(0.001), np.log10(0.5), num=100, endpoint=True),
       'initialize_method': ['cov', 'corrcoef'],
-      'score_metric': [metric],
+      'score_metric': [metric], # note: score_metrics are not comparable
     }
 
     # search for best parameters
@@ -64,13 +64,14 @@ def estimate_via_quic(X, num_folds, metric='log_likelihood'):
 
     return cov, prec
 
+
 def estimate_via_quic_ebic(X, gamma=0):
     print '\n-- QUIC EBIC'
     ic_estimator = QuicGraphLasso(
         lam=1.0,
         mode='path',
         initialize_method='cov',
-        path=np.logspace(np.log10(0.001), np.log10(1.0), num=100, endpoint=True))
+        path=np.logspace(np.log10(0.001), np.log10(0.5), num=100, endpoint=True))
     ic_estimator.fit(X)
 
     # ebic model selection
@@ -84,6 +85,7 @@ def estimate_via_quic_ebic(X, gamma=0):
     prec = ic_estimator.precision_[ebic_index]
 
     return cov, prec
+
 
 def estimate_via_empirical(X):
     cov = np.dot(X.T, X) / n_samples
