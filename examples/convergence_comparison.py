@@ -2,7 +2,7 @@ import sys
 sys.path.append('../inverse_covariance')
 
 from sklearn.covariance import graph_lasso
-from inverse_covariance import InverseCovariance, quic
+from inverse_covariance import quic
 import numpy as np
 
 '''

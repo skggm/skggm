@@ -6,8 +6,8 @@ from sklearn.datasets import make_sparse_spd_matrix
 from sklearn.covariance import GraphLassoCV, ledoit_wolf
 import matplotlib.pyplot as plt
 
-sys.path.append('../inverse_covariance')
-from inverse_covariance import InverseCovariance 
+sys.path.append('..')
+from inverse_covariance import QuicGraphLasso 
 
 
 '''
@@ -39,15 +39,13 @@ def make_data(n_samples, n_features):
 def estimate_via_quic(X, num_folds, metric='log_likelihood'):
     print '\n-- QUIC CV'
     search_grid = {
-      'lam': np.logspace(np.log10(0.001), np.log10(1.0), num=50, endpoint=True),
-      'path': [np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3])],
-      'mode': ['path'],
+      'lam': np.logspace(np.log10(0.001), np.log10(1.0), num=100, endpoint=True),
       'initialize_method': ['cov'],
-      'metric': [metric],
+      'score_metric': [metric],
     }
 
     # search for best parameters
-    estimator = GridSearchCV(InverseCovariance(),
+    estimator = GridSearchCV(QuicGraphLasso(),
                             search_grid,
                             cv=num_folds,
                             refit=True,
@@ -55,44 +53,35 @@ def estimate_via_quic(X, num_folds, metric='log_likelihood'):
     estimator.fit(X)
     ic_estimator = estimator.best_estimator_
     ic_score = ic_estimator.score(X) # must score() to find best lambda index
-    ic_path_index = ic_estimator.score_best_path_scale_index_
 
     print 'Best parameters:'
     pprint.pprint(estimator.best_params_)
     print 'Best score: {}'.format(ic_score)
-    print 'Best lambda path scale {} (index= {}), lam = {}'.format(
-        ic_estimator.path[ic_path_index],
-        ic_path_index,
-        ic_estimator.best_lam)
 
     # get best covariance from QUIC
-    cov = np.reshape(ic_estimator.covariance_[ic_path_index, :],
-                    (n_features, n_features))
-    prec = np.reshape(ic_estimator.precision_[ic_path_index, :],
-                    (n_features, n_features))
+    cov = ic_estimator.covariance_
+    prec = ic_estimator.precision_
 
     return cov, prec
 
 def estimate_via_quic_ebic(X, gamma=0):
     print '\n-- QUIC EBIC'
-    ic_estimator = InverseCovariance(
+    ic_estimator = QuicGraphLasso(
         lam=1.0,
         mode='path',
         initialize_method='cov',
-        path=np.logspace(np.log10(0.001), np.log10(1.0), num=50, endpoint=True))
+        path=np.logspace(np.log10(0.001), np.log10(1.0), num=100, endpoint=True))
     ic_estimator.fit(X)
 
     # ebic model selection
-    ic_path_index = ic_estimator.model_select(gamma=gamma)
+    ebic_index = ic_estimator.ebic_select(gamma=gamma)
     print 'Best lambda path scale {} (index= {}), lam = {}'.format(
-        ic_estimator.path[ic_path_index],
-        ic_path_index,
-        ic_estimator.best_lam)
+        ic_estimator.path[ebic_index],
+        ebic_index,
+        ic_estimator.lam_select_(ebic_index))
 
-    cov = np.reshape(ic_estimator.covariance_[ic_path_index, :],
-                    (n_features, n_features))
-    prec = np.reshape(ic_estimator.precision_[ic_path_index, :],
-                    (n_features, n_features))
+    cov = ic_estimator.covariance_[ebic_index]
+    prec = ic_estimator.precision_[ebic_index]
 
     return cov, prec
 
@@ -149,9 +138,9 @@ def show_results(covs, precs):
 
 
 if __name__ == "__main__":
-    n_samples = 60
-    n_features = 20
-    cv_folds = 2
+    n_samples = 60 * 2 
+    n_features = 20 * 2
+    cv_folds = 3
 
     # make data
     X, cov, prec = make_data(n_samples, n_features)
