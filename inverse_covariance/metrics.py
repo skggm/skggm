@@ -70,7 +70,8 @@ def quadratic_loss(covariance, precision):
     """
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
-    return np.trace((np.dot(covariance, precision) - np.eye(dim))**2)
+    # np.dot(covariance, precision)
+    return np.trace((covariance * precision - np.eye(dim))**2)
 
 
 def ebic(covariance, precision, n_samples, n_features, gamma=0):
