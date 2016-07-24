@@ -317,6 +317,7 @@ def _quic_path(X, path, X_test=None, tol=1e-6,
     
     return covariances_, precisions_
 
+
 class QuicGraphLassoCV(InverseCovarianceEstimator):
     """Sparse inverse covariance w/ cross-validated choice of the l1 penalty
     via quadratic approximation.  
