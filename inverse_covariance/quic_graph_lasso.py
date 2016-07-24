@@ -533,7 +533,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         self.cv_lams_ = lams
 
         # Finally fit the model with the selected lambda
-        if self.method is 'quic':
+        if self.method == 'quic':
             (self.precision_, self.covariance_, self.opt_, self.cputime_, 
             self.iters_, self.duality_gap_) = quic(self.sample_covariance_,
                                                 self.lam_,

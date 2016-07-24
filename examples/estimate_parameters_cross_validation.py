@@ -66,7 +66,7 @@ def estimate_via_quic_cv(X, num_folds, metric='log_likelihood'):
     model = QuicGraphLassoCV(
             cv=num_folds,
             n_refinements=6,
-            n_jobs=4,
+            n_jobs=1,
             initialize_method='cov')
     model.fit(X)
 
@@ -152,8 +152,8 @@ def show_results(covs, precs):
 
 
 if __name__ == "__main__":
-    n_samples = 60 
-    n_features = 20 
+    n_samples = 60
+    n_features = 20
     cv_folds = 3
 
     # make data
