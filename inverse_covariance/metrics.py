@@ -48,7 +48,7 @@ def kl_loss(covariance, precision):
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
     logdet_p_dot_c = np.log(np.linalg.det(precision)) +\
-            np.log(np.linalg.det(precision))
+            np.log(np.linalg.det(covariance))
 
     if np.isnan(logdet_p_dot_c):
         logdet_p_dot_c = 0
