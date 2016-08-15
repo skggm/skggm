@@ -12,6 +12,9 @@ from .metrics import (
     quadratic_loss,
     ebic,
 )
+from .util import (
+    trace_plot,
+)
 
 __all__ = [
     'InverseCovarianceEstimator',
@@ -22,4 +25,5 @@ __all__ = [
     'kl_loss',
     'quadratic_loss',
     'ebic',
+    'trace_plot',
 ]
