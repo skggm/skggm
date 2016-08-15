@@ -85,16 +85,19 @@ class TwoStageAdaptive(BaseEstimator):
             X,
             method='cov')
 
+        # helper functions such as self._gelato() return a scalar and we want to
+        # return the argmin.  Does this mean we need multiple precisions?
+
         # estimate MLE precision with estimator weights
-        if self.method == 'gelato':
-            self.precision_ = self._gelato()
-        elif self.method == 'glasso':
-            self.precision_ = self._glasso()
-        elif self.method == 'inverse':
-            self.precision_ = self._inverse()
-        else:
-            raise NotImplementedError(("Only method='gelato', 'glasso', or",
-                    "'inverse' have been implemented."))
+        #if self.method == 'gelato':
+        #    self.precision_ = self._gelato()
+        #elif self.method == 'glasso':
+        #    self.precision_ = self._glasso()
+        #elif self.method == 'inverse':
+        #    self.precision_ = self._inverse()
+        #else:
+        #    raise NotImplementedError(("Only method='gelato', 'glasso', or",
+        #            "'inverse' have been implemented."))
 
         
 
