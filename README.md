@@ -1,6 +1,14 @@
-# scikitquic
-scikit-learn wrappers for various implementations QUIC
+# skggm
+Gaussian graphical models in scikit-learn.
 
+# Included in this package
+- InverseCovarianceEstimator with common model selection metrics (such as EBIC and metrics for cross validation)
+- QuicGraphLasso & QuicGraphLassoCV estimators
+- AdaptiveInverseCovariance (two stage adaptive meta estimator) [TODO: better name]
+- Ensemble meta estimator
+- Numerous usage examples
+
+^ These are notes, will clean up later.
 
 # Setup pyquic submodule
 
@@ -18,6 +26,8 @@ This project currently depends on the pyquic module for python QUIC bindings.  W
 1. Run `python setup.py (from /scikitquic)`.  This will compile pyquic and copy the module into `/scikitquic/inverse_covariance/`.
 
 2. Download the test data file `ER_692.mat` from `http://www.cs.utexas.edu/~sustik/QUIC/`.  The file is contained in the MEX archive.  Move this file to `/scikitquic/inverse_covariance/tests`.
+
+NOTE:  During cleanup, we should rename setup.py since that file will be used for setting up the entire python package.
 
 ### Runing tests:
     py.test inverse_covariance/tests/
