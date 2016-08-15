@@ -18,6 +18,8 @@ class ModelAverage(BaseEstimator):
 
     num_trials :
 
+    subsample : float
+
     normalize :
 
     penalization : one of 'random', 'adaptive' 
@@ -33,12 +35,13 @@ class ModelAverage(BaseEstimator):
     
     """
     def __init__(self, estimator=None, estimator_args={}, num_trials=100, 
-                 normalize=True, penalization='random'):
+                 normalize=True, penalization='random', subsample=0.3):
         self.estimator = estimator 
         self.estimator_args = estimator_args
         self.num_trials = num_trials
         self.normalize = normalize
         self.penalization = penalization
+        self.subsample = subsample
 
         self.proportion_ = None
         self.estimators_ = []
@@ -68,9 +71,9 @@ class ModelAverage(BaseEstimator):
 
             new_estimator = self.estimator(**self.estimator_args)
 
-            # TO DO: randomly subsample X
-
-            new_estimator.fit(X)
+            num_subsamples = int(self.subsample * n_samples)
+            rp = np.random.permutation(n_samples)[:num_subsamples]
+            new_estimator.fit(X[rp, :])
 
             # QUESTION:  This updates the *nonzero* locations, do we only want the
             #            zero locations?  It's an easy change
@@ -80,8 +83,7 @@ class ModelAverage(BaseEstimator):
             elif isinstance(new_estimator.precision_, np.array):
                 self.proportion_[np.nonzero(new_estimator.precision)] += 1.
             else:
-                raise ValueError(
-                    "Estimator returned invalid precision_.")
+                raise ValueError("Estimator returned invalid precision_.")
 
             self.estimators_.append(new_estimator)
             self.lams_.append(lam)
