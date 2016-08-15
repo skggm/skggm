@@ -380,7 +380,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
     cv_lams_ : list of float
         All penalization parameters explored.
     
-    `grid_scores`: 2D numpy.ndarray (n_alphas, n_folds)
+    grid_scores: 2D numpy.ndarray (n_alphas, n_folds)
         Log-likelihood score on left-out data across folds.
     
     n_iter_ : int
