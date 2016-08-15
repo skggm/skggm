@@ -67,6 +67,9 @@ class ModelAverage(BaseEstimator):
                     "Only penalization='random' has been implemented.")
 
             new_estimator = self.estimator(**self.estimator_args)
+
+            # TO DO: randomly subsample X
+
             new_estimator.fit(X)
 
             # QUESTION:  This updates the *nonzero* locations, do we only want the
