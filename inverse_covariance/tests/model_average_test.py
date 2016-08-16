@@ -19,7 +19,10 @@ class TestQuicGraphLasso(object):
         }),
         ({
             'estimator': QuicGraphLasso,
-            'estimator_args': {},
+            'estimator_args': {
+                'lam': 0.5,
+                'mode': 'trace',
+            },
             'num_trials': 15,
             'normalize': False,
             'subsample': 0.6,
