@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.base import BaseEstimator 
 
 import metrics
-
+import plot_util
 
 def _initialize_coefficients(X, method='corrcoef'):
     if method == 'corrcoef':
@@ -305,3 +305,16 @@ class InverseCovarianceEstimator(BaseEstimator):
 
         ebic_scores = self.ebic(gamma=gamma)
         return np.argmin(ebic_scores)
+
+
+    def trace_plot(self):
+        if not hasattr(self, 'path'):
+            raise ValueError('Estimator class needs attribute "path"',
+                             ' to use this utility.')
+
+        if not isinstance(self.precision_, list):
+            raise ValueError('Estimator needs to be run in path mode.')
+
+        plot_util.trace_plot(self.precision_, self.path)
+
+

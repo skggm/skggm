@@ -185,7 +185,7 @@ class QuicGraphLasso(InverseCovarianceEstimator):
 
     Methods
     ----------
-    lam_at_index(index) :  Compute the scaled lambda used at index lidx.
+    lam_at_index(lidx) :  Compute the scaled lambda used at index lidx.
 
     Attributes
     ----------
