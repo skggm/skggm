@@ -8,30 +8,33 @@ from .. import QuicGraphLasso, QuicGraphLassoCV, ModelAverage
 
 
 class TestQuicGraphLasso(object):
-    @pytest.mark.parametrize("params_in, expected", [
+    @pytest.mark.parametrize("params_in", [
         ({
             'estimator': QuicGraphLassoCV,
             'estimator_args': {},
             'num_trials': 10,
             'normalize': True,
             'subsample': 0.3,
-        }, []),
+            'penalization': 'random',
+        }),
         ({
             'estimator': QuicGraphLasso,
             'estimator_args': {},
             'num_trials': 15,
             'normalize': False,
             'subsample': 0.6,
-        }, []),
+            'penalization': 'random',
+        }),
         ({
             'estimator': GraphLassoCV, # sklearn
             'estimator_args': {},
             'num_trials': 15,
             'normalize': False,
             'subsample': 0.1,
-        }, []),
+            'penalization': 'random',
+        }),
     ])
-    def test_integration_quic_graph_lasso_cv(self, params_in, expected):
+    def test_integration_quic_graph_lasso_cv(self, params_in):
         '''
         Just tests inputs/outputs (not validity of result).
         '''
