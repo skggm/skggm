@@ -421,6 +421,8 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
     def fit(self, X, y=None):
         """Fits the GraphLasso covariance model to X.
         
+        Closely follows sklearn.covariance.graph_lasso.GraphLassoCV.
+
         Parameters
         ----------
         X : ndarray, shape (n_samples, n_features)
