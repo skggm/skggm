@@ -44,7 +44,7 @@ NOTE:  During cleanup, we should rename setup.py since that file will be used fo
 
 # References
 
-### EBIC Model Selection
+### BIC / EBIC Model Selection
 
 * ["Extended Bayesian Information Criteria for Gaussian Graphical Models"](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models) R. Foygel and M. Drton NIPS 2010
 
