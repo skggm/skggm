@@ -15,6 +15,7 @@ from .metrics import (
 from .util import (
     trace_plot,
 )
+from .model_average import ModelAverage
 
 __all__ = [
     'InverseCovarianceEstimator',
@@ -26,4 +27,5 @@ __all__ = [
     'quadratic_loss',
     'ebic',
     'trace_plot',
+    'ModelAverage',
 ]

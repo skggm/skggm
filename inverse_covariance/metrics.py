@@ -1,3 +1,5 @@
+"""Metrics for cross validation with Gaussian graphical models.
+"""
 import numpy as np
 from sklearn.utils.extmath import fast_logdet
 
@@ -84,9 +86,8 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     finding lambda.
 
     See:
-        Extended Bayesian Information Criteria for Gaussian Graphical Models
-        R. Foygel and M. Drton
-        NIPS 2010
+        "Extended Bayesian Information Criteria for Gaussian Graphical Models"
+        R. Foygel and M. Drton, NIPS 2010
 
     Parameters
     ----------

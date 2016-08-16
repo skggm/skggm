@@ -1,6 +1,14 @@
-# scikitquic
-scikit-learn wrappers for various implementations QUIC
+# skggm
+Gaussian graphical models in scikit-learn.
 
+# Included in this package
+- InverseCovarianceEstimator with common model selection metrics (such as EBIC and metrics for cross validation)
+- QuicGraphLasso & QuicGraphLassoCV estimators
+- AdaptiveInverseCovariance (two stage adaptive meta estimator) [TODO: better name]
+- Ensemble meta estimator
+- Numerous usage examples
+
+^ These are notes, will clean up later.
 
 # Setup pyquic submodule
 
@@ -19,6 +27,8 @@ This project currently depends on the pyquic module for python QUIC bindings.  W
 
 2. Download the test data file `ER_692.mat` from `http://www.cs.utexas.edu/~sustik/QUIC/`.  The file is contained in the MEX archive.  Move this file to `/scikitquic/inverse_covariance/tests`.
 
+NOTE:  During cleanup, we should rename setup.py since that file will be used for setting up the entire python package.
+
 ### Runing tests:
     py.test inverse_covariance/tests/
 
@@ -32,8 +42,21 @@ This project currently depends on the pyquic module for python QUIC bindings.  W
 
 4. Directory structure of project tbd, right now main file is at top level.
 
-# Acknowledgements
+# References
 
-* [QUIC](http://www.cs.utexas.edu/~sustik/QUIC/) algorithm is explained in *Sparse Inverse Covariance Matrix Estimation Using Quadratic Approximation* by Cho-Jui Hsieh, Mátyás A. Sustik, Inderjit S. Dhillon, Pradeep Ravikumar and forked from [http://www.cs.utexas.edu/~sustik/QUIC/](http://www.cs.utexas.edu/~sustik/QUIC/).
+### BIC / EBIC Model Selection
 
-* Cython bindings for QUIC forked from [https://github.com/osdf/pyquic](https://github.com/osdf/pyquic)
+* ["Extended Bayesian Information Criteria for Gaussian Graphical Models"](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models) R. Foygel and M. Drton NIPS 2010
+
+### QuicGraphLasso / QuicGraphLassoCV
+
+* ["QUIC: Quadratic Approximation for sparse inverse covariance estimation"](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) by C. Hsieh, M. A. Sustik, I. S. Dhillon, P. Ravikumar, Journal of Machine Learning Research (JMLR), October 2014.
+
+* QUIC implementation found [here](http://www.cs.utexas.edu/~sustik/QUIC/) and [here](http://bigdata.ices.utexas.edu/software/1035/) with cython bindings forked from [pyquic](https://github.com/osdf/pyquic)
+
+### Randomized model averaging 
+
+* ["Stability Selection"](https://arxiv.org/pdf/0809.2932v2.pdf) N. Meinhausen and P. Buehlmann, May 2009
+
+* ["Mixed effects models for resampled network statistics improves statistical power to find differences in multi-subject functional connectivity"](http://biorxiv.org/content/early/2016/03/14/027516) M. Narayan and G. Allen, March 2016
+

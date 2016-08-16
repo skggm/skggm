@@ -230,8 +230,8 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         # these must be updated upon self.fit()
         self.sample_covariance_ = None
         self.lam_scale_ = None
-        self.n_samples = None
-        self.n_features = None
+        #self.n_samples = None
+        #self.n_features = None
         self.is_fitted = False
 
         super(QuicGraphLasso, self).__init__(lam=lam, mode=mode,
@@ -380,7 +380,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
     cv_lams_ : list of float
         All penalization parameters explored.
     
-    `grid_scores`: 2D numpy.ndarray (n_alphas, n_folds)
+    grid_scores: 2D numpy.ndarray (n_alphas, n_folds)
         Log-likelihood score on left-out data across folds.
     
     n_iter_ : int
@@ -413,8 +413,8 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         # these must be updated upon self.fit()
         self.sample_covariance_ = None
         self.lam_scale_ = None
-        self.n_samples = None
-        self.n_features = None
+        #self.n_samples = None
+        #self.n_features = None
         self.is_fitted = False
 
         super(QuicGraphLassoCV, self).__init__(lam=1.0, mode='path',

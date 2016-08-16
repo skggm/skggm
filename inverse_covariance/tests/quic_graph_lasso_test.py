@@ -5,13 +5,12 @@ from scipy.io import loadmat
 
 from sklearn.utils.testing import assert_raises
 from sklearn.utils.testing import assert_allclose
-
 from sklearn import datasets
 
-from .. import QuicGraphLasso, quic
+from .. import QuicGraphLasso, quic, QuicGraphLassoCV
 
 
-class TestInverseCovariance(object):
+class TestQuicGraphLasso(object):
     @pytest.mark.parametrize("params_in, expected", [
         ({}, [4.7973002082865275, 2.1849691442858554, 13.938876329200646, 4.7809889380800996e-10]),
         ({
@@ -34,7 +33,7 @@ class TestInverseCovariance(object):
         }, [0.014341395401919506, 697.28221834407839, 43.958976948867786, 8.8817841970012523e-16]),
 
     ])
-    def test_fit(self, params_in, expected):
+    def test_integration_quic_graph_lasso(self, params_in, expected):
         '''
         Just tests inputs/outputs (not validity of result).
         '''
@@ -50,6 +49,30 @@ class TestInverseCovariance(object):
         ]
         print result_vec
         assert_allclose(expected, result_vec)
+
+
+    @pytest.mark.parametrize("params_in, expected", [
+        ({}, [4.695250607261749, 71.424414001397906, 2.8243718924865178, 0.00011952705621326443, 0.0015848931924611141]),
+    ])
+    def test_integration_quic_graph_lasso_cv(self, params_in, expected):
+        '''
+        Just tests inputs/outputs (not validity of result).
+        '''
+        X = datasets.load_diabetes().data
+        ic = QuicGraphLassoCV(**params_in)
+        ic.fit(X)
+        
+        result_vec = [
+            np.linalg.norm(ic.covariance_),
+            np.linalg.norm(ic.precision_),
+            np.linalg.norm(ic.opt_),
+            np.linalg.norm(ic.duality_gap_),
+            ic.lam_,
+        ]
+        print result_vec
+        assert_allclose(expected, result_vec)
+
+        assert len(ic.grid_scores) == len(ic.cv_lams_)
 
 
     def test_invalid_method(self):
