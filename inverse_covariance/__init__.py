@@ -12,7 +12,7 @@ from .metrics import (
     quadratic_loss,
     ebic,
 )
-from .util import (
+from .plot_util import (
     trace_plot,
 )
 from .model_average import ModelAverage

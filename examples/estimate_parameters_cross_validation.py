@@ -92,12 +92,12 @@ def estimate_via_quic_ebic(X, gamma=0):
     print 'Best lambda path scale {} (index= {}), lam = {}'.format(
         ic_estimator.path[ebic_index],
         ebic_index,
-        ic_estimator.lam_select_(ebic_index))
+        ic_estimator.lam_at_index(ebic_index))
 
     cov = ic_estimator.covariance_[ebic_index]
     prec = ic_estimator.precision_[ebic_index]
 
-    return cov, prec, ic_estimator.lam_select_(ebic_index)
+    return cov, prec, ic_estimator.lam_at_index(ebic_index)
 
 
 def estimate_via_empirical(X):

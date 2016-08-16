@@ -15,6 +15,7 @@ from inverse_covariance import (
     InverseCovarianceEstimator,
     _initialize_coefficients,
     _compute_error,
+    _validate_path,
 )
 
 
@@ -165,7 +166,9 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         identity matrix is used.
 
     path : array of floats (default=None)
-        In "path" mode, an array of float values for scaling L.
+        In "path" mode, an array of float values for scaling lam.
+        The path must be sorted largest to smallest.  This class will auto sort
+        this, in which case indices correspond to self.path_
 
     method : one of 'quic'... (default=quic)
 
@@ -179,6 +182,10 @@ class QuicGraphLasso(InverseCovarianceEstimator):
     initialize_method : one of 'corrcoef', 'cov'
         Computes initial covariance and scales lambda appropriately.
 
+
+    Methods
+    ----------
+    lam_at_index(index) :  Compute the scaled lambda used at index lidx.
 
     Attributes
     ----------
@@ -214,12 +221,20 @@ class QuicGraphLasso(InverseCovarianceEstimator):
                  Theta0=None, Sigma0=None, path=None, method='quic', verbose=0,
                  score_metric='log_likelihood', initialize_method='corrcoef'):
         # quic-specific params
+        self.lam = lam
+        self.mode = mode
         self.tol = tol
         self.max_iter = max_iter
         self.Theta0 = Theta0
         self.Sigma0 = Sigma0
         self.method = method
         self.verbose = verbose
+
+        if self.mode is 'path' and path is None:
+            raise ValueError("path required in path mode.")
+            return
+
+        self.path = _validate_path(path)
 
         # quic-specific outputs
         self.opt_ = None
@@ -232,8 +247,8 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         self.lam_scale_ = None
         self.is_fitted = False
 
-        super(QuicGraphLasso, self).__init__(lam=lam, mode=mode,
-                score_metric=score_metric, path=path, 
+        super(QuicGraphLasso, self).__init__(
+                score_metric=score_metric, 
                 initialize_method=initialize_method)
 
 
@@ -270,6 +285,16 @@ class QuicGraphLasso(InverseCovarianceEstimator):
 
         self.is_fitted = True
         return self
+
+
+    def lam_at_index(self, lidx):
+        """Compute the scaled lambda used at index lidx.
+        """
+        if self.path is None:
+            print 'Warning: When path=None, lam_at_index returns scaled lam.'
+            return self.lam * self.lam_scale_
+
+        return self.lam * self.lam_scale_ * self.path[lidx]
 
 
 def _quic_path(X, path, X_test=None, tol=1e-6,
@@ -352,9 +377,6 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         Initial guess for the covariance matrix. If not provided the diagonal 
         identity matrix is used.
 
-    path : array of floats (default=None)
-        In "path" mode, an array of float values for scaling L.
-
     method : one of 'quic'... (default=quic)
 
     score_metric : one of 'log_likelihood' (default), 'frobenius', 'spectral',
@@ -413,8 +435,8 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         self.lam_scale_ = None
         self.is_fitted = False
 
-        super(QuicGraphLassoCV, self).__init__(lam=1.0, mode='path',
-                score_metric=score_metric, path=[1.0], 
+        super(QuicGraphLassoCV, self).__init__(
+                score_metric=score_metric,
                 initialize_method=initialize_method)
 
 
@@ -549,3 +571,4 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
 
         self.is_fitted = True
         return self
+
