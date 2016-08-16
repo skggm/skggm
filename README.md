@@ -42,11 +42,6 @@ NOTE:  During cleanup, we should rename setup.py since that file will be used fo
 
 4. Directory structure of project tbd, right now main file is at top level.
 
-# Acknowledgements
-
-* [QUIC](http://www.cs.utexas.edu/~sustik/QUIC/) algorithm from [http://www.cs.utexas.edu/~sustik/QUIC/](http://www.cs.utexas.edu/~sustik/QUIC/) with cython bindings forked from [https://github.com/osdf/pyquic](https://github.com/osdf/pyquic)
-http://bigdata.ices.utexas.edu/software/1035/
-
 # References
 
 ### EBIC Model Selection
@@ -56,6 +51,8 @@ http://bigdata.ices.utexas.edu/software/1035/
 ### QuicGraphLasso / QuicGraphLassoCV
 
 * ["QUIC: Quadratic Approximation for sparse inverse covariance estimation"](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) by C. Hsieh, M. A. Sustik, I. S. Dhillon, P. Ravikumar, Journal of Machine Learning Research (JMLR), October 2014.
+
+* QUIC implementation found [here](http://www.cs.utexas.edu/~sustik/QUIC/) and [here](http://bigdata.ices.utexas.edu/software/1035/) with cython bindings forked from [pyquic](https://github.com/osdf/pyquic)
 
 ### Randomized model averaging 
 
