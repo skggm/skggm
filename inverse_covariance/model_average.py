@@ -48,8 +48,13 @@ class ModelAverage(BaseEstimator):
         self.lams_ = []
 
     def _random_weights(self, n_features):
-        # QUESTION:  I assume it's best to normalize like this right?
-        return np.random.randn(n_features, n_features) / np.sqrt(n_features)
+        """Generate a symetric random matrix with ones along the diagonal.
+        """
+        weights = np.eye(n_features)
+        n_off_diag = (n_features ** 2 - n_features) / 2 
+        weights[np.triu_indices(n_features, k=1)] = np.random.randn(n_off_diag)
+        weights = weights + weights.T - np.diag(weights.diagonal())
+        return weights
 
     #def _adaptive_weights(self):
     

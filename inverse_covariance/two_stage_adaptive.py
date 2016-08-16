@@ -87,6 +87,7 @@ class TwoStageAdaptive(BaseEstimator):
 
         # helper functions such as self._gelato() return a scalar and we want to
         # return the argmin.  Does this mean we need multiple precisions?
+        # Oh I see, those should be like scores for cross validation...
 
         # estimate MLE precision with estimator weights
         #if self.method == 'gelato':
