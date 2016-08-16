@@ -66,3 +66,5 @@ def trace_plot(results, path):
 
     plt.show()
     raw_input('Press any key to continue.')
+
+    
