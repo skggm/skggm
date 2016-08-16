@@ -2,15 +2,14 @@ import numpy as np
 import pytest
 
 from sklearn import datasets
-from sklearn.covariance import GraphLassoCV
 
-from .. import QuicGraphLasso, QuicGraphLassoCV, ModelAverage
+from .. import QuicGraphLasso, ModelAverage
 
 
 class TestQuicGraphLasso(object):
     @pytest.mark.parametrize("params_in", [
         ({
-            'estimator': QuicGraphLassoCV,
+            'estimator': QuicGraphLasso,
             'estimator_args': {},
             'num_trials': 10,
             'normalize': True,
@@ -29,15 +28,7 @@ class TestQuicGraphLasso(object):
             'penalization': 'random',
         }),
         ({
-            'estimator': GraphLassoCV, # sklearn
-            'estimator_args': {},
-            'num_trials': 15,
-            'normalize': False,
-            'subsample': 0.1,
-            'penalization': 'random',
-        }),
-        ({
-            'estimator': QuicGraphLassoCV,
+            'estimator': QuicGraphLasso,
             'estimator_args': {},
             'num_trials': 10,
             'normalize': True,

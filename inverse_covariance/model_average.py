@@ -12,8 +12,9 @@ class ModelAverage(BaseEstimator):
     estimator : An inverse covariance estimator class
         After being fit, estimator.precision_ must either be a matrix with the 
         precision or a list of precision matrices (e.g., path mode).
-        This should be compatible with QuicGraphLasso, QuicGraphLassoCV, as well
-        as the scikit-learn variants.
+        Important: The estimator must be able to take a *matrix* penalty,
+                   such as 'lam' in QuicGraphLasso.
+                   Set the penalty kwarg name using penalty='penalty_name'.
 
     estimator_args : A kwargs dict for estimator
         Each new instance of estimator will use these params.
@@ -31,6 +32,10 @@ class ModelAverage(BaseEstimator):
     normalize : bool (default=True)
         Determines whether the proportion_ matrix should be normalized to have
         values in the range (0, 1) or should be absolute.
+
+    penalty : string
+        Name of the penalty kwarg in the estimator
+        e.g., 'lam' for QuicGraphLasso
 
     penalization : one of 'random', 'adaptive' 
         Strategy for generating new random penalization in each trial.
@@ -66,7 +71,7 @@ class ModelAverage(BaseEstimator):
     """
     def __init__(self, estimator=None, estimator_args={}, num_trials=100, 
                  normalize=True, penalization='random', subsample=0.3,
-                 use_cache=True):
+                 use_cache=True, penalty='lam'):
         self.estimator = estimator 
         self.estimator_args = estimator_args
         self.num_trials = num_trials
@@ -74,6 +79,7 @@ class ModelAverage(BaseEstimator):
         self.penalization = penalization
         self.subsample = subsample
         self.use_cache = use_cache
+        self.penalty = penalty
 
         self.proportion_ = None
         self.estimators_ = []
@@ -114,6 +120,9 @@ class ModelAverage(BaseEstimator):
                 raise NotImplementedError(
                     "Only penalization='random' has been implemented.")
 
+            self.estimator_args.update({
+                self.penalty: lam, 
+            })
             new_estimator = self.estimator(**self.estimator_args)
 
             num_subsamples = int(self.subsample * n_samples)
