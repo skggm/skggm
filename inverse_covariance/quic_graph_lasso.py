@@ -230,8 +230,6 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         # these must be updated upon self.fit()
         self.sample_covariance_ = None
         self.lam_scale_ = None
-        #self.n_samples = None
-        #self.n_features = None
         self.is_fitted = False
 
         super(QuicGraphLasso, self).__init__(lam=lam, mode=mode,
@@ -413,8 +411,6 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         # these must be updated upon self.fit()
         self.sample_covariance_ = None
         self.lam_scale_ = None
-        #self.n_samples = None
-        #self.n_features = None
         self.is_fitted = False
 
         super(QuicGraphLassoCV, self).__init__(lam=1.0, mode='path',
@@ -424,6 +420,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
 
     def fit(self, X, y=None):
         """Fits the GraphLasso covariance model to X.
+        
         Parameters
         ----------
         X : ndarray, shape (n_samples, n_features)
