@@ -86,7 +86,7 @@ class ModelAverage(BaseEstimator):
 
 
     def _random_weights(self, n_features):
-        """Generate a symetric random matrix with ones along the diagonal.
+        """Generate a symmetric random matrix with ones along the diagonal.
         """
         weights = np.eye(n_features)
         n_off_diag = (n_features ** 2 - n_features) / 2 
