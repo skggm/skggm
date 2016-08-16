@@ -80,8 +80,6 @@ class ModelAverage(BaseEstimator):
             rp = np.random.permutation(n_samples)[:num_subsamples]
             new_estimator.fit(X[rp, :])
 
-            # QUESTION:  This updates the *nonzero* locations, do we only want the
-            #            zero locations?  It's an easy change
             if isinstance(new_estimator.precision_, list):
                 for prec in new_estimator.precision_:
                     self.proportion_[np.nonzero(prec)] += 1.
