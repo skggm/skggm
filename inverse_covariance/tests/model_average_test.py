@@ -3,7 +3,7 @@ import pytest
 
 from sklearn import datasets
 
-from .. import QuicGraphLassoCV, ModelAverage
+from .. import QuicGraphLasso, QuicGraphLassoCV, ModelAverage
 
 class TestQuicGraphLasso(object):
     @pytest.mark.parametrize("params_in, expected", [
@@ -13,6 +13,13 @@ class TestQuicGraphLasso(object):
             'num_trials': 10,
             'normalize': True,
             'subsample': 0.3,
+        }, []),
+        ({
+            'estimator': QuicGraphLasso,
+            'estimator_args': {},
+            'num_trials': 15,
+            'normalize': False,
+            'subsample': 0.6,
         }, []),
     ])
     def test_integration_quic_graph_lasso_cv(self, params_in, expected):
