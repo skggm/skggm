@@ -12,9 +12,9 @@ class ModelAverage(BaseEstimator):
     estimator : An inverse covariance estimator class
         After being fit, estimator.precision_ must either be a matrix with the 
         precision or a list of precision matrices (e.g., path mode).
-        Important: The estimator must be able to take a matrix penalty parameter,
+        Important: The estimator must be able to take a *matrix* penalty,
                    such as 'lam' in QuicGraphLasso.
-                   Set the name of the penalty kwarg using penalty='penalty_name'.
+                   Set the penalty kwarg name using penalty='penalty_name'.
 
     estimator_args : A kwargs dict for estimator
         Each new instance of estimator will use these params.
