@@ -36,6 +36,15 @@ class TestQuicGraphLasso(object):
             'subsample': 0.1,
             'penalization': 'random',
         }),
+        ({
+            'estimator': QuicGraphLassoCV,
+            'estimator_args': {},
+            'num_trials': 10,
+            'normalize': True,
+            'subsample': 0.3,
+            'penalization': 'random',
+            'use_cache': False,
+        }),
     ])
     def test_integration_quic_graph_lasso_cv(self, params_in):
         '''
@@ -48,8 +57,14 @@ class TestQuicGraphLasso(object):
         n_examples, n_features = X.shape
 
         assert ma.proportion_.shape == (n_features, n_features)
-        assert len(ma.estimators_) == ma.num_trials
-        assert len(ma.lams_) == ma.num_trials
+        if ma.use_cache:
+            assert len(ma.estimators_) == ma.num_trials
+            assert len(ma.lams_) == ma.num_trials
+            assert len(ma.subsets_) == ma.num_trials
+        else:
+            assert len(ma.estimators_) == 0
+            assert len(ma.lams_) == 0
+            assert len(ma.subsets_) == 0
 
         for e in ma.estimators_:
             assert isinstance(e, params_in['estimator'])
