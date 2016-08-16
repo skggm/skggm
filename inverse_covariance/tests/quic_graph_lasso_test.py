@@ -5,13 +5,12 @@ from scipy.io import loadmat
 
 from sklearn.utils.testing import assert_raises
 from sklearn.utils.testing import assert_allclose
-
 from sklearn import datasets
 
 from .. import QuicGraphLasso, quic, QuicGraphLassoCV
 
 
-class TestInverseCovariance(object):
+class TestQuicGraphLasso(object):
     @pytest.mark.parametrize("params_in, expected", [
         ({}, [4.7973002082865275, 2.1849691442858554, 13.938876329200646, 4.7809889380800996e-10]),
         ({

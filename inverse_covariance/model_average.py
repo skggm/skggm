@@ -69,7 +69,7 @@ class ModelAverage(BaseEstimator):
         self.proportion_ = np.zeros((n_features, n_features))
         for nn in range(self.num_trials):
             if self.penalization == 'random':
-                lam = self._random_weights()
+                lam = self._random_weights(n_features)
             else:
                 raise NotImplementedError(
                     "Only penalization='random' has been implemented.")
@@ -83,8 +83,8 @@ class ModelAverage(BaseEstimator):
             if isinstance(new_estimator.precision_, list):
                 for prec in new_estimator.precision_:
                     self.proportion_[np.nonzero(prec)] += 1.
-            elif isinstance(new_estimator.precision_, np.array):
-                self.proportion_[np.nonzero(new_estimator.precision)] += 1.
+            elif isinstance(new_estimator.precision_, np.ndarray):
+                self.proportion_[np.nonzero(new_estimator.precision_)] += 1.
             else:
                 raise ValueError("Estimator returned invalid precision_.")
 
