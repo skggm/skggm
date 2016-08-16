@@ -44,6 +44,15 @@ NOTE:  During cleanup, we should rename setup.py since that file will be used fo
 
 # Acknowledgements
 
-* [QUIC](http://www.cs.utexas.edu/~sustik/QUIC/) algorithm is explained in *Sparse Inverse Covariance Matrix Estimation Using Quadratic Approximation* by Cho-Jui Hsieh, Mátyás A. Sustik, Inderjit S. Dhillon, Pradeep Ravikumar and forked from [http://www.cs.utexas.edu/~sustik/QUIC/](http://www.cs.utexas.edu/~sustik/QUIC/).
+* [QUIC](http://www.cs.utexas.edu/~sustik/QUIC/) algorithm from [http://www.cs.utexas.edu/~sustik/QUIC/](http://www.cs.utexas.edu/~sustik/QUIC/) with cython bindings forked from [https://github.com/osdf/pyquic](https://github.com/osdf/pyquic)
+http://bigdata.ices.utexas.edu/software/1035/
 
-* Cython bindings for QUIC forked from [https://github.com/osdf/pyquic](https://github.com/osdf/pyquic)
+# References
+
+* ["QUIC: Quadratic Approximation for sparse inverse covariance estimation"](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) by C. Hsieh, M. A. Sustik, I. S. Dhillon, P. Ravikumar, Journal of Machine Learning Research (JMLR), October 2014.
+
+* ["Stability Selection"](https://arxiv.org/pdf/0809.2932v2.pdf) N. Meinhausen and P. Buehlmann, May 2009
+
+* ["Mixed effects models for resampled network statistics improves statistical power to find differences in multi-subject functional connectivity"](http://biorxiv.org/content/early/2016/03/14/027516) M. Narayan and G. Allen, March 2016
+
+* ["Extended Bayesian Information Criteria for Gaussian Graphical Models"](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models) R. Foygel and M. Drton NIPS 2010

@@ -6,6 +6,16 @@ class ModelAverage(BaseEstimator):
     """
     Randomized model averaging meta-estimator.
 
+    For more information on 'random' penalization, see:
+        "Stability Selection"
+        N. Meinhausen and P. Buehlmann, May 2009
+
+    For more information on 'random adaptive penalization', see:
+        "Mixed effects models for resampled network statistics improves
+        statistical power to find differences in multi-subject functional
+        connectivity" 
+        M. Narayan and G. Allen, March 2016
+
     Parameters
     -----------        
     estimator : 
