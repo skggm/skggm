@@ -639,15 +639,6 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
 
     lam_ : (float)
         Lambda chosen by EBIC (with scaling already applied).
-
-    opt_ :
-
-    cputime_ :
-
-    iters_ :    
-
-    duality_gap_ :
-
     """
     def __init__(self, lam=1.0, path=100, gamma=0, tol=1e-6, max_iter=1000,
                  Theta0=None, Sigma0=None,  method='quic', verbose=0,
@@ -730,22 +721,8 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
         # apply EBIC criteria
         best_lam_idx = self.ebic_select(gamma=self.gamma)
         self.lam_ = self.lam * self.lam_scale_ * self.path[best_lam_idx]
-
-        # refit with best lambda, populate class variables with single instance
-        if self.method is 'quic':
-            (self.precision_, self.covariance_, self.opt_, self.cputime_, 
-            self.iters_, self.duality_gap_) = quic(self.sample_covariance_,
-                                                self.lam_,
-                                                mode='default',
-                                                tol=self.tol,
-                                                max_iter=self.max_iter,
-                                                Theta0=self.Theta0,
-                                                Sigma0=self.Sigma0,
-                                                path=None,
-                                                msg=self.verbose)
-        else:
-            raise NotImplementedError(
-                "Only method='quic' has been implemented.")
-
+        self.precision_ = self.precision_[best_lam_idx]
+        self.covariance_ = self.covariance_[best_lam_idx]
+        
         self.is_fitted = True
         return self

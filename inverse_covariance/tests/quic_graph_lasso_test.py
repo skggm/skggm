@@ -87,8 +87,8 @@ class TestQuicGraphLasso(object):
 
 
     @pytest.mark.parametrize("params_in, expected", [
-        ({}, [6.043627288609839, 1.6546354568963182, 16.47711829666861, 2.6645352591003757e-15, 0.91116275611548958]),
-        ({'lam': np.eye(10)}, [4.8511102683859564, 14.753317060095569, 5.7940675656399101, 1.89204425460332e-08]),
+        ({}, [6.0436272886101987, 1.65463545689622, 0.91116275611548958]),
+        ({'lam': np.eye(10)}, [4.8511097910208161, 14.753289369252375]),
     ])
     def test_integration_quic_graph_lasso_ebic(self, params_in, expected):
         '''
@@ -101,8 +101,6 @@ class TestQuicGraphLasso(object):
         result_vec = [
             np.linalg.norm(ic.covariance_),
             np.linalg.norm(ic.precision_),
-            np.linalg.norm(ic.opt_),
-            np.linalg.norm(ic.duality_gap_),
         ]
         if isinstance(ic.lam_, float):
             result_vec.append(ic.lam_)
