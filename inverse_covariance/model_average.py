@@ -33,9 +33,9 @@ class ModelAverage(BaseEstimator):
         Determines whether the proportion_ matrix should be normalized to have
         values in the range (0, 1) or should be absolute.
 
-    penalty : string
+    penalty : string (default='lam')
         Name of the penalty kwarg in the estimator
-        e.g., 'lam' for QuicGraphLasso
+        e.g., 'lam' for QuicGraphLasso, '' for GraphLasso
 
     penalization : one of 'random', 'adaptive' 
         Strategy for generating new random penalization in each trial.
@@ -49,6 +49,11 @@ class ModelAverage(BaseEstimator):
             statistical power to find differences in multi-subject functional
             connectivity" 
             M. Narayan and G. Allen, March 2016
+
+    use_scalar_penalty : bool (default=False)
+        Set this to true if the graph lasso estimator does not support matrix
+        penalization.  This leave penalization untouched and only bootstrap the
+        samples.
 
 
     Attributes
@@ -71,7 +76,7 @@ class ModelAverage(BaseEstimator):
     """
     def __init__(self, estimator=None, estimator_args={}, num_trials=100, 
                  normalize=True, penalization='random', subsample=0.3,
-                 use_cache=True, penalty='lam'):
+                 use_cache=True, penalty='lam', use_scalar_penalty=False):
         self.estimator = estimator 
         self.estimator_args = estimator_args
         self.num_trials = num_trials
@@ -80,6 +85,7 @@ class ModelAverage(BaseEstimator):
         self.subsample = subsample
         self.use_cache = use_cache
         self.penalty = penalty
+        self.use_scalar_penalty = use_scalar_penalty
 
         self.proportion_ = None
         self.estimators_ = []
@@ -89,6 +95,11 @@ class ModelAverage(BaseEstimator):
         if self.estimator is None:
             raise ValueError("ModelAvergae must be instantiated with an ",
                              "estimator.")
+
+        test_estimator = self.estimator()
+        if not hasattr(test_estimator, self.penalty):
+            raise ValueError("Must specify valid penalty for estimator: {}.".format(
+                self.penalty))
 
 
     def _random_weights(self, n_features):
@@ -111,15 +122,21 @@ class ModelAverage(BaseEstimator):
         X : ndarray, shape (n_samples, n_features)
             Data from which to compute the proportion matrix.
         """
+        mock_estimator = self.estimator()
         n_samples, n_features = X.shape
         self.proportion_ = np.zeros((n_features, n_features))
         for nn in range(self.num_trials):
+            if self.use_scalar_penalty:
+                lam = self.estimator_args.get(self.penalty, None) 
+                if lam is None:
+                    lam = getattr(mock_estimator, self.penalty)
             if self.penalization == 'random':
                 lam = self._random_weights(n_features)
             else:
                 raise NotImplementedError(
                     "Only penalization='random' has been implemented.")
 
+            # patch estimator args with new penalty
             self.estimator_args.update({
                 self.penalty: lam, 
             })

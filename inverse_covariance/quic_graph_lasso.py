@@ -350,6 +350,10 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
 
     Parameters
     -----------  
+    lam : scalar or 2D ndarray, shape (n_features, n_features) (default=0.5)
+        Regularization parameters per element of the inverse covariance matrix.
+        The next parameter 'lams' scale this matrix as the lasso path is learned.
+
     lams : integer, or list positive float, optional
         If an integer is given, it fixes the number of points on the
         grids of alpha to be used. If a list is given, it gives the

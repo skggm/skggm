@@ -3,7 +3,7 @@ import pytest
 
 from sklearn import datasets
 
-from .. import QuicGraphLasso, ModelAverage
+from .. import QuicGraphLassoCV, QuicGraphLasso, ModelAverage
 
 
 class TestQuicGraphLasso(object):
@@ -28,7 +28,7 @@ class TestQuicGraphLasso(object):
             'penalization': 'random',
         }),
         ({
-            'estimator': QuicGraphLasso,
+            'estimator': QuicGraphLassoCV,
             'estimator_args': {},
             'num_trials': 10,
             'normalize': True,
