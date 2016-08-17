@@ -58,14 +58,16 @@ class StatisticalPower(object):
         self.alphas = None
 
     def exact_support(self, prec, prec_hat):
-        return np.nonzero(prec) == np.nonzero(prec_hat)
+        print np.nonzero(prec)
+        print np.nonzero(prec_hat)
+        return np.linalg.norm(np.nonzero(prec) - np.nonzero(prec_hat)) < 1e-1
 
     def fit(self, X=None, y=None):
         # we'll have each row correspond to a different alpha
         self.results = np.zeros((self.n_grid_points, self.n_grid_points))
 
         grid = np.linspace(0.1, 1, self.n_grid_points)
-        self.alphas = 10 * np.linspace(0.1, 1, self.n_grid_points)
+        self.alphas = np.linspace(0.1, 1, self.n_grid_points)
         for aidx, alpha in enumerate(self.alphas):
             if self.verbose:
                 print 'At alpha {} ({}/{})'.format(
