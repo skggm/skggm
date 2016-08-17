@@ -637,16 +637,8 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
     sample_covariance_ : 2D ndarray, shape (n_features, n_features)
         Estimated sample covariance matrix
 
-    lam_scale_ : (float)
-        Additional scaling factor on lambda (due to magnitude of 
-        sample_covariance_ values).
-
     lam_ : (float)
         Lambda chosen by EBIC (with scaling already applied).
-
-    path_ : None or array of floats
-        Sorted (largest to smallest) path.  This will be None if not in path
-        mode.
 
     opt_ :
 
