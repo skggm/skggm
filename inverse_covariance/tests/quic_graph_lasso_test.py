@@ -52,7 +52,7 @@ class TestQuicGraphLasso(object):
 
 
     @pytest.mark.parametrize("params_in, expected", [
-        ({}, [4.695250607261749, 71.424414001397906, 2.8243718924865178, 0.00011952705621326443, 0.0015848931924611141]),
+        ({}, [4.6950036877095203, 70.365101231835496, 2.8448246138602844, 5.3317835134736313e-06, 0.0016556556074129555]),
     ])
     def test_integration_quic_graph_lasso_cv(self, params_in, expected):
         '''

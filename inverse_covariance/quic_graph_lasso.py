@@ -297,7 +297,7 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         return self.lam * self.lam_scale_ * self.path[lidx]
 
 
-def _quic_path(X, path, X_test=None, tol=1e-6,
+def _quic_path(X, path, X_test=None, lam=0.5, tol=1e-6,
          max_iter=1000, Theta0=None, Sigma0=None, method='quic', 
          verbose=0, score_metric='log_likelihood',
          initialize_method='corrcoef'):
@@ -311,7 +311,7 @@ def _quic_path(X, path, X_test=None, tol=1e-6,
     if method == 'quic':
         (precisions_, covariances_, opt_, cputime_, 
         iters_, duality_gap_) = quic(S,
-                                    1.0,
+                                    lam,
                                     mode='path',
                                     tol=tol,
                                     max_iter=max_iter,
@@ -406,13 +406,14 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
     n_iter_ : int
         Number of iterations run for the optimal alpha.
     """
-    def __init__(self, lams=4, n_refinements=4, cv=None, tol=1e-6,
+    def __init__(self, lam=0.5, lams=4, n_refinements=4, cv=None, tol=1e-6,
                  max_iter=1000, Theta0=None, Sigma0=None, method='quic', 
                  verbose=0, n_jobs=1, score_metric='log_likelihood',
                  initialize_method='corrcoef'):
         # GridCV params
         self.n_jobs = n_jobs
         self.cv = cv
+        self.lam = lam
         self.lams = lams
         self.n_refinements = n_refinements
 
@@ -479,9 +480,9 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                     X[train],
                     path,
                     X_test=X[test],
-                    tol=self.tol, max_iter=self.max_iter, Theta0=self.Theta0,
-                    Sigma0=self.Sigma0, method=self.method, verbose=self.verbose,
-                    score_metric=self.score_metric,
+                    lam=self.lam, tol=self.tol, max_iter=self.max_iter, 
+                    Theta0=self.Theta0, Sigma0=self.Sigma0, method=self.method,
+                    verbose=self.verbose, score_metric=self.score_metric,
                     initialize_method=self.initialize_method)
                 for train, test in cv)
 
@@ -550,8 +551,8 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         grid_scores.append(cross_val_score(EmpiricalCovariance(), X,
                                            cv=cv, n_jobs=self.n_jobs))
         self.grid_scores = np.array(grid_scores)
-        self.lam_ = lams[best_index]
-        self.cv_lams_ = lams
+        self.lam_ = self.lam * lams[best_index]
+        self.cv_lams_ = self.lam * np.array(lams)
 
         # Finally fit the model with the selected lambda
         if self.method == 'quic':
