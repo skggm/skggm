@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from sklearn import datasets
+from sklearn.covariance import GraphLassoCV
 
 from .. import QuicGraphLassoCV, QuicGraphLasso, ModelAverage
 
@@ -35,6 +36,17 @@ class TestQuicGraphLasso(object):
             'subsample': 0.3,
             'penalization': 'random',
             'use_cache': False,
+        }),
+        ({
+            'estimator': GraphLassoCV,
+            'estimator_args': {},
+            'num_trials': 10,
+            'normalize': True,
+            'subsample': 0.3,
+            'penalization': 'random',
+            'use_cache': False,
+            'penalty': 'alpha',
+            'use_scalar_penalty': True,
         }),
     ])
     def test_integration_quic_graph_lasso_cv(self, params_in):

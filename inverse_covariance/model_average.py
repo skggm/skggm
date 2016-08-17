@@ -68,7 +68,8 @@ class ModelAverage(BaseEstimator):
 
     lams_ : list of penalization matrices (num_trials, )
         The penalization matrix chosen in each trial.
-        This returns an empty list if use_cache=False.
+        This returns an empty list if use_cache=False and/or 
+        use_scalar_penalty=True
     
     subsets_ : list of subset indices (num_trials, )
         The example indices chosen in each trial.
@@ -97,7 +98,7 @@ class ModelAverage(BaseEstimator):
                              "estimator.")
 
         test_estimator = self.estimator()
-        if not hasattr(test_estimator, self.penalty):
+        if not self.use_scalar_penalty and not hasattr(test_estimator, self.penalty):
             raise ValueError("Must specify valid penalty for estimator: {}.".format(
                 self.penalty))
 
@@ -122,26 +123,22 @@ class ModelAverage(BaseEstimator):
         X : ndarray, shape (n_samples, n_features)
             Data from which to compute the proportion matrix.
         """
-        mock_estimator = self.estimator()
         n_samples, n_features = X.shape
         self.proportion_ = np.zeros((n_features, n_features))
         for nn in range(self.num_trials):
-            if self.use_scalar_penalty:
-                lam = self.estimator_args.get(self.penalty, None) 
-                if lam is None:
-                    lam = getattr(mock_estimator, self.penalty)
-            if self.penalization == 'random':
-                lam = self._random_weights(n_features)
-            else:
-                raise NotImplementedError(
-                    "Only penalization='random' has been implemented.")
+            if not self.use_scalar_penalty:
+                if self.penalization == 'random':
+                    lam = self._random_weights(n_features)
+                else:
+                    raise NotImplementedError(
+                        "Only penalization='random' has been implemented.")
 
-            # patch estimator args with new penalty
-            self.estimator_args.update({
-                self.penalty: lam, 
-            })
+                # patch estimator args with new penalty
+                self.estimator_args.update({
+                    self.penalty: lam, 
+                })
+
             new_estimator = self.estimator(**self.estimator_args)
-
             num_subsamples = int(self.subsample * n_samples)
             rp = np.random.permutation(n_samples)[:num_subsamples]
             new_estimator.fit(X[rp, :])
@@ -156,8 +153,9 @@ class ModelAverage(BaseEstimator):
 
             if self.use_cache:
                 self.estimators_.append(new_estimator)
-                self.lams_.append(lam)
                 self.subsets_.append(rp)
+                if not self.use_scalar_penalty:
+                    self.lams_.append(lam)
 
         if self.normalize:
             self.proportion_ /= self.num_trials
