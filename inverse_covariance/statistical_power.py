@@ -65,7 +65,7 @@ class StatisticalPower(object):
         self.results = np.zeros((self.n_grid_points, self.n_grid_points))
 
         grid = np.linspace(0.1, 1, self.n_grid_points)
-        self.alphas = np.linspace(0, 1, self.n_grid_points)
+        self.alphas = np.linspace(0.1, 1, self.n_grid_points)
         for aidx, alpha in enumerate(self.alphas):
             if self.verbose:
                 print 'At alpha {} ({}/{})'.format(
@@ -94,8 +94,8 @@ class StatisticalPower(object):
 
                 self.results[aidx, sidx] /= self.n_trials
 
-                if self.verbose:
-                    print 'Results at this row: {}'.format(self.results[aidx, :])
+            if self.verbose:
+                print 'Results at this row: {}'.format(self.results[aidx, :])
 
 
         self.is_fitted = True
