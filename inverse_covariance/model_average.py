@@ -34,8 +34,9 @@ class ModelAverage(BaseEstimator):
         values in the range (0, 1) or should be absolute.
 
     penalty : string (default='lam')
-        Name of the penalty kwarg in the estimator
-        e.g., 'lam' for QuicGraphLasso, '' for GraphLasso
+        Name of the penalty kwarg in the estimator.  This parameter is 
+        unimportant if use_scalar_penalty=True.
+        e.g., 'lam' for QuicGraphLasso, 'alpha' for GraphLasso
 
     penalization : one of 'random', 'adaptive' 
         Strategy for generating new random penalization in each trial.
