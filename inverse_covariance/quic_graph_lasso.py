@@ -406,7 +406,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
     n_iter_ : int
         Number of iterations run for the optimal alpha.
     """
-    def __init__(self, lam=0.5, lams=4, n_refinements=4, cv=None, tol=1e-6,
+    def __init__(self, lam=1.0, lams=4, n_refinements=4, cv=None, tol=1e-6,
                  max_iter=1000, Theta0=None, Sigma0=None, method='quic', 
                  verbose=0, n_jobs=1, score_metric='log_likelihood',
                  initialize_method='corrcoef'):
@@ -552,7 +552,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                                            cv=cv, n_jobs=self.n_jobs))
         self.grid_scores = np.array(grid_scores)
         self.lam_ = self.lam * lams[best_index]
-        self.cv_lams_ = self.lam * np.array(lams)
+        self.cv_lams_ = [self.lam * l for l in lams]
 
         # Finally fit the model with the selected lambda
         if self.method == 'quic':

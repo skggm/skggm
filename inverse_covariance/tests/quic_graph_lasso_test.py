@@ -52,7 +52,8 @@ class TestQuicGraphLasso(object):
 
 
     @pytest.mark.parametrize("params_in, expected", [
-        ({}, [4.6950036877095203, 70.365101231835496, 2.8448246138602844, 5.3317835134736313e-06, 0.0016556556074129555]),
+        ({}, [4.695250607261749, 71.424414001397906, 2.8243718924865178, 0.00011952705621326443, 0.0015848931924611141]),
+        ({'lam': np.eye(10)}, [4.7066725437645127, 80.453242746645287, 2.7220079143895006, 7.3715037470778455e-06]),
     ])
     def test_integration_quic_graph_lasso_cv(self, params_in, expected):
         '''
@@ -67,10 +68,15 @@ class TestQuicGraphLasso(object):
             np.linalg.norm(ic.precision_),
             np.linalg.norm(ic.opt_),
             np.linalg.norm(ic.duality_gap_),
-            ic.lam_,
         ]
+        if isinstance(ic.lam_, float):
+            result_vec.append(ic.lam_)
+        elif isinstance(ic.lam_, np.ndarray):
+            assert ic.lam_.shape == params_in['lam'].shape
+
+
         print result_vec
-        assert_allclose(expected, result_vec)
+        assert_allclose(expected, result_vec, rtol=1e-1)
 
         assert len(ic.grid_scores) == len(ic.cv_lams_)
 
