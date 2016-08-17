@@ -35,7 +35,7 @@ class TestQuicGraphLasso(object):
             'normalize': True,
             'subsample': 0.3,
             'penalization': 'random',
-            'use_cache': False,
+            'use_cache': True,
         }),
         ({
             'estimator': GraphLassoCV,
@@ -44,7 +44,7 @@ class TestQuicGraphLasso(object):
             'normalize': True,
             'subsample': 0.3,
             'penalization': 'random',
-            'use_cache': False,
+            'use_cache': True,
             'penalty': 'alpha',
             'use_scalar_penalty': True,
         }),
@@ -62,8 +62,11 @@ class TestQuicGraphLasso(object):
         assert ma.proportion_.shape == (n_features, n_features)
         if ma.use_cache:
             assert len(ma.estimators_) == ma.num_trials
-            assert len(ma.lams_) == ma.num_trials
             assert len(ma.subsets_) == ma.num_trials
+            if not ma.use_scalar_penalty:
+                assert len(ma.lams_) == ma.num_trials
+            else:
+                assert len(ma.lams_) == 0
         else:
             assert len(ma.estimators_) == 0
             assert len(ma.lams_) == 0
