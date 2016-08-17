@@ -5,7 +5,8 @@ from sklearn.utils.extmath import fast_logdet
 
 
 def log_likelihood(covariance, precision):
-    """Computes ...
+    """Computes the log-likelihood between the covariance and precision 
+    estimate.
     
     Parameters
     ----------
@@ -97,9 +98,11 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     precision : 2D ndarray (n_features, n_features)
         The precision matrix of the model to be tested
 
-    n_samples
+    n_samples :  int
+        Number of examples.
 
-    n_features
+    n_features : int
+        Dimension of an example.
 
     lam: (float)
         Threshold value for precision matrix. This should be lambda scaling
