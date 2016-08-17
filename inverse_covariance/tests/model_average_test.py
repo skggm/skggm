@@ -12,7 +12,7 @@ class TestQuicGraphLasso(object):
         ({
             'estimator': QuicGraphLasso,
             'estimator_args': {},
-            'num_trials': 10,
+            'n_trials': 10,
             'normalize': True,
             'subsample': 0.3,
             'penalization': 'random',
@@ -23,7 +23,7 @@ class TestQuicGraphLasso(object):
                 'lam': 0.5,
                 'mode': 'trace',
             },
-            'num_trials': 15,
+            'n_trials': 15,
             'normalize': False,
             'subsample': 0.6,
             'penalization': 'random',
@@ -31,7 +31,7 @@ class TestQuicGraphLasso(object):
         ({
             'estimator': QuicGraphLassoCV,
             'estimator_args': {},
-            'num_trials': 10,
+            'n_trials': 10,
             'normalize': True,
             'subsample': 0.3,
             'penalization': 'random',
@@ -40,7 +40,7 @@ class TestQuicGraphLasso(object):
         ({
             'estimator': GraphLassoCV,
             'estimator_args': {},
-            'num_trials': 10,
+            'n_trials': 10,
             'normalize': True,
             'subsample': 0.3,
             'penalization': 'random',
@@ -61,10 +61,10 @@ class TestQuicGraphLasso(object):
 
         assert ma.proportion_.shape == (n_features, n_features)
         if ma.use_cache:
-            assert len(ma.estimators_) == ma.num_trials
-            assert len(ma.subsets_) == ma.num_trials
+            assert len(ma.estimators_) == ma.n_trials
+            assert len(ma.subsets_) == ma.n_trials
             if not ma.use_scalar_penalty:
-                assert len(ma.lams_) == ma.num_trials
+                assert len(ma.lams_) == ma.n_trials
             else:
                 assert len(ma.lams_) == 0
         else:
@@ -81,7 +81,7 @@ class TestQuicGraphLasso(object):
         if ma.normalize == True:
             assert np.max(ma.proportion_) <= 1.0
         else:        
-            assert np.max(ma.proportion_) <= ma.num_trials
+            assert np.max(ma.proportion_) <= ma.n_trials
                 
         assert np.min(ma.proportion_) >= 0.0
         assert np.max(ma.proportion_) > 0.0

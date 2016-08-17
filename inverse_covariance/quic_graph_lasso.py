@@ -693,7 +693,8 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
         if self.param_path is None:
             self.path = np.logspace(np.log10(lam_0), np.log10(lam_1), 100)[::-1]
         elif isinstance(self.param_path, int):
-            self.path = np.logspace(np.log10(lam_0), np.log10(lam_1), self.param_path)[::-1]
+            self.path = np.logspace(
+                    np.log10(lam_0), np.log10(lam_1), self.param_path)[::-1]
         else:
             self.path = self.param_path
 
@@ -723,6 +724,6 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
         self.lam_ = self.lam * self.lam_scale_ * self.path[best_lam_idx]
         self.precision_ = self.precision_[best_lam_idx]
         self.covariance_ = self.covariance_[best_lam_idx]
-        
+
         self.is_fitted = True
         return self

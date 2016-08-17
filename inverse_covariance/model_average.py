@@ -6,6 +6,7 @@ class ModelAverage(BaseEstimator):
     """
     Randomized model averaging meta-estimator.
 
+    See analogous sklearn.linear_model.BaseRandomizedLinearModel.
     
     Parameters
     -----------        
@@ -19,7 +20,7 @@ class ModelAverage(BaseEstimator):
     estimator_args : A kwargs dict for estimator
         Each new instance of estimator will use these params.
 
-    num_trials : int (default=100)
+    n_trials : int (default=100)
         Number of random subsets for which to bootstrap the data.
 
     use_cache : bool (default=True)
@@ -63,25 +64,25 @@ class ModelAverage(BaseEstimator):
         Each entry indicates the sample probability (or count) of whether the 
         inverse covariance is non-zero.
 
-    estimators_ : list of estimator instances (num_trials, )
+    estimators_ : list of estimator instances (n_trials, )
         The estimator instance from each trial.  
         This returns an empty list if use_cache=False.
 
-    lams_ : list of penalization matrices (num_trials, )
+    lams_ : list of penalization matrices (n_trials, )
         The penalization matrix chosen in each trial.
         This returns an empty list if use_cache=False and/or 
         use_scalar_penalty=True
     
-    subsets_ : list of subset indices (num_trials, )
+    subsets_ : list of subset indices (n_trials, )
         The example indices chosen in each trial.
         This returns an empty list if use_cache=False.
     """
-    def __init__(self, estimator=None, estimator_args={}, num_trials=100, 
+    def __init__(self, estimator=None, estimator_args={}, n_trials=100, 
                  normalize=True, penalization='random', subsample=0.3,
                  use_cache=True, penalty='lam', use_scalar_penalty=False):
         self.estimator = estimator 
         self.estimator_args = estimator_args
-        self.num_trials = num_trials
+        self.n_trials = n_trials
         self.normalize = normalize
         self.penalization = penalization
         self.subsample = subsample
@@ -126,7 +127,7 @@ class ModelAverage(BaseEstimator):
         """
         n_samples, n_features = X.shape
         self.proportion_ = np.zeros((n_features, n_features))
-        for nn in range(self.num_trials):
+        for nn in range(self.n_trials):
             if not self.use_scalar_penalty:
                 if self.penalization == 'random':
                     lam = self._random_weights(n_features)
@@ -159,6 +160,6 @@ class ModelAverage(BaseEstimator):
                     self.lams_.append(lam)
 
         if self.normalize:
-            self.proportion_ /= self.num_trials
+            self.proportion_ /= self.n_trials
 
 
