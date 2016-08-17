@@ -33,16 +33,6 @@ def show_quic_coefficient_trace(X):
     trace_plot(estimator.precision_, estimator.path)
 
 
-def show_quic_coefficient_trace_on_class(X):
-    path = np.logspace(np.log10(0.01), np.log10(1.0), num=20, endpoint=True)[::-1]
-    estimator = QuicGraphLasso(
-            lam=1.0,
-            path=path,
-            mode='path')
-    estimator.fit(X)
-    estimator.trace_plot()
-
-
 if __name__ == "__main__":
     n_samples = 60
     n_features = 20
