@@ -5,6 +5,7 @@ from .quic_graph_lasso import (
     quic,
     QuicGraphLasso,
     QuicGraphLassoCV,
+    QuicGraphLassoEBIC,
 )
 from .metrics import (
     log_likelihood,
@@ -22,6 +23,7 @@ __all__ = [
     'quic',
     'QuicGraphLasso',
     'QuicGraphLassoCV',
+    'QuicGraphLassoEBIC',
     'log_likelihood',
     'kl_loss',
     'quadratic_loss',

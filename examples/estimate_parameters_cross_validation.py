@@ -7,7 +7,11 @@ from sklearn.covariance import GraphLassoCV, ledoit_wolf
 import matplotlib.pyplot as plt
 
 sys.path.append('..')
-from inverse_covariance import QuicGraphLasso, QuicGraphLassoCV
+from inverse_covariance import (
+    QuicGraphLasso,
+    QuicGraphLassoCV,
+    QuicGraphLassoEBIC,
+)
 
 
 '''
@@ -100,6 +104,17 @@ def estimate_via_quic_ebic(X, gamma=0):
     return cov, prec, ic_estimator.lam_at_index(ebic_index)
 
 
+def estimate_via_quic_ebic_convenience(X, gamma=0):
+    print '\n-- QUIC EBIC (Convenience)'
+    ic_estimator = QuicGraphLassoEBIC(
+        lam=1.0,
+        initialize_method='cov',
+        gamma=gamma)
+    ic_estimator.fit(X)
+
+    print 'Best lambda = {}'.format(ic_estimator.lam_)
+    return ic_estimator.covariance_, ic_estimator.precision_, ic_estimator.lam_
+
 def estimate_via_empirical(X):
     cov = np.dot(X.T, X) / n_samples
     return cov, np.linalg.inv(cov)
@@ -180,7 +195,7 @@ if __name__ == "__main__":
     quic_cv_fro_cov, quic_cv_fro_prec, quic_cv_fro_lam = estimate_via_quic_cv(X,
             cv_folds, metric='frobenius')
     quic_bic_cov, quic_bic_prec, quic_bic_lam = estimate_via_quic_ebic(X, gamma=0)
-    quic_ebic_cov, quic_ebic_prec, quic_ebic_lam = estimate_via_quic_ebic(X, gamma=0.1)
+    quic_ebic_cov, quic_ebic_prec, quic_ebic_lam = estimate_via_quic_ebic_convenience(X, gamma=0.1)
 
     # Show results
     covs = [('True', cov),

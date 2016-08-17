@@ -7,7 +7,12 @@ from sklearn.utils.testing import assert_raises
 from sklearn.utils.testing import assert_allclose
 from sklearn import datasets
 
-from .. import QuicGraphLasso, quic, QuicGraphLassoCV
+from .. import (
+    QuicGraphLasso,
+    quic,
+    QuicGraphLassoCV,
+    QuicGraphLassoEBIC,
+)
 
 
 class TestQuicGraphLasso(object):
@@ -80,6 +85,32 @@ class TestQuicGraphLasso(object):
 
         assert len(ic.grid_scores) == len(ic.cv_lams_)
 
+
+    @pytest.mark.parametrize("params_in, expected", [
+        ({}, [6.043627288609839, 1.6546354568963182, 16.47711829666861, 2.6645352591003757e-15, 0.91116275611548958]),
+        ({'lam': np.eye(10)}, [4.8511102683859564, 14.753317060095569, 5.7940675656399101, 1.89204425460332e-08]),
+    ])
+    def test_integration_quic_graph_lasso_ebic(self, params_in, expected):
+        '''
+        Just tests inputs/outputs (not validity of result).
+        '''
+        X = datasets.load_diabetes().data
+        ic = QuicGraphLassoEBIC(**params_in)
+        ic.fit(X)
+        
+        result_vec = [
+            np.linalg.norm(ic.covariance_),
+            np.linalg.norm(ic.precision_),
+            np.linalg.norm(ic.opt_),
+            np.linalg.norm(ic.duality_gap_),
+        ]
+        if isinstance(ic.lam_, float):
+            result_vec.append(ic.lam_)
+        elif isinstance(ic.lam_, np.ndarray):
+            assert ic.lam_.shape == params_in['lam'].shape
+
+        print result_vec
+        assert_allclose(expected, result_vec, rtol=1e-1)
 
     def test_invalid_method(self):
         '''
