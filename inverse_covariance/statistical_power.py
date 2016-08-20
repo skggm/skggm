@@ -14,8 +14,8 @@ prng = np.random.RandomState(1)
 def _new_graph(n_features, alpha):
     global prng
     prec = make_sparse_spd_matrix(n_features,
-                                  alpha=alpha, # prob that a coeff is nonzero
-                                  smallest_coef=0.4,
+                                  alpha=alpha, # prob that a coeff is zero
+                                  smallest_coef=0.7,
                                   largest_coef=0.7,
                                   random_state=prng)
     cov = np.linalg.inv(prec)
@@ -52,37 +52,43 @@ class GraphLassoSP(object):
 
     Once the model is chosen, we will run QuicGraphLasso with
     lam = self.penalty for multiple instances of a graph.
+    You can override the choice of the naive estimator (such as using the adaptive
+    method with )
 
     Expects that estimator.precision_ is a matrix, already model selected.
 
     Note:  We want to run model selection once at 
     """
-    def __init__(self, estimator=None, estimator_args={}, n_features=10, 
+    def __init__(self, model_selection_estimator=None,
+                model_selection_estimator_args={}, n_features=10, 
                 n_trials=10, n_grid_points=10, verbose=False, penalty='lam_'):
-        self.estimator = estimator 
-        self.estimator_args = estimator_args
+        self.model_selection_estimator = model_selection_estimator  
+        self.model_selection_estimator_args = model_selection_estimator_args
         self.n_features = n_features
         self.n_grid_points = n_grid_points
         self.n_trials = n_trials
         self.verbose = verbose
         self.penalty = penalty
+        # new variable trial_estimator (e.g., QuicGraphLasso)
 
         self.is_fitted = False
         self.results = None
         self.alphas = None
 
     def exact_support(self, prec, prec_hat):
-        return np.array_equal(np.nonzero(prec.flat)[0], np.nonzero(prec_hat.flat)[0])
+        return np.array_equal(
+                np.nonzero(prec.flat)[0],
+                np.nonzero(prec_hat.flat)[0])
  
     def fit(self, X=None, y=None):
         # we'll have each row correspond to a different alpha
         self.results = np.zeros((self.n_grid_points, self.n_grid_points))
 
-        grid = np.linspace(1, 10, self.n_grid_points)
-        self.alphas = np.linspace(0.1, 1, self.n_grid_points)
+        grid = np.linspace(2, 100, self.n_grid_points)
+        self.alphas = np.linspace(0.3, 0.9, self.n_grid_points)[::-1]
         for aidx, alpha in enumerate(self.alphas):
             if self.verbose:
-                print 'At alpha {} ({}/{})'.format(
+                print 'at alpha {} ({}/{})'.format(
                     alpha,
                     aidx,
                     self.n_grid_points,
@@ -90,20 +96,24 @@ class GraphLassoSP(object):
 
             # draw a new fixed graph for alpha
             cov, prec = _new_graph(self.n_features, alpha)
+            n_nonzero_prec = np.count_nonzero(prec.flat)
+            print '   graph has {} nonzero entries'.format(n_nonzero_prec)
 
             for sidx, sample_grid in enumerate(grid):
                 n_samples = int(sample_grid * self.n_features)
                 
-                if self.verbose:
-                    print ' | ({}/{})'.format(sidx, self.n_grid_points)
-
                 # do model selection (once)
                 X = _new_sample(n_samples, self.n_features, cov)
-                ms_estimator = self.estimator(**self.estimator_args)
+                ms_estimator = self.model_selection_estimator(
+                        **self.model_selection_estimator_args)
                 ms_estimator.fit(X)
                 lam = getattr(ms_estimator, self.penalty)
                 if self.verbose:
-                    print 'Selected lambda = {}'.format(lam)
+                    print '   ({}/{}), n_samples = {}, selected lambda = {}'.format(
+                            sidx,
+                            self.n_grid_points,
+                            n_samples,
+                            lam)
 
                 for nn in range(self.n_trials):                    
                     # estimate example with lam=ms_estimator.penalty
@@ -113,6 +123,7 @@ class GraphLassoSP(object):
                             mode='default',
                             initialize_method='cov')
                     new_estimator.fit(X)
+                    #print '    __ {}'.format(np.count_nonzero(new_estimator.precision_.flat))
 
                     self.results[aidx, sidx] += self.exact_support(
                             prec,
