@@ -17,7 +17,7 @@ from .plot_util import (
     trace_plot,
 )
 from .model_average import ModelAverage
-from .statistical_power import StatisticalPower
+from .statistical_power import GraphLassoSP
 
 
 __all__ = [
@@ -32,5 +32,5 @@ __all__ = [
     'ebic',
     'trace_plot',
     'ModelAverage',
-    'StatisticalPower',
+    'GraphLassoSP',
 ]
