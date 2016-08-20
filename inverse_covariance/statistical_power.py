@@ -103,7 +103,7 @@ class GraphLassoSP(object):
                 ms_estimator.fit(X)
                 lam = getattr(ms_estimator, self.penalty)
                 if self.verbose:
-                    'Selected lambda = {}'.format(lam)
+                    print 'Selected lambda = {}'.format(lam)
 
                 for nn in range(self.n_trials):                    
                     # estimate example with lam=ms_estimator.penalty
