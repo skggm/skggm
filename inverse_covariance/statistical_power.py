@@ -11,7 +11,7 @@ plt.ion()
 prng = np.random.RandomState(1)
 
 
-def _new_graph(n_samples, n_features, alpha):
+def _new_graph(n_features, alpha):
     global prng
     prec = make_sparse_spd_matrix(n_features,
                                   alpha=alpha, # prob that a coeff is nonzero
@@ -87,28 +87,27 @@ class GraphLassoSP(object):
                     aidx,
                     self.n_grid_points,
                 )
+
+            # draw a new fixed graph for alpha
+            cov, prec = _new_graph(self.n_features, alpha)
+
             for sidx, sample_grid in enumerate(grid):
                 n_samples = int(sample_grid * self.n_features)
                 
                 if self.verbose:
                     print ' | ({}/{})'.format(sidx, self.n_grid_points)
 
-                # draw a new fixed graph
-                cov, prec = _new_graph(n_samples, self.n_features, alpha)
-                X = _new_sample(n_samples, self.n_features, cov)
-                
                 # do model selection (once)
+                X = _new_sample(n_samples, self.n_features, cov)
                 ms_estimator = self.estimator(**self.estimator_args)
                 ms_estimator.fit(X)
                 lam = getattr(ms_estimator, self.penalty)
                 if self.verbose:
                     'Selected lambda = {}'.format(lam)
 
-                for nn in range(self.n_trials):
-                    # draw a new example from same graph
-                    X = _new_sample(n_samples, self.n_features, cov)
-                    
+                for nn in range(self.n_trials):                    
                     # estimate example with lam=ms_estimator.penalty
+                    X = _new_sample(n_samples, self.n_features, cov)
                     new_estimator = QuicGraphLasso(
                             lam=lam,
                             mode='default',
