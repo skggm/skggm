@@ -5,7 +5,8 @@ from sklearn.utils.extmath import fast_logdet
 
 
 def log_likelihood(covariance, precision):
-    """Computes ...
+    """Computes the log-likelihood between the covariance and precision 
+    estimate.
     
     Parameters
     ----------
@@ -97,9 +98,11 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     precision : 2D ndarray (n_features, n_features)
         The precision matrix of the model to be tested
 
-    n_samples
+    n_samples :  int
+        Number of examples.
 
-    n_features
+    n_features : int
+        Dimension of an example.
 
     lam: (float)
         Threshold value for precision matrix. This should be lambda scaling
@@ -113,8 +116,10 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     -------
     ebic score (float).  Caller should minimized this score.
     '''
-    l_theta = log_likelihood(covariance, precision) 
-    precision_nnz = np.count_nonzero(precision) 
+    l_theta = log_likelihood(covariance, precision)
+    mask = np.abs(precision.flat) > np.finfo(precision.dtype).eps
+    precision_nnz = np.sum(mask) / n_features # TODO: does this scaling make sense?
+    #precision_nnz = 1. * np.count_nonzero(precision) / n_features # TODO: does this scaling make sense?
     return -2.0 * l_theta +\
             precision_nnz * np.log(n_samples) +\
             4.0 * precision_nnz * np.log(n_features) * gamma

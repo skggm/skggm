@@ -33,7 +33,6 @@ def show_quic_coefficient_trace(X):
     trace_plot(estimator.precision_, estimator.path)
 
 
-
 if __name__ == "__main__":
     n_samples = 60
     n_features = 20
@@ -41,3 +40,5 @@ if __name__ == "__main__":
     X, cov, prec = make_data(n_samples, n_features)
 
     show_quic_coefficient_trace(X)
+
+    show_quic_coefficient_trace_on_class(X)

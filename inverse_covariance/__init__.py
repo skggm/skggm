@@ -5,6 +5,7 @@ from .quic_graph_lasso import (
     quic,
     QuicGraphLasso,
     QuicGraphLassoCV,
+    QuicGraphLassoEBIC,
 )
 from .metrics import (
     log_likelihood,
@@ -12,20 +13,24 @@ from .metrics import (
     quadratic_loss,
     ebic,
 )
-from .util import (
+from .plot_util import (
     trace_plot,
 )
 from .model_average import ModelAverage
+from .statistical_power import StatisticalPower
+
 
 __all__ = [
     'InverseCovarianceEstimator',
     'quic',
     'QuicGraphLasso',
     'QuicGraphLassoCV',
+    'QuicGraphLassoEBIC',
     'log_likelihood',
     'kl_loss',
     'quadratic_loss',
     'ebic',
     'trace_plot',
     'ModelAverage',
+    'StatisticalPower',
 ]

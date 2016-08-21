@@ -2,39 +2,44 @@ import numpy as np
 import pytest
 
 from sklearn import datasets
+from sklearn.covariance import GraphLassoCV
 
-from .. import QuicGraphLasso, ModelAverage
+from .. import QuicGraphLassoCV, QuicGraphLasso, ModelAverage
 
 
-class TestQuicGraphLasso(object):
+class TestModelAverage(object):
     @pytest.mark.parametrize("params_in", [
         ({
-            'estimator': QuicGraphLasso,
-            'estimator_args': {},
-            'num_trials': 10,
+            'estimator': QuicGraphLasso(),
+            'n_trials': 10,
             'normalize': True,
             'subsample': 0.3,
             'penalization': 'random',
         }),
         ({
-            'estimator': QuicGraphLasso,
-            'estimator_args': {
-                'lam': 0.5,
-                'mode': 'trace',
-            },
-            'num_trials': 15,
+            'estimator': QuicGraphLasso(lam=0.5, mode='trace'),
+            'n_trials': 15,
             'normalize': False,
             'subsample': 0.6,
             'penalization': 'random',
         }),
         ({
-            'estimator': QuicGraphLasso,
-            'estimator_args': {},
-            'num_trials': 10,
+            'estimator': QuicGraphLassoCV(),
+            'n_trials': 10,
             'normalize': True,
             'subsample': 0.3,
             'penalization': 'random',
-            'use_cache': False,
+            'use_cache': True,
+        }),
+        ({
+            'estimator': GraphLassoCV(),
+            'n_trials': 10,
+            'normalize': True,
+            'subsample': 0.3,
+            'penalization': 'random',
+            'use_cache': True,
+            'penalty': 'alpha',
+            'use_scalar_penalty': True,
         }),
     ])
     def test_integration_quic_graph_lasso_cv(self, params_in):
@@ -49,24 +54,34 @@ class TestQuicGraphLasso(object):
 
         assert ma.proportion_.shape == (n_features, n_features)
         if ma.use_cache:
-            assert len(ma.estimators_) == ma.num_trials
-            assert len(ma.lams_) == ma.num_trials
-            assert len(ma.subsets_) == ma.num_trials
+            assert len(ma.estimators_) == ma.n_trials
+            assert len(ma.subsets_) == ma.n_trials
+            if not ma.use_scalar_penalty:
+                assert len(ma.lams_) == ma.n_trials
+            else:
+                assert len(ma.lams_) == 0
         else:
             assert len(ma.estimators_) == 0
             assert len(ma.lams_) == 0
             assert len(ma.subsets_) == 0
 
-        for e in ma.estimators_:
-            assert isinstance(e, params_in['estimator'])
+        for eidx, e in enumerate(ma.estimators_):
+            assert isinstance(e, params_in['estimator'].__class__)
+            
             # sklearn doesnt have this but ours do
             if hasattr(e, 'is_fitted'):
                 assert e.is_fitted == True
 
+            # check that all lambdas used where different
+            if not ma.use_scalar_penalty and eidx > 0:
+                if hasattr(e, 'lam'):
+                    prev_e = ma.estimators_[eidx - 1]
+                    assert np.linalg.norm((prev_e.lam - e.lam).flat) > 0
+
         if ma.normalize == True:
             assert np.max(ma.proportion_) <= 1.0
         else:        
-            assert np.max(ma.proportion_) <= ma.num_trials
+            assert np.max(ma.proportion_) <= ma.n_trials
                 
         assert np.min(ma.proportion_) >= 0.0
         assert np.max(ma.proportion_) > 0.0

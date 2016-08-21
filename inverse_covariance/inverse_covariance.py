@@ -59,6 +59,22 @@ def _compute_error(comp_cov, covariance_, precision_, score_metric='frobenius'):
     else:
         raise NotImplementedError(("Must be frobenius, spectral, kl, "
                                    "quadratic, or log_likelihood"))
+
+
+def _validate_path(path):
+    """Sorts path values from largest to smallest.
+
+    Will warn if path parameter was not already sorted.
+    """
+    if path is None:
+        return None
+
+    new_path = np.array(sorted(set(path), reverse=True))
+    if new_path[0] != path[0]:
+        print 'Warning: Path must be sorted largest to smallest.'
+
+    return new_path
+
     
 class InverseCovarianceEstimator(BaseEstimator):
     """
@@ -68,18 +84,7 @@ class InverseCovarianceEstimator(BaseEstimator):
     and ebic model selection.
 
     Parameters
-    -----------        
-    lam : scalar or 2D ndarray, shape (n_features, n_features) (default=0.5)
-        Regularization parameters per element of the inverse covariance matrix.
-    
-    mode : one of 'default', 'path', or 'trace'
-        Computation mode.
-
-    path : array of floats (default=None)
-        In "path" mode, an array of float values for scaling lam.
-        The path must be sorted largest to smallest.  This class will auto sort
-        this, in which case indices correspond to self.path_
-
+    -----------            
     score_metric : one of 'log_likelihood' (default), 'frobenius', 'spectral',
                   'kl', or 'quadratic'
         Used for computing self.score().
@@ -92,15 +97,16 @@ class InverseCovarianceEstimator(BaseEstimator):
     covariance_ : 2D ndarray, shape (n_features, n_features)
         Estimated covariance matrix
         
-        If mode='path', this is a len(path) list of
+        This can also be a len(path) list of
         2D ndarray, shape (n_features, n_features)
-
+        (e.g., see mode='path' in QuicGraphLasso)
 
     precision_ : 2D ndarray, shape (n_features, n_features)
         Estimated pseudo-inverse matrix.
         
-        If mode='path', this is a len(path) list of
+        This can also be a len(path) list of
         2D ndarray, shape (n_features, n_features)
+        (e.g., see mode='path' in QuicGraphLasso)
 
     sample_covariance_ : 2D ndarray, shape (n_features, n_features)
         Estimated sample covariance matrix
@@ -108,23 +114,17 @@ class InverseCovarianceEstimator(BaseEstimator):
     lam_scale_ : (float)
         Additional scaling factor on lambda (due to magnitude of 
         sample_covariance_ values).
-
-    path_ : None or array of floats
-        Sorted (largest to smallest) path.  This will be None if not in path
-        mode.
     """
-    def __init__(self, lam=0.5, mode='default', score_metric='log_likelihood',
-                 path=None, initialize_method='corrcoef'):
-        self.lam = lam
-        self.mode = mode
+    def __init__(self, score_metric='log_likelihood', 
+                 initialize_method='cov'):
         self.score_metric = score_metric
         self.initialize_method = initialize_method
-        self.set_path(path)
 
-        self.covariance_ = None
-        self.precision_ = None
+        self.covariance_ = None  # assumes a matrix of a list of matrices
+        self.precision_ = None  # assumes a matrix of a list of matrices
 
         # these must be updated upon self.fit()
+        # the first 4 will be set if self.initialize_coefficients is used.
         self.sample_covariance_ = None
         self.lam_scale_ = None
         self.n_samples = None
@@ -132,10 +132,6 @@ class InverseCovarianceEstimator(BaseEstimator):
         self.is_fitted = False 
 
         super(InverseCovarianceEstimator, self).__init__()
-
-
-    def lam_select_(self, lam_index):
-        return self.lam * self.lam_scale_ * self.path[lam_index]
 
 
     def initialize_coefficients(self, X):
@@ -152,30 +148,12 @@ class InverseCovarianceEstimator(BaseEstimator):
                 X,
                 method=self.initialize_method)
 
-    def set_path(self, path):
-        """Sorts path values from largest to smallest.
-
-        Will warn if path parameter was not already sorted.
-        """
-        if self.mode is 'path' and path is None:
-            raise ValueError("path required in path mode.")
-            return
-
-        if path is None:
-            self.path = None
-            return
-
-        self.path = np.array(sorted(set(path), reverse=True))
-        if self.path[0] != path[0]:
-            print 'Warning: Path must be sorted largest to smallest.'
-
 
     def score(self, X_test, y=None):
         """Computes the score between cov/prec of sample covariance of X_test 
         and X via 'score_metric'.
 
-        Note: We want to maximize score so we return the negative error 
-              (or the max negative error). 
+        Note: We want to maximize score so we return the negative error.
        
         Parameters
         ----------
@@ -189,13 +167,12 @@ class InverseCovarianceEstimator(BaseEstimator):
         
         Returns
         -------
-        result : float
-            #The likelihood of the data set with `self.covariance_` as an
-            #estimator of its covariance matrix.
+        result : float or list of floats
+            The negative of the min error between `self.covariance_` and
+            the sample covariance of X_test.
         """        
-        if self.mode is 'path':
-            raise NotImplementedError(("self.score is not implemented for path "
-                                        "mode.  Use QuicGraphLassoCV."))
+        if isinstance(self.precision_, list):
+            print 'Warning: returning a list of scores.'
 
         S_test, lam_scale_test = _initialize_coefficients(
                 X_test,
@@ -237,9 +214,12 @@ class InverseCovarianceEstimator(BaseEstimator):
         
         Returns
         -------
-        The min error between `self.covariance_` and `comp_cov` 
+        The min error between `self.covariance_` and `comp_cov`.
+        
+        If self.precision_ is a list, returns errors for each matrix, otherwise
+        returns a scalar.
         """  
-        if self.mode is not 'path':
+        if not isinstance(self.precision_, list):
             return _compute_error(comp_cov,
                                 self.covariance_,
                                 self.precision_,
@@ -252,14 +232,54 @@ class InverseCovarianceEstimator(BaseEstimator):
                                             self.precision_[lidx],
                                             score_metric))
 
-        return path_errors
+        return np.array(path_errors)
+
+
+    def ebic(self, gamma=0):
+        """Compute EBIC scores for each model. If model is not "path" then 
+        returns a scalar score value.
+
+        See:
+            Extended Bayesian Information Criteria for Gaussian Graphical Models
+            R. Foygel and M. Drton
+            NIPS 2010
+    
+        Parameters
+        ----------
+        gamma : (float) \in (0, 1)
+            Choice of gamma=0 leads to classical BIC
+            Positive gamma leads to stronger penalization of large graphs.
+
+        Returns
+        -------
+        Scalar ebic score or list of ebic scores.
+        """
+        if not self.is_fitted:
+            return
+
+        if not isinstance(self.precision_, list):
+            return metrics.ebic(self.sample_covariance_,
+                                self.precision_,
+                                self.n_samples,
+                                self.n_features,
+                                gamma=gamma)
+
+        ebic_scores = []
+        for lidx, lam in enumerate(self.path):
+            ebic_scores.append(metrics.ebic(
+                    self.sample_covariance_,
+                    self.precision_[lidx],
+                    self.n_samples,
+                    self.n_features,
+                    gamma=gamma))
+
+        return ebic_scores
 
 
     def ebic_select(self, gamma=0):
-        '''
-        Uses Extended Bayesian Information Criteria for model selection.
+        """Uses Extended Bayesian Information Criteria for model selection.
 
-        Can only be used in path mode.
+        Can only be used in path mode (doesn't really make sense otherwise).
 
         See:
             Extended Bayesian Information Criteria for Gaussian Graphical Models
@@ -275,26 +295,13 @@ class InverseCovarianceEstimator(BaseEstimator):
         Returns
         -------
         Lambda index with best ebic score.
-        '''
-        # must be path mode
-        if self.mode is not 'path':
-            raise NotImplementedError(("Model selection only implemented for " 
-                                      "mode=path"))
+        """
+        if not isinstance(self.precision_, list):
+            raise NotImplementedError("EBIC requires multiple models to select from.")
             return
 
-        # model must be fitted
         if not self.is_fitted:
             return
 
-        ebic_scores = []
-        for lidx, lam in enumerate(self.path):
-            ebic_scores.append(metrics.ebic(
-                    self.sample_covariance_,
-                    self.precision_[lidx],
-                    self.n_samples,
-                    self.n_features,
-                    gamma=gamma))
-
+        ebic_scores = self.ebic(gamma=gamma)
         return np.argmin(ebic_scores)
-
-    
