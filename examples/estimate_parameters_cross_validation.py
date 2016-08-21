@@ -195,7 +195,7 @@ if __name__ == "__main__":
     quic_cv_fro_cov, quic_cv_fro_prec, quic_cv_fro_lam = estimate_via_quic_cv(X,
             cv_folds, metric='frobenius')
     quic_bic_cov, quic_bic_prec, quic_bic_lam = estimate_via_quic_ebic(X, gamma=0)
-    quic_ebic_cov, quic_ebic_prec, quic_ebic_lam = estimate_via_quic_ebic_convenience(X, gamma=0.1)
+    quic_ebic_cov, quic_ebic_prec, quic_ebic_lam = estimate_via_quic_ebic_convenience(X, gamma=0.3)
 
     # Show results
     covs = [('True', cov),
@@ -225,7 +225,7 @@ if __name__ == "__main__":
             ('QuicCV (fro)', quic_cv_fro_prec, quic_cv_fro_lam),
             ('True', prec, ''),
             ('Quic (bic)', quic_bic_prec, quic_bic_lam),
-            ('Quic (ebic gamma = 0.1)', quic_ebic_prec, quic_ebic_lam)]
+            ('Quic (ebic gamma = 0.3)', quic_ebic_prec, quic_ebic_lam)]
     show_results(covs, precs)
 
   

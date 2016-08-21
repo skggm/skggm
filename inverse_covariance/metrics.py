@@ -117,7 +117,9 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     ebic score (float).  Caller should minimized this score.
     '''
     l_theta = log_likelihood(covariance, precision)
-    precision_nnz = 1. * np.count_nonzero(precision) / n_features # TODO: this normalization seems to help a lot mnarayan??
+    mask = np.abs(precision.flat) > np.finfo(precision.dtype).eps
+    precision_nnz = np.sum(mask) / n_features # TODO: does this scaling make sense?
+    #precision_nnz = 1. * np.count_nonzero(precision) / n_features # TODO: does this scaling make sense?
     return -2.0 * l_theta +\
             precision_nnz * np.log(n_samples) +\
             4.0 * precision_nnz * np.log(n_features) * gamma

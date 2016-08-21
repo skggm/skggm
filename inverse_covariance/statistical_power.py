@@ -1,5 +1,6 @@
 import numpy as np 
 
+from sklearn.base import clone
 from sklearn.datasets import make_sparse_spd_matrix
 from matplotlib import pyplot as plt
 #import seaborn
@@ -64,17 +65,16 @@ class GraphLassoSP(object):
     Note:  There is no lambda for model_average, so we need to think about how 
            we would do that in this framework.
     """
-    def __init__(self, model_selection_estimator=None,
-                model_selection_estimator_args={}, n_features=10, 
-                n_trials=10, n_grid_points=10, verbose=False, penalty='lam_'):
+    def __init__(self, model_selection_estimator=None, n_features=10, 
+                trial_estimator=None, n_trials=10, n_grid_points=10,
+                verbose=False, penalty='lam_'):
         self.model_selection_estimator = model_selection_estimator  
-        self.model_selection_estimator_args = model_selection_estimator_args
+        self.trial_estimator = trial_estimator
         self.n_features = n_features
         self.n_grid_points = n_grid_points
         self.n_trials = n_trials
         self.verbose = verbose
         self.penalty = penalty
-        # new variable trial_estimator (e.g., QuicGraphLasso)
 
         self.is_fitted = False
         self.results = None
@@ -86,7 +86,8 @@ class GraphLassoSP(object):
         # Q: why do we need something like this?, and why must eps be so big?
         # Q: can we automatically determine what this threshold should be?
         eps = 0.2
-        prec_hat[np.abs(prec_hat) < eps] = 0.0
+        #eps = np.finfo(prec_hat.dtype).eps # too small
+        prec_hat[np.abs(prec_hat) <= eps] = 0.0
         
         return np.array_equal(
                 np.nonzero(prec.flat)[0],
@@ -119,11 +120,9 @@ class GraphLassoSP(object):
                 
                 # do model selection (once)
                 X = _new_sample(n_samples, self.n_features, cov)
-                ms_estimator = self.model_selection_estimator(
-                        **self.model_selection_estimator_args)
+                ms_estimator = clone(self.model_selection_estimator)
                 ms_estimator.fit(X)
                 lam = getattr(ms_estimator, self.penalty)
-                print ms_estimator.lam_scale_
                 if self.verbose:
                     print '   ({}/{}), n_samples = {}, selected lambda = {}'.format(
                             sidx,
@@ -131,14 +130,25 @@ class GraphLassoSP(object):
                             n_samples,
                             lam)
 
+                # setup default trial estimator
+                if self.trial_estimator is None:
+                    trial_estimator = QuicGraphLasso(lam=lam,
+                                                     mode='default',
+                                                     initialize_method='corrcoef') # maybe try corrcoef since 'cov' will modify lamba
+                else:
+                    trial_estimator = self.trial_estimator
+
                 for nn in range(self.n_trials):                    
                     # estimate example with lam=ms_estimator.penalty
                     X = _new_sample(n_samples, self.n_features, cov)
-                    new_estimator = QuicGraphLasso(
-                            lam=lam,
-                            mode='default',
-                            initialize_method='corrcoef') # maybe try corrcoef since 'cov' will modify lamba
+                    new_estimator = clone(trial_estimator)
                     new_estimator.fit(X)
+
+                    #plt.figure(10)
+                    #plt.imshow(np.abs(prec), interpolation='nearest')
+                    #plt.figure(11)
+                    #plt.imshow(np.abs(new_estimator.precision_), interpolation='nearest')
+                    #raw_input()
                     
                     self.results[aidx, sidx] += self.exact_support(
                             prec,

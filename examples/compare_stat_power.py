@@ -18,14 +18,14 @@ A few comments to do on phone with M:
 
 
 '''
-# EBIC, gamma=0.1
+# EBIC, gamma=0.3
 sp = GraphLassoSP(
         model_selection_estimator=QuicGraphLassoEBIC,
         model_selection_estimator_args={
-            'gamma': 0.1,
+            'gamma': 0.3,
         },
         n_features=50,
-        n_trials=100,
+        n_trials=10,
         verbose=True,
     )
 '''
@@ -33,9 +33,9 @@ sp = GraphLassoSP(
 
 # GraphLassoCV CV, 
 sp = GraphLassoSP(
-        model_selection_estimator=QuicGraphLassoCV,
+        model_selection_estimator=QuicGraphLassoCV(),
         n_features=50,
-        n_trials=1000,
+        n_trials=10,
         verbose=True,
     )
 
