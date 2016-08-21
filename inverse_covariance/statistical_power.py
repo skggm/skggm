@@ -59,6 +59,7 @@ def _exact_support(prec, prec_hat):
             np.nonzero(prec.flat)[0],
             np.nonzero(prec_hat.flat)[0])
 
+
 def _sp_trial(trial_estimator, n_samples, n_features, cov, prec):
     X = _new_sample(n_samples, n_features, cov)
     new_estimator = clone(trial_estimator)
@@ -227,22 +228,6 @@ class StatisticalPower(object):
                     for nn in range(self.n_trials))
 
                 self.results_[aidx, sidx] = 1. * np.sum(exact_support_counts) / self.n_trials
-
-                '''
-                # TODO: paralellize this 
-                for nn in range(self.n_trials):                    
-                    X = _new_sample(n_samples, self.n_features, cov)
-                    new_estimator = clone(trial_estimator)
-                    new_estimator.fit(X)
-                    
-                    self.results_[aidx, sidx] += self.exact_support(
-                            prec,
-                            new_estimator.precision_)
-
-                    del new_estimator
-
-                self.results_[aidx, sidx] /= self.n_trials
-                '''
 
             if self.verbose:
                 print 'Results at this row: {}'.format(self.results_[aidx, :])
