@@ -5,28 +5,41 @@ from sklearn import datasets
 from sklearn.covariance import GraphLassoCV
 
 from .. import StatisticalPower
-
-
-class MockGraphLasso(object):
-    """Will return result with statistical power performance linear in the size
-    of n_examples/n_features.
-    """
-    def __init__(self, cov_true, prec_true):
-        self.cov_true = cov_true
-        self.prec_true = prec_true
-
-        self.precision_ = None
-        self.covariance_ = self.cov_true # ignoring covariance for now
-
-    def fit(self, X, y=None, **fit_params):
-        n_examples, n_features = X.shape
-        ratio = 1. * n_examples / n_features
-
-        prec_est = np.copy(self.prec_true)
-        prec_est[np.nonzero(prec_est)]
-
-
-        return self
+from .. import (
+    QuicGraphLassoCV,
+    QuicGraphLassoEBIC,
+)
 
 
 class TestStatisticalPower(object):
+    @pytest.mark.parametrize("params_in", [
+        ({
+            'model_selection_estimator': QuicGraphLassoCV(),
+            'n_trials': 20,
+            'n_features': 25,
+        }),
+        ({
+            'model_selection_estimator': QuicGraphLassoEBIC(),
+            'n_trials': 20,
+            'n_features': 10,
+            'n_jobs': 2,
+        }),
+        ({
+            'model_selection_estimator': GraphLassoCV(),
+            'n_trials': 20,
+            'n_features': 20,
+            'penalty_': 'alpha_',
+        }),
+    ])
+    def test_integration_statistical_power(self, params_in):
+        '''
+        Just tests inputs/outputs (not validity of result).
+        '''
+        X = datasets.load_diabetes().data
+        sp = StatisticalPower(**params_in)
+        sp.fit(X)
+
+        assert np.sum(sp.results_.flat) > 0
+        assert sp.results_.shape == (5, sp.n_grid_points)
+        assert len(sp.ks_) == 5
+        assert len(sp.grid_) == sp.n_grid_points

@@ -2,6 +2,7 @@ import time
 import sys
 sys.path.append('..')
 
+from sklearn.covariance import GraphLassoCV
 from inverse_covariance import (
     StatisticalPower,
     QuicGraphLassoCV, 
@@ -79,6 +80,16 @@ sp = StatisticalPower(
 sp.fit()
 sp.show()
 '''
+
+# GraphLassoCV CV, 
+sp = StatisticalPower(
+        model_selection_estimator=GraphLassoCV(),
+        n_features=50,
+        n_trials=100,
+        verbose=True,
+    )
+sp.fit()
+sp.show()
 
 
 raw_input()

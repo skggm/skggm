@@ -186,7 +186,8 @@ class StatisticalPower(object):
             cov, prec = _new_graph(self.n_features, alpha)
             n_nonzero_prec = np.count_nonzero(prec.flat)
             self.ks_.append(n_nonzero_prec)
-            print '   Graph has {} nonzero entries'.format(n_nonzero_prec)
+            if self.verbose:
+                print '   Graph has {} nonzero entries'.format(n_nonzero_prec)
 
             for sidx, sample_grid in enumerate(self.grid_):
                 n_samples = int(sample_grid * self.n_features)
