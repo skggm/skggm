@@ -221,6 +221,9 @@ class StatisticalPower(object):
                 exact_support_counts = Parallel(
                     n_jobs=self.n_jobs,
                     verbose=False,
+                    backend='threading',
+                    #max_nbytes=None,
+                    #batch_size=1,
                 )(
                     delayed(_sp_trial)(
                         trial_estimator, n_samples, self.n_features, cov, prec

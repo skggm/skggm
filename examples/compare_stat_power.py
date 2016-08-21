@@ -46,7 +46,7 @@ sp = StatisticalPower(
         model_selection_estimator=QuicGraphLassoCV(),
         n_features=50,
         n_trials=100,
-        n_jobs=1,
+        n_jobs=4,
         verbose=True,
     )
 sp.fit()
