@@ -4,8 +4,8 @@ import pytest
 from sklearn import datasets
 from sklearn.covariance import GraphLassoCV
 
-from .. import StatisticalPower
-from .. import (
+from inverse_covariance.profiling import StatisticalPower
+from inverse_covariance import (
     QuicGraphLassoCV,
     QuicGraphLassoEBIC,
 )

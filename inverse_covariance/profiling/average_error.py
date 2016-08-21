@@ -137,7 +137,7 @@ class AverageError(object):
 
         self.results_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
         self.grid_ = np.linspace(0.25, 4, self.n_grid_points)
-        self.alphas_ = np.linspace(0.99, 0.999, n_alpha_grid_points)[::-1]
+        self.alphas_ = np.linspace(0.95, 0.99, n_alpha_grid_points)[::-1]
         self.ks_ = []
 
         for aidx, alpha in enumerate(self.alphas_):
@@ -189,7 +189,7 @@ class AverageError(object):
                     )
                     for nn in range(self.n_trials))
 
-                self.results_[aidx, sidx] = 1. * np.sum(errors) / self.n_trials
+                self.results_[aidx, sidx] = np.mean(errors)
 
             if self.verbose:
                 print 'Results at this row: {}'.format(self.results_[aidx, :])
