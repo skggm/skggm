@@ -21,7 +21,7 @@ A few comments to do on phone with M:
 
 
 '''
-# EBIC, gamma=0.3
+# QuicGraphLassoEBIC, gamma=0.3
 sp = StatisticalPower(
         model_selection_estimator=QuicGraphLassoEBIC(gamma=0.3),
         n_features=50,
@@ -69,7 +69,7 @@ print 'Elapsed time for 4 thread {}'.format(end - start)
 '''
 
 '''
-# GraphLassoCV CV, 
+# QuicGraphLassoCV CV, 
 sp = StatisticalPower(
         model_selection_estimator=QuicGraphLassoCV(),
         n_features=50,
@@ -87,6 +87,7 @@ sp = StatisticalPower(
         n_features=50,
         n_trials=100,
         verbose=True,
+        penalty_='alpha_',
     )
 sp.fit()
 sp.show()
