@@ -2,7 +2,7 @@ import numpy as np
 
 from sklearn.datasets import make_sparse_spd_matrix
 from matplotlib import pyplot as plt
-import seaborn
+#import seaborn
 
 from . import QuicGraphLasso
 
@@ -34,14 +34,14 @@ def _new_sample(n_samples, n_features, cov):
     return X
 
 
-def _plot_spower(results, alphas):
+def _plot_spower(results, grid, ks):
     plt.figure()
-    plt.plot(results, lw=2)
+    plt.plot(grid, results.T, lw=2)
     plt.xlabel('n/p (n_samples/n_features)')
     plt.ylabel('P(exact recovery)')
     legend_text = []
-    for alpha in alphas:
-        legend_text.append('alpha={}'.format(alpha))
+    for ks in ks:
+        legend_text.append('sparsity={}'.format(ks))
     plt.legend(legend_text)
     plt.show()
 
@@ -58,6 +58,11 @@ class GraphLassoSP(object):
     Expects that estimator.precision_ is a matrix, already model selected.
 
     Note:  We want to run model selection once at 
+
+    Note:  Look into what sklearn's clone feature does
+
+    Note:  There is no lambda for model_average, so we need to think about how 
+           we would do that in this framework.
     """
     def __init__(self, model_selection_estimator=None,
                 model_selection_estimator_args={}, n_features=10, 
@@ -74,8 +79,15 @@ class GraphLassoSP(object):
         self.is_fitted = False
         self.results = None
         self.alphas = None
+        self.ks = None
+        self.grid = None
 
     def exact_support(self, prec, prec_hat):
+        # Q: why do we need something like this?, and why must eps be so big?
+        # Q: can we automatically determine what this threshold should be?
+        eps = 0.2
+        prec_hat[np.abs(prec_hat) < eps] = 0.0
+        
         return np.array_equal(
                 np.nonzero(prec.flat)[0],
                 np.nonzero(prec_hat.flat)[0])
@@ -84,8 +96,9 @@ class GraphLassoSP(object):
         # we'll have each row correspond to a different alpha
         self.results = np.zeros((self.n_grid_points, self.n_grid_points))
 
-        grid = np.linspace(2, 100, self.n_grid_points)
-        self.alphas = np.linspace(0.3, 0.9, self.n_grid_points)[::-1]
+        self.grid = np.linspace(0.25, 4, self.n_grid_points)
+        self.alphas = np.linspace(0.99, 0.999, self.n_grid_points / 2)[::-1]
+        self.ks = []
         for aidx, alpha in enumerate(self.alphas):
             if self.verbose:
                 print 'at alpha {} ({}/{})'.format(
@@ -97,9 +110,10 @@ class GraphLassoSP(object):
             # draw a new fixed graph for alpha
             cov, prec = _new_graph(self.n_features, alpha)
             n_nonzero_prec = np.count_nonzero(prec.flat)
+            self.ks.append(n_nonzero_prec)
             print '   graph has {} nonzero entries'.format(n_nonzero_prec)
 
-            for sidx, sample_grid in enumerate(grid):
+            for sidx, sample_grid in enumerate(self.grid):
                 n_samples = int(sample_grid * self.n_features)
                 
                 # do model selection (once)
@@ -108,6 +122,7 @@ class GraphLassoSP(object):
                         **self.model_selection_estimator_args)
                 ms_estimator.fit(X)
                 lam = getattr(ms_estimator, self.penalty)
+                print ms_estimator.lam_scale_
                 if self.verbose:
                     print '   ({}/{}), n_samples = {}, selected lambda = {}'.format(
                             sidx,
@@ -121,10 +136,9 @@ class GraphLassoSP(object):
                     new_estimator = QuicGraphLasso(
                             lam=lam,
                             mode='default',
-                            initialize_method='cov')
+                            initialize_method='corrcoef') # maybe try corrcoef since 'cov' will modify lamba
                     new_estimator.fit(X)
-                    #print '    __ {}'.format(np.count_nonzero(new_estimator.precision_.flat))
-
+                    
                     self.results[aidx, sidx] += self.exact_support(
                             prec,
                             new_estimator.precision_)
@@ -145,6 +159,6 @@ class GraphLassoSP(object):
             print 'Not fitted.'
             return
 
-        _plot_spower(self.results, self.alphas)
+        _plot_spower(self.results, self.grid, self.alphas)
         raw_input()
 

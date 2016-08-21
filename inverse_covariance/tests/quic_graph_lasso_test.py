@@ -79,7 +79,6 @@ class TestQuicGraphLasso(object):
         elif isinstance(ic.lam_, np.ndarray):
             assert ic.lam_.shape == params_in['lam'].shape
 
-
         print result_vec
         assert_allclose(expected, result_vec, rtol=1e-1)
 

@@ -88,7 +88,7 @@ def estimate_via_quic_ebic(X, gamma=0):
         lam=1.0,
         mode='path',
         initialize_method='cov',
-        path=np.logspace(np.log10(0.01), np.log10(0.5), num=100, endpoint=True))
+        path=np.logspace(np.log10(0.01), np.log10(1.0), num=100, endpoint=True))
     ic_estimator.fit(X)
 
     # ebic model selection
