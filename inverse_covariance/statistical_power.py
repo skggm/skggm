@@ -93,18 +93,19 @@ class GraphLassoSP(object):
                 np.nonzero(prec_hat.flat)[0])
  
     def fit(self, X=None, y=None):
-        # we'll have each row correspond to a different alpha
-        self.results = np.zeros((self.n_grid_points, self.n_grid_points))
+        n_alpha_grid_points = self.n_grid_points / 2
 
+        self.results = np.zeros((n_alpha_grid_points, self.n_grid_points))
         self.grid = np.linspace(0.25, 4, self.n_grid_points)
-        self.alphas = np.linspace(0.99, 0.999, self.n_grid_points / 2)[::-1]
+        self.alphas = np.linspace(0.99, 0.999, n_alpha_grid_points)[::-1]
         self.ks = []
+
         for aidx, alpha in enumerate(self.alphas):
             if self.verbose:
                 print 'at alpha {} ({}/{})'.format(
                     alpha,
                     aidx,
-                    self.n_grid_points,
+                    n_alpha_grid_points,
                 )
 
             # draw a new fixed graph for alpha
@@ -150,7 +151,6 @@ class GraphLassoSP(object):
             if self.verbose:
                 print 'Results at this row: {}'.format(self.results[aidx, :])
 
-
         self.is_fitted = True
         return self
 
@@ -159,6 +159,5 @@ class GraphLassoSP(object):
             print 'Not fitted.'
             return
 
-        _plot_spower(self.results, self.grid, self.alphas)
-        raw_input()
+        _plot_spower(self.results, self.grid, self.ks)
 
