@@ -20,7 +20,7 @@ A few comments to do on phone with M:
 '''
 
 
-'''
+
 # QuicGraphLassoEBIC, gamma=0.3
 sp = StatisticalPower(
         model_selection_estimator=QuicGraphLassoEBIC(gamma=0.3),
@@ -40,7 +40,7 @@ sp = StatisticalPower(
 sp.fit()
 sp.show()
 plt.title('gamma = 0')
-'''
+
 
 '''
 start = time.time()
@@ -81,6 +81,7 @@ sp.fit()
 sp.show()
 '''
 
+'''
 # GraphLassoCV CV, 
 sp = StatisticalPower(
         model_selection_estimator=GraphLassoCV(),
@@ -91,6 +92,6 @@ sp = StatisticalPower(
     )
 sp.fit()
 sp.show()
-
+'''
 
 raw_input()
