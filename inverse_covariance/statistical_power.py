@@ -38,7 +38,7 @@ def _new_sample(n_samples, n_features, cov):
 def _plot_spower(results, grid, ks):
     plt.figure()
     plt.plot(grid, results.T, lw=2)
-    plt.xlabel('n/p (n_samples/n_features)')
+    plt.xlabel('n/p (n_samples / n_features)')
     plt.ylabel('P(exact recovery)')
     legend_text = []
     for ks in ks:
@@ -47,40 +47,101 @@ def _plot_spower(results, grid, ks):
     plt.show()
 
 
-class GraphLassoSP(object):
+class StatisticalPower(object):
     """Compute the statistical power P(exact support) of a model selector for
-    different values of alpha over grid of n_samples/n_features.
+    different values of alpha over grid of n_samples / n_features.
+
+    For each choice of alpha, we select a fixed test graph.
+    For each choice of n_samples / n_features, we learn the model selection
+    penalty once and apply this learned value to each subsequent random trial,
+    which (new instances of the fixed graph).
 
     Once the model is chosen, we will run QuicGraphLasso with
     lam = self.penalty for multiple instances of a graph.
     You can override the choice of the naive estimator (such as using the adaptive
     method with )
 
-    Expects that estimator.precision_ is a matrix, already model selected.
+    Parameters
+    -----------        
+    model_selection_estimator : An inverse covariance estimator instance 
+        This estimator must be able to select a penalization parameter. 
+        Use .penalty_ to obtain selected penalty.
+
+    n_features : int (default=50)
+        Fixed number of features to test.
+
+    n_trials : int (default=100)
+        Number of examples to draw to measure P(recovery).
+
+    trial_estimator : An inverse covariance estimator instance (default=None)
+        Estimator to use on each instance after selecting a penalty lambda.
+        If None, this will use QuicGraphLasso with lambda obtained with 
+        model_selection_estimator.
+        Use .penalty to set selected penalty.
+
+    penalty_ : string (default='lam_')
+        Name of the selected best penalty in estimator
+        e.g., 'lam_' for QuicGraphLassoCV, QuicGraphLassoEBIC,
+              'alpha_' for GraphLassoCV
+
+    penalty : string (default='lam')
+        Name of the penalty kwarg in the estimator.  
+        e.g., 'lam' for QuicGraphLasso, 'alpha' for GraphLasso
+
+    n_grid_points : int (default=10)
+        Number of grid points for sampling n_samples / n_features between (0,1)
+
+    verbose : bool (default=False)
+        Print out progress information.
+
+    Methods
+    ----------
+    show() : Plot the results.
+
+    Attributes
+    ----------
+    grid_ : 
+        #Each entry indicates the sample probability (or count) of whether the 
+        #inverse covariance is non-zero.
+
+    alphas_ : 
+
+    ks_ : 
+        #The estimator instance from each trial.  
+        #This returns an empty list if use_cache=False.
+
+    results_ : matrix of size (n_alpha_grid_points, n_grid_points)
+        #The penalization matrix chosen in each trial.
+        #This returns an empty list if use_cache=False and/or 
+        #use_scalar_penalty=True
+    
+
+    ======
 
     Note:  We want to run model selection once at 
 
     Note:  Look into what sklearn's clone feature does
 
-    Note:  There is no lambda for model_average, so we need to think about how 
-           we would do that in this framework.
+    Note:  Set custom trial-estimator that doesn't do anything with lambda
+           if need to override this feature.
     """
-    def __init__(self, model_selection_estimator=None, n_features=10, 
-                trial_estimator=None, n_trials=10, n_grid_points=10,
-                verbose=False, penalty='lam_'):
+    def __init__(self, model_selection_estimator=None, n_features=50, 
+                trial_estimator=None, n_trials=100, n_grid_points=10,
+                verbose=False, penalty_='lam_', penalty='lam'):
         self.model_selection_estimator = model_selection_estimator  
         self.trial_estimator = trial_estimator
         self.n_features = n_features
         self.n_grid_points = n_grid_points
         self.n_trials = n_trials
         self.verbose = verbose
-        self.penalty = penalty
+        self.penalty_ = penalty_ # class name for model selected penalty
+        self.penalty = penalty # class name for setting penalty
 
         self.is_fitted = False
-        self.results = None
-        self.alphas = None
-        self.ks = None
-        self.grid = None
+        self.results_ = None
+        self.alphas_ = None
+        self.ks_ = None
+        self.grid_ = None
 
     def exact_support(self, prec, prec_hat):
         # Q: why do we need something like this?, and why must eps be so big?
@@ -94,14 +155,14 @@ class GraphLassoSP(object):
                 np.nonzero(prec_hat.flat)[0])
  
     def fit(self, X=None, y=None):
-        n_alpha_grid_points = self.n_grid_points / 2
+        n_alpha_grid_points = 5
 
-        self.results = np.zeros((n_alpha_grid_points, self.n_grid_points))
-        self.grid = np.linspace(0.25, 4, self.n_grid_points)
-        self.alphas = np.linspace(0.99, 0.999, n_alpha_grid_points)[::-1]
-        self.ks = []
+        self.results_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
+        self.grid_ = np.linspace(0.25, 4, self.n_grid_points)
+        self.alphas_ = np.linspace(0.99, 0.999, n_alpha_grid_points)[::-1]
+        self.ks_ = []
 
-        for aidx, alpha in enumerate(self.alphas):
+        for aidx, alpha in enumerate(self.alphas_):
             if self.verbose:
                 print 'at alpha {} ({}/{})'.format(
                     alpha,
@@ -112,17 +173,18 @@ class GraphLassoSP(object):
             # draw a new fixed graph for alpha
             cov, prec = _new_graph(self.n_features, alpha)
             n_nonzero_prec = np.count_nonzero(prec.flat)
-            self.ks.append(n_nonzero_prec)
-            print '   graph has {} nonzero entries'.format(n_nonzero_prec)
+            self.ks_.append(n_nonzero_prec)
+            print '   Graph has {} nonzero entries'.format(n_nonzero_prec)
 
-            for sidx, sample_grid in enumerate(self.grid):
+            for sidx, sample_grid in enumerate(self.grid_):
                 n_samples = int(sample_grid * self.n_features)
                 
-                # do model selection (once)
+                # model selection (once)
                 X = _new_sample(n_samples, self.n_features, cov)
                 ms_estimator = clone(self.model_selection_estimator)
                 ms_estimator.fit(X)
-                lam = getattr(ms_estimator, self.penalty)
+                lam = getattr(ms_estimator, self.penalty_)
+                
                 if self.verbose:
                     print '   ({}/{}), n_samples = {}, selected lambda = {}'.format(
                             sidx,
@@ -134,12 +196,17 @@ class GraphLassoSP(object):
                 if self.trial_estimator is None:
                     trial_estimator = QuicGraphLasso(lam=lam,
                                                      mode='default',
-                                                     initialize_method='corrcoef') # maybe try corrcoef since 'cov' will modify lamba
+                                                     initialize_method='corrcoef')
                 else:
                     trial_estimator = self.trial_estimator
 
+                # patch trial estimator with this lambda
+                trial_estimator.set_params(**{
+                    self.penalty: lam, 
+                })
+
+                # TODO: paralellize this 
                 for nn in range(self.n_trials):                    
-                    # estimate example with lam=ms_estimator.penalty
                     X = _new_sample(n_samples, self.n_features, cov)
                     new_estimator = clone(trial_estimator)
                     new_estimator.fit(X)
@@ -150,16 +217,16 @@ class GraphLassoSP(object):
                     #plt.imshow(np.abs(new_estimator.precision_), interpolation='nearest')
                     #raw_input()
                     
-                    self.results[aidx, sidx] += self.exact_support(
+                    self.results_[aidx, sidx] += self.exact_support(
                             prec,
                             new_estimator.precision_)
 
                     del new_estimator
 
-                self.results[aidx, sidx] /= self.n_trials
+                self.results_[aidx, sidx] /= self.n_trials
 
             if self.verbose:
-                print 'Results at this row: {}'.format(self.results[aidx, :])
+                print 'Results at this row: {}'.format(self.results_[aidx, :])
 
         self.is_fitted = True
         return self
@@ -169,5 +236,5 @@ class GraphLassoSP(object):
             print 'Not fitted.'
             return
 
-        _plot_spower(self.results, self.grid, self.ks)
+        _plot_spower(self.results_, self.grid_, self.ks_)
 

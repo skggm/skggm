@@ -13,9 +13,6 @@ class ModelAverage(BaseEstimator):
     estimator : An inverse covariance estimator instance
         After being fit, estimator.precision_ must either be a matrix with the 
         precision or a list of precision matrices (e.g., path mode).
-        Important: The estimator must be able to take a *matrix* penalty,
-                   such as 'lam' in QuicGraphLasso.
-                   Set the penalty kwarg name using penalty='penalty_name'.
 
     n_trials : int (default=100)
         Number of random subsets for which to bootstrap the data.
