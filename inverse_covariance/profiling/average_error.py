@@ -114,16 +114,6 @@ class AverageError(object):
     results_ : matrix of size (n_alpha_grid_points, n_grid_points)
         The statisical power, P(exact support recovery) for each alpha and 
         n_samples / n_features grid point.
-    
-
-    ======
-
-    Note:  We want to run model selection once at 
-
-    Note:  Look into what sklearn's clone feature does
-
-    Note:  Set custom trial-estimator that doesn't do anything with lambda
-           if need to override this feature.
     """
     def __init__(self, model_selection_estimator=None, n_features=50, 
                 n_trials=100, n_grid_points=10, verbose=False, penalty_='lam_',

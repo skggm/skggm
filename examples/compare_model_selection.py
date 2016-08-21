@@ -1,4 +1,3 @@
-import time
 import sys
 sys.path.append('..')
 
@@ -8,40 +7,33 @@ from inverse_covariance import (
     QuicGraphLassoEBIC,
 )
 from inverse_covariance.profiling import (
-    StatisticalPower,
+    AverageError,
 )
 from matplotlib import pyplot as plt
 
 
-'''
-A few comments to do on phone with M:
-- why do I still need to threshold, and by how much?
-- what about that ebic thing that fixed the situation?
-- In the case of model-average, do we threshold the proportion matrix to 
-  determine a sparsity?  How does that work?
-'''
-
-
-
-# QuicGraphLassoEBIC, gamma=0.3
-sp = StatisticalPower(
-        model_selection_estimator=QuicGraphLassoEBIC(gamma=0.3),
+ae = AverageError(
+        model_selection_estimator=QuicGraphLassoEBIC(
+            gamma=0.3,
+            score_metric='frobenius'),
         n_features=50,
         n_trials=100,
         verbose=True,
     )
-sp.fit()
-sp.show()
-plt.title('gamma = 0.3')
-sp = StatisticalPower(
-        model_selection_estimator=QuicGraphLassoEBIC(gamma=0.0),
+ae.fit()
+ae.show()
+plt.title('EBIC, gamma = 0.3')
+ae = AverageError(
+        model_selection_estimator=QuicGraphLassoEBIC(
+            gamma=0.0,
+            score_metric='frobenius'),
         n_features=50,
         n_trials=100,
         verbose=True,
     )
-sp.fit()
-sp.show()
-plt.title('gamma = 0')
+ae.fit()
+ae.show()
+plt.title('EBIC, gamma = 0')
 
 
 '''
