@@ -14,6 +14,10 @@ from matplotlib import pyplot as plt
 
 
 '''
+THIS IS A WORK IN PROGRESS
+'''
+
+'''
 A few comments to do on phone with M:
 - why do I still need to threshold, and by how much?
 - what about that ebic thing that fixed the situation?
