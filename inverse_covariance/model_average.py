@@ -128,7 +128,6 @@ class ModelAverage(BaseEstimator):
                     raise NotImplementedError(
                         "Only penalization='random' has been implemented.")
 
-
             # new instance of estimator
             new_estimator = clone(self.estimator)
             
