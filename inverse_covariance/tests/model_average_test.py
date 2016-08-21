@@ -7,30 +7,24 @@ from sklearn.covariance import GraphLassoCV
 from .. import QuicGraphLassoCV, QuicGraphLasso, ModelAverage
 
 
-class TestQuicGraphLasso(object):
+class TestModelAverage(object):
     @pytest.mark.parametrize("params_in", [
         ({
-            'estimator': QuicGraphLasso,
-            'estimator_args': {},
+            'estimator': QuicGraphLasso(),
             'n_trials': 10,
             'normalize': True,
             'subsample': 0.3,
             'penalization': 'random',
         }),
         ({
-            'estimator': QuicGraphLasso,
-            'estimator_args': {
-                'lam': 0.5,
-                'mode': 'trace',
-            },
+            'estimator': QuicGraphLasso(lam=0.5, mode='trace'),
             'n_trials': 15,
             'normalize': False,
             'subsample': 0.6,
             'penalization': 'random',
         }),
         ({
-            'estimator': QuicGraphLassoCV,
-            'estimator_args': {},
+            'estimator': QuicGraphLassoCV(),
             'n_trials': 10,
             'normalize': True,
             'subsample': 0.3,
@@ -38,8 +32,7 @@ class TestQuicGraphLasso(object):
             'use_cache': True,
         }),
         ({
-            'estimator': GraphLassoCV,
-            'estimator_args': {},
+            'estimator': GraphLassoCV(),
             'n_trials': 10,
             'normalize': True,
             'subsample': 0.3,
@@ -73,7 +66,7 @@ class TestQuicGraphLasso(object):
             assert len(ma.subsets_) == 0
 
         for e in ma.estimators_:
-            assert isinstance(e, params_in['estimator'])
+            assert isinstance(e, params_in['estimator'].__class__)
             # sklearn doesnt have this but ours do
             if hasattr(e, 'is_fitted'):
                 assert e.is_fitted == True
