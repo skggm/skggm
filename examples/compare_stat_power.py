@@ -4,12 +4,18 @@ sys.path.append('..')
 
 from sklearn.covariance import GraphLassoCV
 from inverse_covariance import (
-    StatisticalPower,
     QuicGraphLassoCV, 
     QuicGraphLassoEBIC,
 )
+from inverse_covariance.profiling import (
+    StatisticalPower,
+)
 from matplotlib import pyplot as plt
 
+
+'''
+THIS IS A WORK IN PROGRESS
+'''
 
 '''
 A few comments to do on phone with M:
@@ -20,7 +26,7 @@ A few comments to do on phone with M:
 '''
 
 
-'''
+
 # QuicGraphLassoEBIC, gamma=0.3
 sp = StatisticalPower(
         model_selection_estimator=QuicGraphLassoEBIC(gamma=0.3),
@@ -40,7 +46,7 @@ sp = StatisticalPower(
 sp.fit()
 sp.show()
 plt.title('gamma = 0')
-'''
+
 
 '''
 start = time.time()
@@ -81,6 +87,7 @@ sp.fit()
 sp.show()
 '''
 
+'''
 # GraphLassoCV CV, 
 sp = StatisticalPower(
         model_selection_estimator=GraphLassoCV(),
@@ -91,6 +98,6 @@ sp = StatisticalPower(
     )
 sp.fit()
 sp.show()
-
+'''
 
 raw_input()

@@ -642,7 +642,7 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
     """
     def __init__(self, lam=1.0, path=100, gamma=0, tol=1e-6, max_iter=1000,
                  Theta0=None, Sigma0=None,  method='quic', verbose=0,
-                 initialize_method='corrcoef'):
+                 score_metric='log_likelihood', initialize_method='corrcoef'):
         # quic-specific params
         self.lam = lam
         self.tol = tol
@@ -667,7 +667,8 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
         self.is_fitted = False
 
         super(QuicGraphLassoEBIC, self).__init__(
-                initialize_method=initialize_method)
+                initialize_method=initialize_method,
+                score_metric=score_metric)
 
 
     def fit(self, X, y=None, **fit_params):

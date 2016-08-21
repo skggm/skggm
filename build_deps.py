@@ -1,12 +1,6 @@
-'''
-Setup script that:
-
-/pyquic:
-    - compiles pyquic
-    - copies py_quic into base directory so that we can use the module directly
-'''
+"""Script to build pyquic from base dir.
+"""
 import os
-import shutil
 
 
 class temp_cd():
@@ -23,8 +17,8 @@ def setup_pyquic():
         os.system('make')
         
 def clean_pyquic():
-    shutil.rmtree('py_quic')
-    os.system('git submodule update --checkout --remote -f')
+    with temp_cd('inverse_covariance/pyquic'):
+        os.system('make clean')
 
 if __name__ == "__main__":
     setup_pyquic()
