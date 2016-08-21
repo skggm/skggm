@@ -1,3 +1,4 @@
+import time
 import sys
 sys.path.append('..')
 
@@ -40,7 +41,33 @@ sp.show()
 plt.title('gamma = 0')
 '''
 
+'''
+start = time.time()
+sp = StatisticalPower(
+        model_selection_estimator=QuicGraphLassoCV(),
+        n_features=100,
+        n_trials=100,
+        n_jobs=1,
+        verbose=True,
+    )
+sp.fit()
+end = time.time()
+print 'Elapsed time for single thread {}'.format(end - start)
 
+start = time.time()
+sp = StatisticalPower(
+        model_selection_estimator=QuicGraphLassoCV(),
+        n_features=100,
+        n_trials=100,
+        n_jobs=4,
+        verbose=True,
+    )
+sp.fit()
+end = time.time()
+print 'Elapsed time for 4 thread {}'.format(end - start)
+'''
+
+'''
 # GraphLassoCV CV, 
 sp = StatisticalPower(
         model_selection_estimator=QuicGraphLassoCV(),
@@ -51,6 +78,7 @@ sp = StatisticalPower(
     )
 sp.fit()
 sp.show()
+'''
 
 
 raw_input()
