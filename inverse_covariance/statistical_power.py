@@ -2,8 +2,9 @@ import numpy as np
 
 from sklearn.base import clone
 from sklearn.datasets import make_sparse_spd_matrix
+from sklearn.externals.joblib import Parallel, delayed
 from matplotlib import pyplot as plt
-#import seaborn
+import seaborn
 
 from . import QuicGraphLasso
 
@@ -45,6 +46,24 @@ def _plot_spower(results, grid, ks):
         legend_text.append('sparsity={}'.format(ks))
     plt.legend(legend_text)
     plt.show()
+
+
+def _exact_support(prec, prec_hat):
+    # Q: why do we need something like this?, and why must eps be so big?
+    # Q: can we automatically determine what this threshold should be?
+    eps = 0.2
+    #eps = np.finfo(prec_hat.dtype).eps # too small
+    prec_hat[np.abs(prec_hat) <= eps] = 0.0
+    
+    return np.array_equal(
+            np.nonzero(prec.flat)[0],
+            np.nonzero(prec_hat.flat)[0])
+
+def _sp_trial(trial_estimator, n_samples, n_features, cov, prec):
+    X = _new_sample(n_samples, n_features, cov)
+    new_estimator = clone(trial_estimator)
+    new_estimator.fit(X)
+    return _exact_support(prec, new_estimator.precision_)
 
 
 class StatisticalPower(object):
@@ -94,6 +113,9 @@ class StatisticalPower(object):
     verbose : bool (default=False)
         Print out progress information.
 
+    n_jobs: int, optional
+        number of jobs to run in parallel (default 1).
+
     Methods
     ----------
     show() : Plot the results.
@@ -126,7 +148,7 @@ class StatisticalPower(object):
     """
     def __init__(self, model_selection_estimator=None, n_features=50, 
                 trial_estimator=None, n_trials=100, n_grid_points=10,
-                verbose=False, penalty_='lam_', penalty='lam'):
+                verbose=False, penalty_='lam_', penalty='lam', n_jobs=1):
         self.model_selection_estimator = model_selection_estimator  
         self.trial_estimator = trial_estimator
         self.n_features = n_features
@@ -135,23 +157,13 @@ class StatisticalPower(object):
         self.verbose = verbose
         self.penalty_ = penalty_ # class name for model selected penalty
         self.penalty = penalty # class name for setting penalty
+        self.n_jobs = n_jobs
 
         self.is_fitted = False
         self.results_ = None
         self.alphas_ = None
         self.ks_ = None
         self.grid_ = None
-
-    def exact_support(self, prec, prec_hat):
-        # Q: why do we need something like this?, and why must eps be so big?
-        # Q: can we automatically determine what this threshold should be?
-        eps = 0.2
-        #eps = np.finfo(prec_hat.dtype).eps # too small
-        prec_hat[np.abs(prec_hat) <= eps] = 0.0
-        
-        return np.array_equal(
-                np.nonzero(prec.flat)[0],
-                np.nonzero(prec_hat.flat)[0])
  
     def fit(self, X=None, y=None):
         n_alpha_grid_points = 5
@@ -204,17 +216,24 @@ class StatisticalPower(object):
                     self.penalty: lam, 
                 })
 
+                # estimate statistical power
+                exact_support_counts = Parallel(
+                    n_jobs=self.n_jobs,
+                    verbose=False,
+                )(
+                    delayed(_sp_trial)(
+                        trial_estimator, n_samples, self.n_features, cov, prec
+                    )
+                    for nn in range(self.n_trials))
+
+                self.results_[aidx, sidx] = 1. * np.sum(exact_support_counts) / self.n_trials
+
+                '''
                 # TODO: paralellize this 
                 for nn in range(self.n_trials):                    
                     X = _new_sample(n_samples, self.n_features, cov)
                     new_estimator = clone(trial_estimator)
                     new_estimator.fit(X)
-
-                    #plt.figure(10)
-                    #plt.imshow(np.abs(prec), interpolation='nearest')
-                    #plt.figure(11)
-                    #plt.imshow(np.abs(new_estimator.precision_), interpolation='nearest')
-                    #raw_input()
                     
                     self.results_[aidx, sidx] += self.exact_support(
                             prec,
@@ -223,6 +242,7 @@ class StatisticalPower(object):
                     del new_estimator
 
                 self.results_[aidx, sidx] /= self.n_trials
+                '''
 
             if self.verbose:
                 print 'Results at this row: {}'.format(self.results_[aidx, :])

@@ -77,7 +77,7 @@ def quic(S, lam, mode='default', tol=1e-6, max_iter=1000,
     Theta0 = as_float_array(Theta0, copy=False, force_all_finite=False)
     Sigma0 = as_float_array(Sigma0, copy=False, force_all_finite=False)
 
-    if mode is 'path':
+    if mode == 'path':
         assert path is not None, 'Please specify the path scaling values.'
 
         # path must be sorted from largest to smallest and have unique values
@@ -123,7 +123,7 @@ def quic(S, lam, mode='default', tol=1e-6, max_iter=1000,
     # reshape Theta, Sigma in path mode
     Theta_out = Theta 
     Sigma_out = Sigma
-    if mode is 'path':
+    if mode == 'path':
         Theta_out = []
         Sigma_out = []
         for lidx in range(path_len):
@@ -230,7 +230,7 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         self.method = method
         self.verbose = verbose
 
-        if self.mode is 'path' and path is None:
+        if self.mode == 'path' and path is None:
             raise ValueError("path required in path mode.")
             return
 
@@ -268,7 +268,7 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         X = check_array(X, ensure_min_features=2, estimator=self)
         X = as_float_array(X, copy=False, force_all_finite=False)
         self.initialize_coefficients(X)
-        if self.method is 'quic':
+        if self.method == 'quic':
             (self.precision_, self.covariance_, self.opt_, self.cputime_, 
             self.iters_, self.duality_gap_) = quic(self.sample_covariance_,
                                                 self.lam * self.lam_scale_,
@@ -703,7 +703,7 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
         # fit along the path, temporarily populate 
         # self.precision_, self.covariance_ with path values so we can use our
         # inherited selection function
-        if self.method is 'quic':
+        if self.method == 'quic':
             (self.precision_, self.covariance_, _, _, 
             _, _) = quic(self.sample_covariance_,
                         self.lam * self.lam_scale_,
