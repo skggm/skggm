@@ -4,7 +4,7 @@ from sklearn.base import clone
 from sklearn.datasets import make_sparse_spd_matrix
 from sklearn.externals.joblib import Parallel, delayed
 from matplotlib import pyplot as plt
-import seaborn
+#import seaborn
 
 from .. import QuicGraphLasso
 
@@ -12,12 +12,7 @@ from .. import QuicGraphLasso
 plt.ion()
 prng = np.random.RandomState(1)
 
-'''
-TODO:  
-    This needs to become something that can measure performance of the 
-    randomized ModelAverage method since thresholding the output there is 
-    appropriate.
-'''
+
 
 def _new_graph(n_features, alpha):
     global prng
@@ -42,7 +37,7 @@ def _new_sample(n_samples, n_features, cov):
     return X
 
 
-def _plot_spower(results, grid, ks):
+def _plot_avg_error(results, grid, ks):
     plt.figure()
     plt.plot(grid, results.T, lw=2)
     plt.xlabel('n/p (n_samples / n_features)')
@@ -54,31 +49,22 @@ def _plot_spower(results, grid, ks):
     plt.show()
 
 
-def _exact_support(prec, prec_hat):
-    # Q: why do we need something like this?, and why must eps be so big?
-    # Q: can we automatically determine what this threshold should be?
-    eps = 0.2
-    #eps = np.finfo(prec_hat.dtype).eps # too small
-    prec_hat[np.abs(prec_hat) <= eps] = 0.0
-    
-    return np.array_equal(
-            np.nonzero(prec.flat)[0],
-            np.nonzero(prec_hat.flat)[0])
-
-
-def _sp_trial(trial_estimator, n_samples, n_features, cov, prec):
+def _ae_trial(trial_estimator, n_samples, n_features, cov, prec):
     X = _new_sample(n_samples, n_features, cov)
     new_estimator = clone(trial_estimator)
     new_estimator.fit(X)
-    return _exact_support(prec, new_estimator.precision_)
+    return new_estimator.cov_error(
+            cov,
+            score_metric=new_estimator.score_metric) 
 
 
-class StatisticalPower(object):
-    """Compute the statistical power P(exact support) of a model selector for
+class AverageError(object):
+    """Compute the average error of a model selector for
     different values of alpha over grid of n_samples / n_features.
 
+    Use this to compare model selection methods.
+
     For each choice of alpha, we select a fixed test graph.
-    
     For each choice of n_samples / n_features, we learn the model selection
     penalty just once and apply this learned value to each subsequent random
     trial (new instances with the fixed covariance).
@@ -95,20 +81,10 @@ class StatisticalPower(object):
     n_trials : int (default=100)
         Number of examples to draw to measure P(recovery).
 
-    trial_estimator : An inverse covariance estimator instance (default=None)
-        Estimator to use on each instance after selecting a penalty lambda.
-        If None, this will use QuicGraphLasso with lambda obtained with 
-        model_selection_estimator.
-        Use .penalty to set selected penalty.
-
     penalty_ : string (default='lam_')
         Name of the selected best penalty in estimator
         e.g., 'lam_' for QuicGraphLassoCV, QuicGraphLassoEBIC,
               'alpha_' for GraphLassoCV
-
-    penalty : string (default='lam')
-        Name of the penalty kwarg in the estimator.  
-        e.g., 'lam' for QuicGraphLasso, 'alpha' for GraphLasso
 
     n_grid_points : int (default=10)
         Number of grid points for sampling n_samples / n_features between (0,1)
@@ -150,16 +126,14 @@ class StatisticalPower(object):
            if need to override this feature.
     """
     def __init__(self, model_selection_estimator=None, n_features=50, 
-                trial_estimator=None, n_trials=100, n_grid_points=10,
-                verbose=False, penalty_='lam_', penalty='lam', n_jobs=1):
+                n_trials=100, n_grid_points=10, verbose=False, penalty_='lam_',
+                n_jobs=1):
         self.model_selection_estimator = model_selection_estimator  
-        self.trial_estimator = trial_estimator
         self.n_features = n_features
         self.n_grid_points = n_grid_points
         self.n_trials = n_trials
         self.verbose = verbose
         self.penalty_ = penalty_ # class name for model selected penalty
-        self.penalty = penalty # class name for setting penalty
         self.n_jobs = n_jobs
 
         self.is_fitted = False
@@ -208,32 +182,24 @@ class StatisticalPower(object):
                             lam)
 
                 # setup default trial estimator
-                if self.trial_estimator is None:
-                    trial_estimator = QuicGraphLasso(lam=lam,
-                                                     mode='default',
-                                                     initialize_method='corrcoef')
-                else:
-                    trial_estimator = self.trial_estimator
-
-                # patch trial estimator with this lambda
-                trial_estimator.set_params(**{
-                    self.penalty: lam, 
-                })
+                trial_estimator = QuicGraphLasso(lam=lam,
+                                                 mode='default',
+                                                 initialize_method='corrcoef')
 
                 # estimate statistical power
-                exact_support_counts = Parallel(
+                errors = Parallel(
                     n_jobs=self.n_jobs,
                     verbose=False,
                     backend='threading',
                     #max_nbytes=None,
                     #batch_size=1,
                 )(
-                    delayed(_sp_trial)(
+                    delayed(_ae_trial)(
                         trial_estimator, n_samples, self.n_features, cov, prec
                     )
                     for nn in range(self.n_trials))
 
-                self.results_[aidx, sidx] = 1. * np.sum(exact_support_counts) / self.n_trials
+                self.results_[aidx, sidx] = 1. * np.sum(errors) / self.n_trials
 
             if self.verbose:
                 print 'Results at this row: {}'.format(self.results_[aidx, :])
@@ -246,5 +212,5 @@ class StatisticalPower(object):
             print 'Not fitted.'
             return
 
-        _plot_spower(self.results_, self.grid_, self.ks_)
+        _plot_avg_error(self.results_, self.grid_, self.ks_)
 
