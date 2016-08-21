@@ -65,11 +65,18 @@ class TestModelAverage(object):
             assert len(ma.lams_) == 0
             assert len(ma.subsets_) == 0
 
-        for e in ma.estimators_:
+        for eidx, e in enumerate(ma.estimators_):
             assert isinstance(e, params_in['estimator'].__class__)
+            
             # sklearn doesnt have this but ours do
             if hasattr(e, 'is_fitted'):
                 assert e.is_fitted == True
+
+            # check that all lambdas used where different
+            if not ma.use_scalar_penalty and eidx > 0:
+                if hasattr(e, 'lam'):
+                    prev_e = ma.estimators_[eidx - 1]
+                    assert np.linalg.norm((prev_e.lam - e.lam).flat) > 0
 
         if ma.normalize == True:
             assert np.max(ma.proportion_) <= 1.0
