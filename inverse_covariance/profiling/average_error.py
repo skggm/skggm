@@ -41,7 +41,7 @@ def _plot_avg_error(results, grid, ks):
     plt.figure()
     plt.plot(grid, results.T, lw=2)
     plt.xlabel('n/p (n_samples / n_features)')
-    plt.ylabel('P(exact recovery)')
+    plt.ylabel('Average error')
     legend_text = []
     for ks in ks:
         legend_text.append('sparsity={}'.format(ks))
