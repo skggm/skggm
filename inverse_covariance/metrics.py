@@ -120,7 +120,7 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     l_theta *= n_features / 2.
     
     mask = np.abs(precision.flat) > np.finfo(precision.dtype).eps
-    precision_nnz = (np.sum(mask) - n_features) / 2.0 
+    precision_nnz = (np.sum(mask) - n_features) / 2.0 # lower off diagonal triangle
     
     return -2.0 * l_theta +\
             precision_nnz * np.log(n_samples) +\

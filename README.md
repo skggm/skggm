@@ -31,6 +31,7 @@ NOTE:  During cleanup, we should rename setup.py since that file will be used fo
 
 ### Runing tests:
     py.test inverse_covariance/tests/
+    python -m pytest inverse_covariance/tests/
 
 # TODO/Notes:
 
