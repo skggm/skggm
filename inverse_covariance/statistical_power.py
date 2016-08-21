@@ -72,14 +72,10 @@ class StatisticalPower(object):
     different values of alpha over grid of n_samples / n_features.
 
     For each choice of alpha, we select a fixed test graph.
+    
     For each choice of n_samples / n_features, we learn the model selection
-    penalty once and apply this learned value to each subsequent random trial,
-    which (new instances of the fixed graph).
-
-    Once the model is chosen, we will run QuicGraphLasso with
-    lam = self.penalty for multiple instances of a graph.
-    You can override the choice of the naive estimator (such as using the adaptive
-    method with )
+    penalty just once and apply this learned value to each subsequent random
+    trial (new instances with the fixed covariance).
 
     Parameters
     -----------        
