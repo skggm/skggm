@@ -100,20 +100,19 @@ class StatisticalPower(object):
 
     Attributes
     ----------
-    grid_ : 
-        #Each entry indicates the sample probability (or count) of whether the 
-        #inverse covariance is non-zero.
+    grid_ : array of size (n_grid_points, )
+        Array of n_samples / n_features ratios.
 
-    alphas_ : 
+    alphas_ : array of size (n_alpha_grid_points, )
+        Array of alphas used to generate test graphs 
+        (see .statistical_power._new_graph)
 
-    ks_ : 
-        #The estimator instance from each trial.  
-        #This returns an empty list if use_cache=False.
+    ks_ : array of size (n_alpha_grid_points, )
+        The sparsity of each test graph.
 
     results_ : matrix of size (n_alpha_grid_points, n_grid_points)
-        #The penalization matrix chosen in each trial.
-        #This returns an empty list if use_cache=False and/or 
-        #use_scalar_penalty=True
+        The statisical power, P(exact support recovery) for each alpha and 
+        n_samples / n_features grid point.
     
 
     ======
