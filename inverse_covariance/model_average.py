@@ -98,12 +98,18 @@ class ModelAverage(BaseEstimator):
 
 
     def _random_weights(self, n_features):
-        """Generate a symmetric random matrix with ones along the diagonal.
+        """Generate a symmetric random matrix with zeros along the diagonal.
+
+        TODO: 0.5 or 0.25 * max lambda value from data.
+        TODO: Original scalar lambda random matrix version.
+
+        For scalar:  do a bernoulli where adding/subtracting by some constant
+                    amount; adding or subtracting by 0.1 - 0.5 * max lambda
         """
-        weights = np.eye(n_features)
+        weights = np.zeros(n_features)
         n_off_diag = (n_features ** 2 - n_features) / 2 
         weights[np.triu_indices(n_features, k=1)] = np.random.randn(n_off_diag)
-        weights = weights + weights.T - np.diag(weights.diagonal())
+        weights = weights + weights.T
         return weights
 
 
