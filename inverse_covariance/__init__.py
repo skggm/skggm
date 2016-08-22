@@ -17,6 +17,7 @@ from .plot_util import (
     trace_plot,
 )
 from .model_average import ModelAverage
+from .adaptive_graph_lasso import AdaptiveGraphLasso
 import profiling
 
 __all__ = [
@@ -31,5 +32,6 @@ __all__ = [
     'ebic',
     'trace_plot',
     'ModelAverage',
+    'AdaptiveGraphLasso',
     'profiling',
 ]

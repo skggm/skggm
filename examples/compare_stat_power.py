@@ -6,6 +6,7 @@ from sklearn.covariance import GraphLassoCV
 from inverse_covariance import (
     QuicGraphLassoCV, 
     QuicGraphLassoEBIC,
+    AdaptiveGraphLasso,
 )
 from inverse_covariance.profiling import (
     StatisticalPower,
@@ -26,7 +27,17 @@ A few comments to do on phone with M:
 '''
 
 
+sp = StatisticalPower(
+        model_selection_estimator=AdaptiveGraphLasso(method='binary'),
+        n_features=50,
+        n_trials=100,
+        verbose=True,
+    )
+sp.fit()
+sp.show()
 
+
+'''
 # QuicGraphLassoEBIC, gamma=0.3
 sp = StatisticalPower(
         model_selection_estimator=QuicGraphLassoEBIC(gamma=0.3),
@@ -46,6 +57,7 @@ sp = StatisticalPower(
 sp.fit()
 sp.show()
 plt.title('gamma = 0')
+'''
 
 
 '''

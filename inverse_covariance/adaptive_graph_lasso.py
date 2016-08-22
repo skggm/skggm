@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.base import clone
 
-from inverse_covariance import (
+from . import (
     QuicGraphLasso,
     QuicGraphLassoCV,
     InverseCovarianceEstimator,
@@ -22,16 +22,18 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
     See:
         "High dimensional covariance estimation based on Gaussian graphical
         models"
-        S. Zhou, P. Rühtimann, M. Xu, and P. Bühlmann
+        S. Zhou, P. R{u}htimann, M. Xu, and P. B{u}hlmann
         ftp://ess.r-project.org/Manuscripts/buhlmann/gelato.pdf
+
+    Add: "Relaxed lasso" by Meinshausen
 
     Parameters
     -----------        
-    estimator : GraphLasso / InverseCovarainceEstimator instance (default=QuicGraphLassoCV())
+    estimator : GraphLasso instance with model selection (default=QuicGraphLassoCV())
         After being fit, estimator.precision_ must either be a matrix.
 
     method : one of 'binary', 'glasso', 'inverse' (default='binary')
-        binary: also called gelato
+        binary: also called gelato or "relaxed lasso"
         glasso: 1/|coefficient|^2
         inverse: 1/|coefficient|
 
@@ -54,22 +56,30 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         if self.estimator is None:
             self.estimator = QuicGraphLassoCV()
 
+
     def _binary_weights(self, estimator):
         n_features, _ = estimator.precision_.shape
         lam = np.zeros((n_features, n_features))
         lam[estimator.precision_ != 0] = 1
+        lam[np.diag_indices(n_features)] = 0
         return lam
         
 
     def _glasso_weights(self, estimator):
         n_features, _ = estimator.precision_.shape
-        lam = 1. / (np.abs(estimator.precision_) ** 2)
+        lam = np.zeros((n_features, n_features))
+        mask = estimator.precision_ != 0
+        lam[mask] = 1. / (np.abs(estimator.precision_[mask]) ** 2)
+        lam[np.diag_indices(n_features)] = 0
         return lam
 
 
     def _inverse_weights(self, estimator):
         n_features, _ = estimator.precision_.shape
-        lam = 1. / (np.abs(estimator.precision_) ** 2)
+        lam = np.zeros((n_features, n_features))
+        mask = estimator.precision_ != 0
+        lam[mask] = 1. / (np.abs(estimator.precision_[mask]) ** 2)
+        lam[np.diag_indices(n_features)] = 0
         return lam
 
 

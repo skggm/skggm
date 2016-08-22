@@ -166,11 +166,14 @@ class AverageError(object):
                 lam = getattr(ms_estimator, self.penalty_)
                 
                 if self.verbose:
+                    display_lam = lam
+                    if isinstance(lam, np.ndarray):
+                        display_lam = np.linalg.norm(lam)
                     print '   ({}/{}), n_samples = {}, selected lambda = {}'.format(
                             sidx,
                             self.n_grid_points,
                             n_samples,
-                            lam)
+                            display_lam)
 
                 # setup default trial estimator
                 trial_estimator = QuicGraphLasso(lam=lam,
