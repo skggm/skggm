@@ -52,7 +52,7 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         self.lam_ = None
         self.estimator_ = None
 
-        #
+        # default to QuicGraphLassoCV
         if self.estimator is None:
             self.estimator = QuicGraphLassoCV()
 
@@ -60,7 +60,7 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
     def _binary_weights(self, estimator):
         n_features, _ = estimator.precision_.shape
         lam = np.zeros((n_features, n_features))
-        lam[estimator.precision_ != 0] = 1
+        lam[estimator.precision_ == 0] = 1
         lam[np.diag_indices(n_features)] = 0
         return lam
         
@@ -70,6 +70,8 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         lam = np.zeros((n_features, n_features))
         mask = estimator.precision_ != 0
         lam[mask] = 1. / (np.abs(estimator.precision_[mask]) ** 2)
+        mask_0 = estimator.precision_ == 0
+        lam[mask_0] = np.max(lam.flat)
         lam[np.diag_indices(n_features)] = 0
         return lam
 
@@ -78,7 +80,9 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         n_features, _ = estimator.precision_.shape
         lam = np.zeros((n_features, n_features))
         mask = estimator.precision_ != 0
-        lam[mask] = 1. / (np.abs(estimator.precision_[mask]) ** 2)
+        lam[mask] = 1. / np.abs(estimator.precision_[mask])
+        mask_0 = estimator.precision_ == 0
+        lam[mask_0] = np.max(lam.flat)
         lam[np.diag_indices(n_features)] = 0
         return lam
 
@@ -108,7 +112,7 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
                     "'inverse' have been implemented."))
 
         # perform second step adaptive estimate
-        self.estimator_ = QuicGraphLasso(lam=self.lam_,
+        self.estimator_ = QuicGraphLasso(lam=self.lam_ * new_estimator.lam_, 
                                          mode='default',
                                          initialize_method='cov')
         self.estimator_.fit(X)

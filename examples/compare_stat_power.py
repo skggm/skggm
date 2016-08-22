@@ -26,15 +26,17 @@ A few comments to do on phone with M:
   determine a sparsity?  How does that work?
 '''
 
-
+'''
 sp = StatisticalPower(
         model_selection_estimator=AdaptiveGraphLasso(method='binary'),
+        trial_estimator=AdaptiveGraphLasso(method='binary'),
         n_features=50,
         n_trials=100,
         verbose=True,
     )
 sp.fit()
 sp.show()
+'''
 
 
 '''

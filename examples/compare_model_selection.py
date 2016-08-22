@@ -13,6 +13,7 @@ n_features = 50
 n_trials = 100
 verbose = True
 
+
 ae = AverageError(
         model_selection_estimator=QuicGraphLassoEBIC(
             gamma=0.3),
@@ -44,6 +45,5 @@ ae = AverageError(
 ae.fit()
 ae.show()
 plt.title('CV')
-
 
 raw_input()
