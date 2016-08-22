@@ -53,9 +53,10 @@ def _ae_trial(trial_estimator, n_samples, n_features, cov, prec):
     X = _new_sample(n_samples, n_features, cov)
     new_estimator = clone(trial_estimator)
     new_estimator.fit(X)
-    return new_estimator.cov_error(
-            cov,
-            score_metric=new_estimator.score_metric) 
+
+    # force forbenius 
+    pdiff = prec - new_estimator.precision_
+    return np.sum(pdiff ** 2)
 
 
 class AverageError(object):
