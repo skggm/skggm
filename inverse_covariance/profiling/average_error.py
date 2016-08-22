@@ -53,9 +53,10 @@ def _ae_trial(trial_estimator, n_samples, n_features, cov, prec):
     X = _new_sample(n_samples, n_features, cov)
     new_estimator = clone(trial_estimator)
     new_estimator.fit(X)
-    return new_estimator.cov_error(
-            cov,
-            score_metric=new_estimator.score_metric) 
+
+    # force forbenius 
+    pdiff = prec - new_estimator.precision_
+    return np.sum(pdiff ** 2)
 
 
 class AverageError(object):
@@ -165,11 +166,14 @@ class AverageError(object):
                 lam = getattr(ms_estimator, self.penalty_)
                 
                 if self.verbose:
+                    display_lam = lam
+                    if isinstance(lam, np.ndarray):
+                        display_lam = np.linalg.norm(lam)
                     print '   ({}/{}), n_samples = {}, selected lambda = {}'.format(
                             sidx,
                             self.n_grid_points,
                             n_samples,
-                            lam)
+                            display_lam)
 
                 # setup default trial estimator
                 trial_estimator = QuicGraphLasso(lam=lam,

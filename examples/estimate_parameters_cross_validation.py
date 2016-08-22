@@ -11,6 +11,7 @@ from inverse_covariance import (
     QuicGraphLasso,
     QuicGraphLassoCV,
     QuicGraphLassoEBIC,
+    AdaptiveGraphLasso,
 )
 
 
@@ -80,6 +81,20 @@ def estimate_via_quic_cv(X, num_folds, metric='log_likelihood'):
     print 'CV lams: {}'.format(model.cv_lams_)
 
     return model.covariance_, model.precision_, model.lam_
+
+
+def estimate_via_adaptive(X, num_folds):
+    print '\n-- AdaptiveGraphLasso'
+    #model = AdaptiveGraphLasso(
+    #        estimator=QuicGraphLassoCV(score_metric='frobenius'),
+    #        method='glasso',
+    #)
+    model = AdaptiveGraphLasso(
+            estimator=QuicGraphLassoEBIC(),
+            method='binary',
+    )
+    model.fit(X)
+    return model.estimator_.covariance_, model.estimator_.precision_, -1
 
 
 def estimate_via_quic_ebic(X, gamma=0):
@@ -196,6 +211,7 @@ if __name__ == "__main__":
             cv_folds, metric='frobenius')
     quic_bic_cov, quic_bic_prec, quic_bic_lam = estimate_via_quic_ebic(X, gamma=0)
     quic_ebic_cov, quic_ebic_prec, quic_ebic_lam = estimate_via_quic_ebic_convenience(X, gamma=0.3)
+    quic_adaptive_cov, quic_adaptive_prec, quic_adaptive_lam = estimate_via_adaptive(X, cv_folds)
 
     # Show results
     covs = [('True', cov),
@@ -211,7 +227,8 @@ if __name__ == "__main__":
             ('QuicCV (fro)', quic_cv_fro_cov),
             ('True', cov),
             ('Quic (bic)', quic_bic_cov),
-            ('Quic (ebic gamma = 0.1)', quic_ebic_cov)]
+            ('Quic (ebic gamma = 0.1)', quic_ebic_cov),
+            ('Adaptive', quic_adaptive_cov)]
     precs = [('True', prec, ''),
             ('Empirical', emp_prec, ''),
             ('GraphLassoCV', gl_prec, ''),
@@ -225,7 +242,8 @@ if __name__ == "__main__":
             ('QuicCV (fro)', quic_cv_fro_prec, quic_cv_fro_lam),
             ('True', prec, ''),
             ('Quic (bic)', quic_bic_prec, quic_bic_lam),
-            ('Quic (ebic gamma = 0.3)', quic_ebic_prec, quic_ebic_lam)]
+            ('Quic (ebic gamma = 0.3)', quic_ebic_prec, quic_ebic_lam),
+            ('Adaptive', quic_adaptive_prec, quic_adaptive_lam)]
     show_results(covs, precs)
 
   
