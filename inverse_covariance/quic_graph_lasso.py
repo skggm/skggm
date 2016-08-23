@@ -53,6 +53,7 @@ def quic(S, lam, mode='default', tol=1e-6, max_iter=1000,
     if isinstance(lam, float):
         _lam = np.empty((Sn, Sm))
         _lam[:] = lam
+        _lam[np.diag_indices(Sn)] = 0. # make sure diagonal is zero
     else:
         assert lam.shape == S.shape, 'lam, S shape mismatch.'
         _lam = as_float_array(lam, copy=False, force_all_finite=False)
@@ -503,10 +504,16 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
             best_score = -np.inf
             last_finite_idx = 0
             for index, (lam, scores, _) in enumerate(results):
-                this_score = np.mean(scores)
+                # sometimes we get -np.inf in the result (in kl-loss)
+                scores = [s for s in scores if not np.isinf(s)]
+                if len(scores) == 0:
+                    this_score = -np.inf 
+                else:
+                    this_score = np.mean(scores)
+
                 if this_score >= .1 / np.finfo(np.float64).eps:
                     this_score = np.nan
-                
+
                 if np.isfinite(this_score):
                     last_finite_idx = index
                 

@@ -49,13 +49,8 @@ def kl_loss(covariance, precision):
     KL-divergence 
     """
     assert covariance.shape == precision.shape
-    dim, _ = precision.shape
-    logdet_p_dot_c = np.log(np.linalg.det(precision)) +\
-            np.log(np.linalg.det(covariance))
-
-    if np.isnan(logdet_p_dot_c):
-        logdet_p_dot_c = 0
-
+    dim, _ = precision.shape 
+    logdet_p_dot_c = fast_logdet(np.dot(precision, covariance))
     return 0.5 * (np.sum(precision * covariance) - logdet_p_dot_c - dim)
 
 
@@ -118,10 +113,10 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     '''    
     l_theta = -np.sum(covariance * precision) + fast_logdet(precision)
     l_theta *= n_features / 2.
-    
+
     mask = np.abs(precision.flat) > np.finfo(precision.dtype).eps
-    precision_nnz = (np.sum(mask) - n_features) / 2.0 # lower off diagonal triangle
-    
+    precision_nnz = (np.sum(mask) - n_features) / 2.0  # lower off diagonal triangle
+
     return -2.0 * l_theta +\
             precision_nnz * np.log(n_samples) +\
             4.0 * precision_nnz * np.log(n_features) * gamma

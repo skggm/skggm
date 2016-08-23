@@ -106,7 +106,7 @@ class ModelAverage(BaseEstimator):
         For scalar:  do a bernoulli where adding/subtracting by some constant
                     amount; adding or subtracting by 0.1 - 0.5 * max lambda
         """
-        weights = np.zeros(n_features)
+        weights = np.zeros((n_features, n_features))
         n_off_diag = (n_features ** 2 - n_features) / 2 
         weights[np.triu_indices(n_features, k=1)] = np.random.randn(n_off_diag)
         weights = weights + weights.T

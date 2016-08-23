@@ -69,7 +69,7 @@ def estimate_via_quic(X, num_folds, metric='log_likelihood'):
 def estimate_via_quic_cv(X, num_folds, metric='log_likelihood'):
     print '\n-- QUIC QuicGraphLassoCV'
     model = QuicGraphLassoCV(
-            cv=num_folds,
+            cv=2, # cant deal w more folds at small size
             n_refinements=6,
             n_jobs=1,
             initialize_method='cov',
@@ -186,7 +186,7 @@ def show_results(covs, precs):
 
 
 if __name__ == "__main__":
-    n_samples = 60
+    n_samples = 100
     n_features = 20
     cv_folds = 3
 
@@ -210,7 +210,7 @@ if __name__ == "__main__":
     quic_cv_fro_cov, quic_cv_fro_prec, quic_cv_fro_lam = estimate_via_quic_cv(X,
             cv_folds, metric='frobenius')
     quic_bic_cov, quic_bic_prec, quic_bic_lam = estimate_via_quic_ebic(X, gamma=0)
-    quic_ebic_cov, quic_ebic_prec, quic_ebic_lam = estimate_via_quic_ebic_convenience(X, gamma=0.3)
+    quic_ebic_cov, quic_ebic_prec, quic_ebic_lam = estimate_via_quic_ebic_convenience(X, gamma=0.1)
     quic_adaptive_cov, quic_adaptive_prec, quic_adaptive_lam = estimate_via_adaptive(X, cv_folds)
 
     # Show results
@@ -242,7 +242,7 @@ if __name__ == "__main__":
             ('QuicCV (fro)', quic_cv_fro_prec, quic_cv_fro_lam),
             ('True', prec, ''),
             ('Quic (bic)', quic_bic_prec, quic_bic_lam),
-            ('Quic (ebic gamma = 0.3)', quic_ebic_prec, quic_ebic_lam),
+            ('Quic (ebic gamma = 0.1)', quic_ebic_prec, quic_ebic_lam),
             ('Adaptive', quic_adaptive_prec, quic_adaptive_lam)]
     show_results(covs, precs)
 

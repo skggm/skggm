@@ -273,7 +273,7 @@ class InverseCovarianceEstimator(BaseEstimator):
                     self.n_features,
                     gamma=gamma))
 
-        return ebic_scores
+        return np.array(ebic_scores)
 
 
     def ebic_select(self, gamma=0):
@@ -294,7 +294,8 @@ class InverseCovarianceEstimator(BaseEstimator):
 
         Returns
         -------
-        Lambda index with best ebic score.
+        Lambda index with best ebic score.  When multiple ebic scores are the 
+        same, returns the smallest lambda (largest index) with minimum score.
         """
         if not isinstance(self.precision_, list):
             raise NotImplementedError("EBIC requires multiple models to select from.")
@@ -304,4 +305,5 @@ class InverseCovarianceEstimator(BaseEstimator):
             return
 
         ebic_scores = self.ebic(gamma=gamma)
-        return np.argmin(ebic_scores)
+        min_indices = np.where(np.abs(ebic_scores - ebic_scores.min()) < 1e-10) 
+        return np.max(min_indices) 
