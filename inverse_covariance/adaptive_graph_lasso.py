@@ -25,16 +25,18 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         S. Zhou, P. R{u}htimann, M. Xu, and P. B{u}hlmann
         ftp://ess.r-project.org/Manuscripts/buhlmann/gelato.pdf
 
-    Add: "Relaxed lasso" by Meinshausen
+        "Relaxed Lasso"
+        N. Meinshausen, December 2006.
+        http://stat.ethz.ch/~nicolai/relaxo.pdf
 
     Parameters
     -----------        
     estimator : GraphLasso instance with model selection (default=QuicGraphLassoCV())
         After being fit, estimator.precision_ must either be a matrix.
 
-    method : one of 'binary', 'glasso', 'inverse' (default='binary')
-        binary: also called gelato or "relaxed lasso"
-        glasso: 1/|coefficient|^2
+    method : one of 'binary', 'inverse_squared', 'inverse' (default='binary')
+        binary: non-zero where estimator was zero, 1 else (gelato, "relaxed lasso")
+        inverse_squared: 1/|coefficient|^2  (glasso)
         inverse: 1/|coefficient|
 
     Attributes
@@ -65,13 +67,13 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         return lam
         
 
-    def _glasso_weights(self, estimator):
+    def _inverse_squared_weights(self, estimator):
         n_features, _ = estimator.precision_.shape
         lam = np.zeros((n_features, n_features))
         mask = estimator.precision_ != 0
         lam[mask] = 1. / (np.abs(estimator.precision_[mask]) ** 2)
         mask_0 = estimator.precision_ == 0
-        lam[mask_0] = np.max(lam.flat)
+        lam[mask_0] = 1.5 * np.min(lam[mask].flat) # non-zero in appropriate scale range
         lam[np.diag_indices(n_features)] = 0
         return lam
 
@@ -82,10 +84,9 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         mask = estimator.precision_ != 0
         lam[mask] = 1. / np.abs(estimator.precision_[mask])
         mask_0 = estimator.precision_ == 0
-        lam[mask_0] = np.max(lam.flat)
+        lam[mask_0] = 1.5 * np.min(lam[mask].flat) # non-zero in appropriate scale range
         lam[np.diag_indices(n_features)] = 0
         return lam
-
 
     def fit(self, X, y=None):
         """Estimate the precision using an adaptive maximum likelihood estimator.
@@ -100,13 +101,30 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         new_estimator = clone(self.estimator)
         new_estimator.fit(X)
 
-        # generate weights
         if self.method == 'binary':
+            # generate weights
             self.lam_ = self._binary_weights(new_estimator)
-        elif self.method == 'glasso':
-            self.lam_ = self._glasso_weights(new_estimator)
+
+            # perform second step adaptive estimate
+            self.estimator_ = QuicGraphLasso(lam=self.lam_ * new_estimator.lam_, 
+                                             mode='default',
+                                             initialize_method='cov') # TODO: add auto_scale param, use False here
+            self.estimator_.fit(X)
+        
+        elif self.method == 'inverse_squared':
+            self.lam_ = self._inverse_squared_weights(new_estimator)
+
+            # perform second step adaptive estimate
+            self.estimator_ = QuicGraphLassoCV(lam=self.lam_ * new_estimator.lam_) 
+            self.estimator_.fit(X)
+        
         elif self.method == 'inverse':
             self.lam_ = self._inverse_weights(new_estimator)
+
+            # perform second step adaptive estimate
+            self.estimator_ = QuicGraphLassoCV(lam=self.lam_ * new_estimator.lam_)
+            self.estimator_.fit(X)
+
         else:
             raise NotImplementedError(("Only method='binary', 'glasso', or",
                     "'inverse' have been implemented."))
