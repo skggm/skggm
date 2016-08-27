@@ -292,11 +292,17 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         """Compute the scaled lambda used at index lidx.
         """
         if self.path is None:
-            print 'Warning: When path=None, lam_at_index returns scaled lam.'
             return self.lam * self.lam_scale_
 
         return self.lam * self.lam_scale_ * self.path[lidx]
 
+    @property
+    def lam_(self):
+        if self.path is not None:
+            print ('lam_ is an invalid parameter in path mode, '
+                   'use self.lam_at_index')
+        return self.lam_at_index(0)
+    
 
 def _quic_path(X, path, X_test=None, lam=0.5, tol=1e-6,
          max_iter=1000, Theta0=None, Sigma0=None, method='quic', 

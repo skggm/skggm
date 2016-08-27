@@ -73,7 +73,7 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         mask = estimator.precision_ != 0
         lam[mask] = 1. / (np.abs(estimator.precision_[mask]) ** 2)
         mask_0 = estimator.precision_ == 0
-        lam[mask_0] = 1e10
+        lam[mask_0] = np.median(lam[mask].flat) # non-zero in appropriate scale range
         lam[np.diag_indices(n_features)] = 0
         return lam
 
@@ -84,10 +84,9 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         mask = estimator.precision_ != 0
         lam[mask] = 1. / np.abs(estimator.precision_[mask])
         mask_0 = estimator.precision_ == 0
-        lam[mask_0] = 1e10
+        lam[mask_0] = np.median(lam[mask].flat) # non-zero in appropriate scale range
         lam[np.diag_indices(n_features)] = 0
         return lam
-
 
     def fit(self, X, y=None):
         """Estimate the precision using an adaptive maximum likelihood estimator.
@@ -111,10 +110,21 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
                                              mode='default',
                                              initialize_method='cov') # TODO: add auto_scale param, use False here
             self.estimator_.fit(X)
+        
         elif self.method == 'inverse_squared':
-            self.lam_ = self._glasso_weights(new_estimator)
+            self.lam_ = self._inverse_squared_weights(new_estimator)
+
+            # perform second step adaptive estimate
+            self.estimator_ = QuicGraphLassoCV(lam=self.lam_ * new_estimator.lam_) # TODO: add auto_scale param, use False here
+            self.estimator_.fit(X)
+        
         elif self.method == 'inverse':
             self.lam_ = self._inverse_weights(new_estimator)
+
+            # perform second step adaptive estimate
+            self.estimator_ = QuicGraphLassoCV(lam=self.lam_ * new_estimator.lam_)
+            self.estimator_.fit(X)
+
         else:
             raise NotImplementedError(("Only method='binary', 'glasso', or",
                     "'inverse' have been implemented."))

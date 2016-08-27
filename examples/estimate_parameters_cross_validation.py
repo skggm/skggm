@@ -83,18 +83,24 @@ def estimate_via_quic_cv(X, num_folds, metric='log_likelihood'):
     return model.covariance_, model.precision_, model.lam_
 
 
-def estimate_via_adaptive(X, num_folds):
+def estimate_via_adaptive(X, num_folds, msel, method):
     print '\n-- AdaptiveGraphLasso'
-    #model = AdaptiveGraphLasso(
-    #        estimator=QuicGraphLassoCV(score_metric='frobenius'),
-    #        method='glasso',
-    #)
-    model = AdaptiveGraphLasso(
-            estimator=QuicGraphLassoEBIC(),
-            method='binary',
-    )
+    
+    if msel == 'cv':
+        model = AdaptiveGraphLasso(
+                estimator=QuicGraphLassoCV(score_metric='frobenius'),
+                method=method,
+        )
+    
+    elif msel == 'ebic':
+        model = AdaptiveGraphLasso(
+                estimator=QuicGraphLassoEBIC(),
+                method=method,
+        )
+
     model.fit(X)
-    return model.estimator_.covariance_, model.estimator_.precision_, -1
+    lam_ = np.linalg.norm(model.estimator_.lam_)
+    return model.estimator_.covariance_, model.estimator_.precision_, lam_
 
 
 def estimate_via_quic_ebic(X, gamma=0):
@@ -153,7 +159,7 @@ def show_results(covs, precs):
     plt.subplots_adjust(left=0.02, right=0.98)
     for i, (name, this_cov) in enumerate(covs):
         vmax = np.abs(this_cov).max()
-        plt.subplot(4, 4, i + 1)
+        plt.subplot(7, 3, i + 1)
         plt.imshow(this_cov, 
                    interpolation='nearest', vmin=-vmax, vmax=vmax,
                    cmap=plt.cm.RdBu_r)
@@ -168,7 +174,7 @@ def show_results(covs, precs):
     plt.subplots_adjust(left=0.02, right=0.98)
     for i, (name, this_prec, lam) in enumerate(precs):
         vmax = np.abs(this_prec).max()
-        ax = plt.subplot(4, 4, i + 1)
+        ax = plt.subplot(7, 3, i + 1)
         plt.imshow(np.ma.masked_values(this_prec, 0),
                    interpolation='nearest', vmin=-vmax, vmax=vmax,
                    cmap=plt.cm.RdBu_r)
@@ -197,53 +203,83 @@ if __name__ == "__main__":
     emp_cov, emp_prec = estimate_via_empirical(X)
     gl_cov, gl_prec = estimate_via_graph_lasso(X, cv_folds)
     lw_cov, lw_prec = estimate_via_ledoit_wolf(X)
+    
     quic_ll_cov, quic_ll_prec, quic_ll_lam = estimate_via_quic(X,
             cv_folds, metric='log_likelihood')
     quic_kl_cov, quic_kl_prec, quic_kl_lam = estimate_via_quic(X,
             cv_folds, metric='kl')
     quic_fro_cov, quic_fro_prec, quic_fro_lam = estimate_via_quic(X,
             cv_folds, metric='frobenius')
+    
     quic_cv_ll_cov, quic_cv_ll_prec, quic_cv_ll_lam = estimate_via_quic_cv(X,
             cv_folds, metric='log_likelihood')
     quic_cv_kl_cov, quic_cv_kl_prec, quic_cv_kl_lam = estimate_via_quic_cv(X,
             cv_folds, metric='kl')
     quic_cv_fro_cov, quic_cv_fro_prec, quic_cv_fro_lam = estimate_via_quic_cv(X,
             cv_folds, metric='frobenius')
+    
     quic_bic_cov, quic_bic_prec, quic_bic_lam = estimate_via_quic_ebic(X, gamma=0)
+    quic_ebic_cov_01, quic_ebic_prec_01, quic_ebic_lam_01 = estimate_via_quic_ebic_convenience(X, gamma=0.01)
     quic_ebic_cov, quic_ebic_prec, quic_ebic_lam = estimate_via_quic_ebic_convenience(X, gamma=0.1)
-    quic_adaptive_cov, quic_adaptive_prec, quic_adaptive_lam = estimate_via_adaptive(X, cv_folds)
+    
+    quic_adaptive_cov_b, quic_adaptive_prec_b, quic_adaptive_lam = estimate_via_adaptive(
+        X, cv_folds, 'cv', 'binary')
+    quic_adaptive_cov_i, quic_adaptive_prec_i, quic_adaptive_lam = estimate_via_adaptive(
+        X, cv_folds, 'cv', 'inverse')
+    quic_adaptive_cov_is, quic_adaptive_prec_is, quic_adaptive_lam = estimate_via_adaptive(
+        X, cv_folds, 'cv', 'inverse_squared')
+
+    quic_adaptive_ebic_cov_b, quic_adaptive_ebic_prec_b, quic_adaptive_lam = estimate_via_adaptive(
+        X, cv_folds, 'ebic', 'binary')
+    quic_adaptive_ebic_cov_i, quic_adaptive_ebic_prec_i, quic_adaptive_lam = estimate_via_adaptive(
+        X, cv_folds, 'ebic', 'inverse')
+    quic_adaptive_ebic_cov_is, quic_adaptive_ebic_prec_is, quic_adaptive_lam = estimate_via_adaptive(
+        X, cv_folds, 'ebic', 'inverse_squared')
+
 
     # Show results
     covs = [('True', cov),
+            ('True', cov),
+            ('True', cov),
             ('Empirical', emp_cov),
             ('GraphLassoCV', gl_cov),
             ('Ledoit-Wolf', lw_cov),
             ('Quic (cv-ll)', quic_ll_cov),
             ('Quic (cv-kl)', quic_kl_cov),
             ('Quic (cv-fro)', quic_fro_cov),
-            ('True', cov),
             ('QuicCV (ll)', quic_cv_ll_cov),
             ('QuicCV (kl)', quic_cv_kl_cov),
             ('QuicCV (fro)', quic_cv_fro_cov),
-            ('True', cov),
             ('Quic (bic)', quic_bic_cov),
+            ('Quic (ebic gamma = 0.01)', quic_ebic_cov_01),
             ('Quic (ebic gamma = 0.1)', quic_ebic_cov),
-            ('Adaptive', quic_adaptive_cov)]
+            ('Adaptive (cv, binary)', quic_adaptive_cov_b),
+            ('Adaptive (cv, inv)', quic_adaptive_cov_i),
+            ('Adaptive (cv, inv**2)', quic_adaptive_cov_is),
+            ('Adaptive (ebic, binary)', quic_adaptive_ebic_cov_b),
+            ('Adaptive (ebic, inv)', quic_adaptive_ebic_cov_i),
+            ('Adaptive (ebic, inv**2)', quic_adaptive_ebic_cov_is)]
     precs = [('True', prec, ''),
+            ('True', prec, ''),
+            ('True', prec, ''),
             ('Empirical', emp_prec, ''),
             ('GraphLassoCV', gl_prec, ''),
             ('Ledoit-Wolf', lw_prec, ''),
             ('Quic (cv-ll)', quic_ll_prec, quic_ll_lam),
             ('Quic (cv-kl)', quic_kl_prec, quic_kl_lam),
             ('Quic (cv-fro)', quic_fro_prec, quic_fro_lam),
-            ('True', prec, ''),
             ('QuicCV (ll)', quic_cv_ll_prec, quic_cv_ll_lam),
             ('QuicCV (kl)', quic_cv_kl_prec, quic_cv_kl_lam),
             ('QuicCV (fro)', quic_cv_fro_prec, quic_cv_fro_lam),
-            ('True', prec, ''),
             ('Quic (bic)', quic_bic_prec, quic_bic_lam),
+            ('Quic (ebic gamma = 0.01)', quic_ebic_prec_01, quic_ebic_lam_01),
             ('Quic (ebic gamma = 0.1)', quic_ebic_prec, quic_ebic_lam),
-            ('Adaptive', quic_adaptive_prec, quic_adaptive_lam)]
+            ('Adaptive (cv, binary)', quic_adaptive_prec_b, ''),
+            ('Adaptive (cv, inv)', quic_adaptive_prec_i, ''),
+            ('Adaptive (cv, inv**2)', quic_adaptive_prec_is, ''),
+            ('Adaptive (ebic, binary)', quic_adaptive_ebic_prec_b, ''),
+            ('Adaptive (ebic, inv)', quic_adaptive_ebic_prec_i, ''),
+            ('Adaptive (ebic, inv**2)', quic_adaptive_ebic_prec_is, '')]
     show_results(covs, precs)
 
   
