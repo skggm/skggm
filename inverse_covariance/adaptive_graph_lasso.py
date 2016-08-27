@@ -73,7 +73,7 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         mask = estimator.precision_ != 0
         lam[mask] = 1. / (np.abs(estimator.precision_[mask]) ** 2)
         mask_0 = estimator.precision_ == 0
-        lam[mask_0] = np.median(lam[mask].flat) # non-zero in appropriate scale range
+        lam[mask_0] = 1.5 * np.min(lam[mask].flat) # non-zero in appropriate scale range
         lam[np.diag_indices(n_features)] = 0
         return lam
 
@@ -84,7 +84,7 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         mask = estimator.precision_ != 0
         lam[mask] = 1. / np.abs(estimator.precision_[mask])
         mask_0 = estimator.precision_ == 0
-        lam[mask_0] = np.median(lam[mask].flat) # non-zero in appropriate scale range
+        lam[mask_0] = 1.5 * np.min(lam[mask].flat) # non-zero in appropriate scale range
         lam[np.diag_indices(n_features)] = 0
         return lam
 
@@ -115,7 +115,7 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
             self.lam_ = self._inverse_squared_weights(new_estimator)
 
             # perform second step adaptive estimate
-            self.estimator_ = QuicGraphLassoCV(lam=self.lam_ * new_estimator.lam_) # TODO: add auto_scale param, use False here
+            self.estimator_ = QuicGraphLassoCV(lam=self.lam_ * new_estimator.lam_) 
             self.estimator_.fit(X)
         
         elif self.method == 'inverse':
