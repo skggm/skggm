@@ -178,7 +178,7 @@ class AverageError(object):
                 # setup default trial estimator
                 trial_estimator = QuicGraphLasso(lam=lam,
                                                  mode='default',
-                                                 initialize_method='corrcoef')
+                                                 init_method='corrcoef')
 
                 # estimate statistical power
                 errors = Parallel(
