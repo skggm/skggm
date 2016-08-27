@@ -45,7 +45,7 @@ def estimate_via_quic(X, num_folds, metric='log_likelihood'):
     print '\n-- QUIC CV'
     search_grid = {
       'lam': np.logspace(np.log10(0.01), np.log10(1.0), num=100, endpoint=True),
-      'initialize_method': ['cov', 'corrcoef'],
+      'init_method': ['cov', 'corrcoef'],
       'score_metric': [metric], # note: score_metrics are not comparable
     }
 
@@ -72,7 +72,7 @@ def estimate_via_quic_cv(X, num_folds, metric='log_likelihood'):
             cv=2, # cant deal w more folds at small size
             n_refinements=6,
             n_jobs=1,
-            initialize_method='cov',
+            init_method='cov',
             score_metric=metric)
     model.fit(X)
 
@@ -108,7 +108,7 @@ def estimate_via_quic_ebic(X, gamma=0):
     ic_estimator = QuicGraphLasso(
         lam=1.0,
         mode='path',
-        initialize_method='cov',
+        init_method='cov',
         path=np.logspace(np.log10(0.01), np.log10(1.0), num=100, endpoint=True))
     ic_estimator.fit(X)
 
@@ -129,7 +129,7 @@ def estimate_via_quic_ebic_convenience(X, gamma=0):
     print '\n-- QUIC EBIC (Convenience)'
     ic_estimator = QuicGraphLassoEBIC(
         lam=1.0,
-        initialize_method='cov',
+        init_method='cov',
         gamma=gamma)
     ic_estimator.fit(X)
 

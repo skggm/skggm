@@ -13,7 +13,7 @@ from sklearn.cross_validation import check_cv, cross_val_score # < 0.18
 import pyquic
 from inverse_covariance import (
     InverseCovarianceEstimator,
-    _initialize_coefficients,
+    _init_coefs,
     _compute_error,
     _validate_path,
 )
@@ -171,7 +171,8 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         The path must be sorted largest to smallest.  This class will auto sort
         this, in which case indices correspond to self.path_
 
-    method : one of 'quic'... (default=quic)
+    method : 'quic' or 'bigquic', ... (default=quic)
+        Currently only 'quic' is supported.
 
     verbose : integer
         Used in quic routine.
@@ -180,13 +181,15 @@ class QuicGraphLasso(InverseCovarianceEstimator):
                   'kl', or 'quadratic'
         Used for computing self.score().
 
-    initialize_method : one of 'corrcoef', 'cov'
+    init_method : one of 'corrcoef', 'cov'
         Computes initial covariance and scales lambda appropriately.
 
 
     Methods
     ----------
     lam_at_index(lidx) :  Compute the scaled lambda used at index lidx.
+        The parameter lidx is ignored when mode='default'.  Can use self.lam_
+        for convenience in this case.
 
     Attributes
     ----------
@@ -200,6 +203,9 @@ class QuicGraphLasso(InverseCovarianceEstimator):
 
     sample_covariance_ : 2D ndarray, shape (n_features, n_features)
         Estimated sample covariance matrix
+
+    lam_ : (float) or 2D ndarray, shape (n_features, n_features)
+        When mode='default', this is the lambda used in fit (lam * lam_scale_)
 
     lam_scale_ : (float)
         Additional scaling factor on lambda (due to magnitude of 
@@ -220,7 +226,8 @@ class QuicGraphLasso(InverseCovarianceEstimator):
     """
     def __init__(self, lam=0.5, mode='default', tol=1e-6, max_iter=1000,
                  Theta0=None, Sigma0=None, path=None, method='quic', verbose=0,
-                 score_metric='log_likelihood', initialize_method='corrcoef'):
+                 score_metric='log_likelihood', init_method='corrcoef',
+                 auto_scale=True):
         # quic-specific params
         self.lam = lam
         self.mode = mode
@@ -250,7 +257,8 @@ class QuicGraphLasso(InverseCovarianceEstimator):
 
         super(QuicGraphLasso, self).__init__(
                 score_metric=score_metric, 
-                initialize_method=initialize_method)
+                init_method=init_method,
+                auto_scale=auto_scale)
 
 
     def fit(self, X, y=None, **fit_params):
@@ -268,7 +276,7 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         """
         X = check_array(X, ensure_min_features=2, estimator=self)
         X = as_float_array(X, copy=False, force_all_finite=False)
-        self.initialize_coefficients(X)
+        self.init_coefs(X)
         if self.method == 'quic':
             (self.precision_, self.covariance_, self.opt_, self.cputime_, 
             self.iters_, self.duality_gap_) = quic(self.sample_covariance_,
@@ -307,12 +315,12 @@ class QuicGraphLasso(InverseCovarianceEstimator):
 def _quic_path(X, path, X_test=None, lam=0.5, tol=1e-6,
          max_iter=1000, Theta0=None, Sigma0=None, method='quic', 
          verbose=0, score_metric='log_likelihood',
-         initialize_method='corrcoef'):
+         init_method='corrcoef'):
     """Wrapper to compute path for example X.
     """
-    S, lam_scale_ = _initialize_coefficients(
+    S, lam_scale_ = _init_coefs(
             X,
-            method=initialize_method)
+            method=init_method)
 
     path = path.copy(order='C')
     if method == 'quic':
@@ -331,9 +339,9 @@ def _quic_path(X, path, X_test=None, lam=0.5, tol=1e-6,
             "Only method='quic' has been implemented.")
 
     if X_test is not None:
-        S_test, lam_scale_test = _initialize_coefficients(
+        S_test, lam_scale_test = _init_coefs(
             X_test,
-            method=initialize_method)
+            method=init_method)
         
         path_errors = []
         for lidx, lam in enumerate(path):
@@ -388,13 +396,14 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         Initial guess for the covariance matrix. If not provided the diagonal 
         identity matrix is used.
 
-    method : one of 'quic'... (default=quic)
+    method : 'quic' or 'bigquic', ... (default=quic)
+        Currently only 'quic' is supported.
 
     score_metric : one of 'log_likelihood' (default), 'frobenius', 'spectral',
                   'kl', or 'quadratic'
         Used for computing self.score().
 
-    initialize_method : one of 'corrcoef', 'cov'
+    init_method : one of 'corrcoef', 'cov'
         Computes initial covariance and scales lambda appropriately.
 
     Attributes
@@ -420,7 +429,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
     def __init__(self, lam=1.0, lams=4, n_refinements=4, cv=None, tol=1e-6,
                  max_iter=1000, Theta0=None, Sigma0=None, method='quic', 
                  verbose=0, n_jobs=1, score_metric='log_likelihood',
-                 initialize_method='corrcoef'):
+                 init_method='corrcoef', auto_scale=True):
         # GridCV params
         self.n_jobs = n_jobs
         self.cv = cv
@@ -449,7 +458,8 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
 
         super(QuicGraphLassoCV, self).__init__(
                 score_metric=score_metric,
-                initialize_method=initialize_method)
+                init_method=init_method,
+                auto_scale=auto_scale)
 
 
     def fit(self, X, y=None):
@@ -466,7 +476,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         cv = check_cv(self.cv, X, y, classifier=False)
         X = check_array(X, ensure_min_features=2, estimator=self)
         X = as_float_array(X, copy=False, force_all_finite=False)
-        self.initialize_coefficients(X)
+        self.init_coefs(X)
 
         # get path
         if isinstance(self.lams, collections.Sequence):
@@ -474,7 +484,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
             n_refinements = 1
         else:
             n_refinements = self.n_refinements
-            lam_1 = np.max(np.abs(self.sample_covariance_.flat)) #self.lam_scale_
+            lam_1 = np.max(np.abs(self.sample_covariance_.flat)) 
             lam_0 = 1e-2 * lam_1
             path = np.logspace(np.log10(lam_0), np.log10(lam_1), self.lams)[::-1]
 
@@ -494,7 +504,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                     lam=self.lam, tol=self.tol, max_iter=self.max_iter, 
                     Theta0=self.Theta0, Sigma0=self.Sigma0, method=self.method,
                     verbose=self.verbose, score_metric=self.score_metric,
-                    initialize_method=self.initialize_method)
+                    init_method=self.init_method)
                 for train, test in cv)
 
             # Little dance to transform the list in what we need
@@ -635,7 +645,7 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
     verbose : integer
         Used in quic routine.
 
-    initialize_method : one of 'corrcoef', 'cov'
+    init_method : one of 'corrcoef', 'cov'
         Computes initial covariance and scales lambda appropriately.
 
 
@@ -655,7 +665,8 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
     """
     def __init__(self, lam=1.0, path=100, gamma=0, tol=1e-6, max_iter=1000,
                  Theta0=None, Sigma0=None,  method='quic', verbose=0,
-                 score_metric='log_likelihood', initialize_method='corrcoef'):
+                 score_metric='log_likelihood', init_method='corrcoef',
+                 auto_scale=True):
         # quic-specific params
         self.lam = lam
         self.tol = tol
@@ -680,8 +691,9 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
         self.is_fitted = False
 
         super(QuicGraphLassoEBIC, self).__init__(
-                initialize_method=initialize_method,
-                score_metric=score_metric)
+                init_method=init_method,
+                score_metric=score_metric,
+                auto_scale=auto_scale)
 
 
     def fit(self, X, y=None, **fit_params):
@@ -699,7 +711,7 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
         """
         X = check_array(X, ensure_min_features=2, estimator=self)
         X = as_float_array(X, copy=False, force_all_finite=False)
-        self.initialize_coefficients(X)
+        self.init_coefs(X)
 
         # either use passed in path, or make our own path
         lam_1 = self.lam_scale_

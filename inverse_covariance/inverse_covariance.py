@@ -4,7 +4,7 @@ from sklearn.base import BaseEstimator
 import metrics
 
 
-def _initialize_coefficients(X, method='corrcoef'):
+def _init_coefs(X, method='corrcoef'):
     if method == 'corrcoef':
         return np.corrcoef(X, rowvar=False), 1.0
     elif method == 'cov':   
@@ -89,8 +89,14 @@ class InverseCovarianceEstimator(BaseEstimator):
                   'kl', or 'quadratic'
         Used for computing self.score().
 
-    initialize_method : one of 'corrcoef', 'cov'
+    init_method : one of 'corrcoef', 'cov'
         Computes initial covariance and scales lambda appropriately.
+
+    auto_scale : bool
+        If True, will compute self.lam_scale_ = max off-diagonal value when 
+        init_method='cov'. 
+        If false, then self.lam_scale_ = 1.
+        lam_scale_ is used to scale user-supplied self.lam during fit.
 
     Attributes
     ----------
@@ -115,16 +121,17 @@ class InverseCovarianceEstimator(BaseEstimator):
         Additional scaling factor on lambda (due to magnitude of 
         sample_covariance_ values).
     """
-    def __init__(self, score_metric='log_likelihood', 
-                 initialize_method='cov'):
+    def __init__(self, score_metric='log_likelihood', init_method='cov',
+                 auto_scale=True):
         self.score_metric = score_metric
-        self.initialize_method = initialize_method
+        self.init_method = init_method
+        self.auto_scale = auto_scale
 
         self.covariance_ = None  # assumes a matrix of a list of matrices
         self.precision_ = None  # assumes a matrix of a list of matrices
 
         # these must be updated upon self.fit()
-        # the first 4 will be set if self.initialize_coefficients is used.
+        # the first 4 will be set if self.init_coefs is used.
         self.sample_covariance_ = None
         self.lam_scale_ = None
         self.n_samples = None
@@ -134,7 +141,7 @@ class InverseCovarianceEstimator(BaseEstimator):
         super(InverseCovarianceEstimator, self).__init__()
 
 
-    def initialize_coefficients(self, X):
+    def init_coefs(self, X):
         """Computes ...
 
         Initialize the following values:
@@ -144,9 +151,12 @@ class InverseCovarianceEstimator(BaseEstimator):
             self.lam_scale_
         """
         self.n_samples, self.n_features = X.shape
-        self.sample_covariance_, self.lam_scale_ = _initialize_coefficients(
+        self.sample_covariance_, self.lam_scale_ = _init_coefs(
                 X,
-                method=self.initialize_method)
+                method=self.init_method)
+
+        if not self.auto_scale:
+            self.lam_scale_ = 1.0
 
 
     def score(self, X_test, y=None):
@@ -174,9 +184,9 @@ class InverseCovarianceEstimator(BaseEstimator):
         if isinstance(self.precision_, list):
             print 'Warning: returning a list of scores.'
 
-        S_test, lam_scale_test = _initialize_coefficients(
+        S_test, lam_scale_test = _init_coefs(
                 X_test,
-                method=self.initialize_method)
+                method=self.init_method)
         error = self.cov_error(S_test, score_metric=self.score_metric)
 
         # maximize score with -error
