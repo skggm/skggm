@@ -277,9 +277,9 @@ if __name__ == "__main__":
             ('Adaptive (cv, binary)', quic_adaptive_prec_b, ''),
             ('Adaptive (cv, inv)', quic_adaptive_prec_i, ''),
             ('Adaptive (cv, inv**2)', quic_adaptive_prec_is, ''),
-            ('Adaptive (ebic, binary)', quic_adaptive_ebic_prec_b, ''),
-            ('Adaptive (ebic, inv)', quic_adaptive_ebic_prec_i, ''),
-            ('Adaptive (ebic, inv**2)', quic_adaptive_ebic_prec_is, '')]
+            ('Adaptive (bic, binary)', quic_adaptive_ebic_prec_b, ''),
+            ('Adaptive (bic, inv)', quic_adaptive_ebic_prec_i, ''),
+            ('Adaptive (bic, inv**2)', quic_adaptive_ebic_prec_is, '')]
     show_results(covs, precs)
 
   
