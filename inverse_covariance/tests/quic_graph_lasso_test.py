@@ -34,7 +34,7 @@ class TestQuicGraphLasso(object):
         ({
             'lam': 1.0,
             'max_iter': 100,
-            'initialize_method': 'cov',
+            'init_method': 'cov',
         }, [0.0071706976421055616, 1394.564448134179, 50.890448754467911, 7.1054273576010019e-15]),
     ])
     def test_integration_quic_graph_lasso(self, params_in, expected):
@@ -116,46 +116,4 @@ class TestQuicGraphLasso(object):
         X = datasets.load_diabetes().data
         ic = QuicGraphLasso(method='unknownmethod')
         assert_raises(NotImplementedError, ic.fit, X)
-
-
-    @pytest.mark.parametrize("params_in, expected", [
-        ({
-            'lam': 0.5,
-            'max_iter': 100,
-        }, [593.747625799]),
-        ({
-            'lam': 1.0,
-            'mode': 'path',
-            'path': np.array([1.0, 0.9, 0.8, 0.7, 0.6, 0.5]),
-            'tol': 1e-16,
-            'max_iter': 100,
-        }, [692., 691.85406837, 689.44452037, 675.59092901, 643.30280267,
-            593.7476258]),
-        ({
-            'lam': 0.5,
-            'mode': 'trace',
-            'tol': 1e-16,
-            'max_iter': 11,
-        }, [656.72143772, 638.21734896, 607.84863314, 595.38094248,
-            594.01024824, 593.76739962,  593.74926575, 593.74777092,
-            593.747634, 593.74762626, 593.74762583]),
-    ])
-    def test_ER_692(self, params_in, expected):
-        '''
-        Requires that inverse_covariance/tests/ER_692.mat exists. 
-        It can be found in the MEX package archive from the [QUIC].
-        http://www.cs.utexas.edu/~sustik/QUIC/
-        
-        Reproduces tests from pyquic: https://github.com/osdf/pyquic
-        '''
-        if not os.path.exists('inverse_covariance/tests/ER_692.mat'):
-            print ('''Requires the file tests/ER_692.mat - this can be obtained in the MEX archive at http://www.cs.utexas.edu/~sustik/QUIC/''')
-            assert False
-
-        data = loadmat('inverse_covariance/tests/ER_692.mat')['S']
-        X = np.zeros(data.shape)
-        X[:] = data
-        Theta, Sigma, opt, cputime, iters, dGap = quic(X, **params_in)
-        print np.array(opt)
-        assert_allclose(opt, expected, rtol=1e-2)
 
