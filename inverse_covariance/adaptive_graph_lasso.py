@@ -73,7 +73,7 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         mask = estimator.precision_ != 0
         lam[mask] = 1. / (np.abs(estimator.precision_[mask]) ** 2)
         mask_0 = estimator.precision_ == 0
-        lam[mask_0] = 1.5 * np.min(lam[mask].flat) # non-zero in appropriate scale range
+        lam[mask_0] = np.max(lam[mask].flat) # non-zero in appropriate scale range
         lam[np.diag_indices(n_features)] = 0
         return lam
 
@@ -84,9 +84,10 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         mask = estimator.precision_ != 0
         lam[mask] = 1. / np.abs(estimator.precision_[mask])
         mask_0 = estimator.precision_ == 0
-        lam[mask_0] = 1.5 * np.min(lam[mask].flat) # non-zero in appropriate scale range
+        lam[mask_0] = np.max(lam[mask].flat) # non-zero in appropriate scale range
         lam[np.diag_indices(n_features)] = 0
         return lam
+
 
     def fit(self, X, y=None):
         """Estimate the precision using an adaptive maximum likelihood estimator.
@@ -108,7 +109,8 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
             # perform second step adaptive estimate
             self.estimator_ = QuicGraphLasso(lam=self.lam_ * new_estimator.lam_, 
                                              mode='default',
-                                             initialize_method='cov') # TODO: add auto_scale param, use False here
+                                             init_method='cov',
+                                             auto_scale=False) 
             self.estimator_.fit(X)
         
         elif self.method == 'inverse_squared':
@@ -128,12 +130,6 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         else:
             raise NotImplementedError(("Only method='binary', 'glasso', or",
                     "'inverse' have been implemented."))
-
-        # perform second step adaptive estimate
-        self.estimator_ = QuicGraphLasso(lam=self.lam_ * new_estimator.lam_, 
-                                         mode='default',
-                                         initialize_method='cov')
-        self.estimator_.fit(X)
 
         self.is_fitted = True
         return self

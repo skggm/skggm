@@ -204,7 +204,7 @@ class StatisticalPower(object):
                 if self.trial_estimator is None:
                     trial_estimator = QuicGraphLasso(lam=lam,
                                                      mode='default',
-                                                     initialize_method='corrcoef')
+                                                     init_method='corrcoef')
                 else:
                     trial_estimator = self.trial_estimator
 
