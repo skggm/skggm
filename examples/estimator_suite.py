@@ -8,6 +8,7 @@ from sklearn.datasets import make_sparse_spd_matrix
 from sklearn.covariance import GraphLassoCV, ledoit_wolf
 import matplotlib.pyplot as plt
 
+
 sys.path.append('..')
 from inverse_covariance import (
     QuicGraphLasso,
@@ -15,7 +16,6 @@ from inverse_covariance import (
     QuicGraphLassoEBIC,
     AdaptiveGraphLasso,
 )
-from inverse_covariance.inverse_covariance import _compute_error
 
 
 '''
@@ -45,40 +45,39 @@ def make_data(n_samples, n_features):
     return X, cov, prec
 
 
+def multiplot(named_mats, suptitle):
+    num_rows = len(named_mats) / 3
+    num_plots = int(np.ceil(num_rows / 4.))
+    for nn in range(num_plots):
+        plt.figure(figsize=(10, 8))
+        plt.subplots_adjust(left=0.02, right=0.98, hspace=0.4)
+        for i, item in enumerate(named_mats[nn * 4 * 3: (nn + 1) * 4 * 3]):
+            lam = None
+            if len(item) == 3:
+                name, this_mat, lam = item
+            elif len(item) == 2:
+                name, this_mat = item
+
+            vmax = np.abs(this_mat).max()
+            ax = plt.subplot(4, 3, i + 1)
+            plt.imshow(np.ma.masked_values(this_mat, 0),
+                       interpolation='nearest', vmin=-vmax, vmax=vmax,
+                       cmap=plt.cm.RdBu_r)
+            plt.xticks(())
+            plt.yticks(())
+            if lam is None or lam == '':
+                plt.title('{}'.format(name))
+            else:
+                plt.title('{}\n(lam={:.2f})'.format(name, lam))
+            ax.set_axis_bgcolor('.7')
+
+        plt.suptitle(suptitle + ' (page {})'.format(nn), fontsize=14)
+        plt.show()
+
+
 def show_results(covs, precs):
-    # plot the covariances
-    plt.figure(figsize=(10, 6))
-    plt.subplots_adjust(left=0.02, right=0.98)
-    for i, (name, this_cov) in enumerate(covs):
-        vmax = np.abs(this_cov).max()
-        plt.subplot(7, 3, i + 1)
-        plt.imshow(this_cov, 
-                   interpolation='nearest', vmin=-vmax, vmax=vmax,
-                   cmap=plt.cm.RdBu_r)
-        plt.xticks(())
-        plt.yticks(())
-        plt.title('%s covariance' % name)
-
-    plt.show()
-
-    # plot the precisions
-    plt.figure(figsize=(10, 6))
-    plt.subplots_adjust(left=0.02, right=0.98)
-    for i, (name, this_prec, lam) in enumerate(precs):
-        vmax = np.abs(this_prec).max()
-        ax = plt.subplot(7, 3, i + 1)
-        plt.imshow(np.ma.masked_values(this_prec, 0),
-                   interpolation='nearest', vmin=-vmax, vmax=vmax,
-                   cmap=plt.cm.RdBu_r)
-        plt.xticks(())
-        plt.yticks(())
-        if lam == '':
-            plt.title('{}'.format(name))
-        else:
-            plt.title('{}\n(lam={:.2f})'.format(name, lam))
-        ax.set_axis_bgcolor('.7')
-
-    plt.show()
+    multiplot(covs, 'Covariance Estimates')
+    multiplot(precs, 'Precision Estimates')
 
 
 def quic_graph_lasso(X, num_folds, metric):
@@ -252,7 +251,7 @@ if __name__ == "__main__":
     name = 'Empirical'
     plot_covs.append((name, cov))
     plot_precs.append((name, prec, ''))
-    error = _compute_error(true_cov, cov, prec)
+    error = np.linalg.norm(true_cov - cov, ord='fro')
     results.append([name, error, '', ctime])
     print '   frobenius error: {}'.format(error)
     print ''
@@ -265,7 +264,7 @@ if __name__ == "__main__":
     name = 'Ledoit-Wolf (sklearn)'
     plot_covs.append((name, cov))
     plot_precs.append((name, prec, ''))
-    error = _compute_error(true_cov, cov, prec)
+    error = np.linalg.norm(true_cov - cov, ord='fro')
     results.append([name, error, '', ctime])
     print '   frobenius error: {}'.format(error)
     print ''
@@ -278,7 +277,7 @@ if __name__ == "__main__":
     name = 'GraphLassoCV (sklearn)'
     plot_covs.append((name, cov))
     plot_precs.append((name, prec, lam))
-    error = _compute_error(true_cov, cov, prec)
+    error = np.linalg.norm(true_cov - cov, ord='fro')
     results.append([name, error, lam, ctime])
     print '   frobenius error: {}'.format(error)
     print ''
@@ -296,7 +295,7 @@ if __name__ == "__main__":
         ctime = end_time - start_time
         plot_covs.append((name, cov))
         plot_precs.append((name, prec, lam))
-        error = _compute_error(true_cov, cov, prec)
+        error = np.linalg.norm(true_cov - cov, ord='fro')
         results.append([name, error, lam, ctime])
         print '   frobenius error: {}'.format(error)
         print ''
@@ -314,7 +313,7 @@ if __name__ == "__main__":
         ctime = end_time - start_time
         plot_covs.append((name, cov))
         plot_precs.append((name, prec, lam))
-        error = _compute_error(true_cov, cov, prec)
+        error = np.linalg.norm(true_cov - cov, ord='fro')
         results.append([name, error, lam, ctime])
         print '   frobenius error: {}'.format(error)
         print ''
@@ -333,7 +332,7 @@ if __name__ == "__main__":
         ctime = end_time - start_time
         plot_covs.append((name, cov))
         plot_precs.append((name, prec, lam))
-        error = _compute_error(true_cov, cov, prec)
+        error = np.linalg.norm(true_cov - cov, ord='fro')
         results.append([name, error, lam, ctime])
         print '   error: {}'.format(error)
         print ''
@@ -354,7 +353,7 @@ if __name__ == "__main__":
         ctime = end_time - start_time
         plot_covs.append((name, cov))
         plot_precs.append((name, prec, ''))
-        error = _compute_error(true_cov, cov, prec)
+        error = np.linalg.norm(true_cov - cov, ord='fro')
         results.append([name, error, '', ctime])
         print '   frobenius error: {}'.format(error)
         print ''
