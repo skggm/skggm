@@ -2,10 +2,16 @@
 
 
 # Included in this package
-- QuicGraphLasso 
-    - QuicGraphLassoCV
-    - QuicGraphLassoEBIC
-    
+- `QuicGraphLasso`
+    This class wraps the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm for GraphLasso estimation as a scikit-learn compatible estimator. 
+
+    Notable advantages of this implementation over sklearn's built-in implementation are: a) support for a matrix penalization term, and b) speed.
+
+    - `QuicGraphLassoCV`
+        The 
+
+    - `QuicGraphLassoEBIC`
+
 - AdaptiveInverseCovariance (two stage adaptive meta estimator) [TODO: better name]
 - Ensemble meta estimator
 - Numerous usage examples
