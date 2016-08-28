@@ -28,6 +28,8 @@ class TestModelAverage(object):
             'n_trials': 10,
             'normalize': True,
             'subsample': 0.3,
+            'lam': 0.1,
+            'lam_perturb': 0.1,
             'penalization': 'random',
             'use_cache': True,
         }),

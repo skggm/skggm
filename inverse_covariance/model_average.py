@@ -3,6 +3,7 @@ from sklearn.base import BaseEstimator, clone
 from sklearn.utils import check_array, as_float_array
 
 from .inverse_covariance import _init_coefs
+from . import QuicGraphLassoCV
 
 
 def _check_psd(m):
@@ -167,9 +168,9 @@ class ModelAverage(BaseEstimator):
         self.lams_ = []
         self.subsets_ = []
 
+        # default to QuicGraphLassoCV
         if self.estimator is None:
-            raise ValueError("ModelAvergae must be instantiated with an "
-                             "estimator.")
+            self.estimator = QuicGraphLassoCV()
 
         if self.penalization != 'subsampling' and\
                 not hasattr(self.estimator, self.penalty_name):
