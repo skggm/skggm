@@ -133,11 +133,11 @@ def adaptive_graph_lasso(X, model_selector, method):
 
     Compare the support and values to the model-selection estimator.
     '''
-    metric = 'frobenius'
+    metric = 'log_likelihood'
     print 'Adaptive {} with:'.format(model_selector)
-    print '   metric: {}'.format(metric)  
     print '   adaptive-method: {}'.format(method)  
     if model_selector == 'QuicGraphLassoCV':
+        print '   metric: {}'.format(metric)  
         model = AdaptiveGraphLasso(
                 estimator=QuicGraphLassoCV(score_metric=metric),
                 method=method,
