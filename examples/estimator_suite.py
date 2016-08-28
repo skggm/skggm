@@ -139,7 +139,12 @@ def adaptive_graph_lasso(X, model_selector, method):
     if model_selector == 'QuicGraphLassoCV':
         print '   metric: {}'.format(metric)  
         model = AdaptiveGraphLasso(
-                estimator=QuicGraphLassoCV(score_metric=metric),
+                estimator=QuicGraphLassoCV(
+                    cv=2, # cant deal w more folds at small size
+                    n_refinements=6,
+                    init_method='cov',
+                    score_metric=metric
+                ),
                 method=method,
         )
     
