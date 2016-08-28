@@ -38,9 +38,17 @@ Download the test data file `ER_692.mat` from `http://www.cs.utexas.edu/~sustik/
 
 * QUIC implementation found [here](http://www.cs.utexas.edu/~sustik/QUIC/) and [here](http://bigdata.ices.utexas.edu/software/1035/) with cython bindings forked from [pyquic](https://github.com/osdf/pyquic)
 
+### Adaptive refitting (two-step methods)
+
+* ["High dimensional covariance estimation based on Gaussian graphical models"](ftp://ess.r-project.org/Manuscripts/buhlmann/gelato.pdf) S. Zhou, P. R{u}htimann, M. Xu, and P. B{u}hlmann
+
+* ["Relaxed Lasso"](http://stat.ethz.ch/~nicolai/relaxo.pdf) N. Meinshausen, December 2006.
+
 ### Randomized model averaging 
 
 * ["Stability Selection"](https://arxiv.org/pdf/0809.2932v2.pdf) N. Meinhausen and P. Buehlmann, May 2009
 
+* ["Random Lasso"](https://arxiv.org/abs/1104.3398) S. Wang, B. Nan, S. Rosset, and J. Zhu, Apr 2011
+            
 * ["Mixed effects models for resampled network statistics improves statistical power to find differences in multi-subject functional connectivity"](http://biorxiv.org/content/early/2016/03/14/027516) M. Narayan and G. Allen, March 2016
 

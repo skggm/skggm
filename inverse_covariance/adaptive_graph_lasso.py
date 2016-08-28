@@ -23,11 +23,9 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         "High dimensional covariance estimation based on Gaussian graphical
         models"
         S. Zhou, P. R{u}htimann, M. Xu, and P. B{u}hlmann
-        ftp://ess.r-project.org/Manuscripts/buhlmann/gelato.pdf
 
         "Relaxed Lasso"
         N. Meinshausen, December 2006.
-        http://stat.ethz.ch/~nicolai/relaxo.pdf
 
     Parameters
     -----------        

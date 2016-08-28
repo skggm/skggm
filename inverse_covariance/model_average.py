@@ -33,14 +33,17 @@ class ModelAverage(BaseEstimator):
         unimportant if use_scalar_penalty=True.
         e.g., 'lam' for QuicGraphLasso, 'alpha' for GraphLasso
 
-    penalization : one of 'random', 'adaptive' 
+    penalization : one of 'random', 'fully-random' 
         Strategy for generating new random penalization in each trial.
 
         For more information on 'random' penalization, see:
             "Stability Selection"
             N. Meinhausen and P. Buehlmann, May 2009
 
-        For more information on 'random adaptive penalization', see:
+            "Random lasso" 
+            S. Wang, B. Nan, S. Rosset, and J. Zhu, Apr 2011
+
+        For more information on 'fully-random', see:
             "Mixed effects models for resampled network statistics improves
             statistical power to find differences in multi-subject functional
             connectivity" 
