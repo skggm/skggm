@@ -1,12 +1,15 @@
-# skggm
-Gaussian graphical models in scikit-learn.
+# skggm : Gaussian graphical models in scikit-learn.
+
 
 # Included in this package
-- InverseCovarianceEstimator with common model selection metrics (such as EBIC and metrics for cross validation)
-- QuicGraphLasso & QuicGraphLassoCV estimators
+- QuicGraphLasso 
+-- QuicGraphLassoCV
+-- QuicGraphLassoEBIC
 - AdaptiveInverseCovariance (two stage adaptive meta estimator) [TODO: better name]
 - Ensemble meta estimator
 - Numerous usage examples
+- InverseCovarianceEstimator with common model selection metrics (such as EBIC and metrics for cross validation)
+
 
 ^ These are notes, will clean up later.
 
