@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.base import clone
+from sklearn.utils import check_array, as_float_array
 
 from . import (
     QuicGraphLasso,
@@ -94,6 +95,9 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         X : ndarray, shape (n_samples, n_features)
             Data from which to compute the proportion matrix.
         """
+        X = check_array(X, ensure_min_features=2, estimator=self)
+        X = as_float_array(X, copy=False, force_all_finite=False)
+
         n_samples, n_features = X.shape
 
         # perform first estimate
