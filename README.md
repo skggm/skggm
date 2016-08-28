@@ -36,7 +36,6 @@ An example run for `n_examples=100` and `n_features=20` yielded the following re
 <img src="images/estimator_suite_scorecard_100x20.png" alt="(n_examples, n_features) = (100, 20)" width="400">
 
 <img src="images/estimator_suite_plots_page0_100x20.png" alt="(n_examples, n_features) = (100, 20)" width="400">
-
 <img src="images/estimator_suite_plots_page1_100x20.png" alt="(n_examples, n_features) = (100, 20)" width="400">
 
 For slightly higher dimensions of `n_examples=600` and `n_features=120` we obtained:
