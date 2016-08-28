@@ -123,6 +123,10 @@ class ModelAverage(BaseEstimator):
             connectivity" 
             M. Narayan and G. Allen, March 2016
 
+    support_thresh : float (0, 1)
+        Threshold for estimating supports from proportions.  This is provided
+        for convience.
+
     use_cache : bool (default=True)
         If false, will optionally not cache each estimator instance and 
         penalization instance (to save memory).
@@ -138,6 +142,9 @@ class ModelAverage(BaseEstimator):
         Each entry indicates the sample probability (or count) of whether the 
         inverse covariance is non-zero.
 
+    support_ : matrix of size (n_features, n_features)
+        Support estimate via thresholding proportions by support_thresh.
+
     estimators_ : list of estimator instances (n_trials, )
         The estimator instance from each trial.  
         This returns an empty list if use_cache=False.
@@ -149,10 +156,13 @@ class ModelAverage(BaseEstimator):
     subsets_ : list of subset indices (n_trials, )
         The example indices chosen in each trial.
         This returns an empty list if use_cache=False.
+
+    lam_ : float
+        Average matrix value used among lam_ for all estimators.
     """
     def __init__(self, estimator=None, n_trials=100, subsample=0.3, 
                  normalize=True, lam=0.5, lam_perturb=0.5, penalization='random',
-                 use_cache=True, penalty_name='lam'):
+                 use_cache=True, penalty_name='lam', support_thresh=0.5):
         self.estimator = estimator 
         self.n_trials = n_trials
         self.subsample = subsample
@@ -162,8 +172,12 @@ class ModelAverage(BaseEstimator):
         self.penalization = penalization
         self.use_cache = use_cache
         self.penalty_name = penalty_name
+        self.support_thresh = support_thresh
 
         self.proportion_ = None
+        self.support_ = None
+        self.lam_ = None
+        self.lam_scale_ = None
         self.estimators_ = []
         self.lams_ = []
         self.subsets_ = []
@@ -188,7 +202,9 @@ class ModelAverage(BaseEstimator):
         X = as_float_array(X, copy=False, force_all_finite=False)
 
         n_samples, n_features = X.shape
+        _, self.lam_scale_ = _init_coefs(X, method='cov')
         
+        self.lam_ = 0.0
         self.proportion_ = np.zeros((n_features, n_features))
         for nn in range(self.n_trials):
             prec_is_real = False
@@ -202,10 +218,9 @@ class ModelAverage(BaseEstimator):
                                        self.lam,
                                        self.lam_perturb)
                 elif self.penalization == 'fully-random':
-                    _, lam_scale = _init_coefs(X, method='cov')
                     lam = _fix_weights(_fully_random_weights,
                                        n_features,
-                                       lam_scale)
+                                       self.lam_scale_)
                 else:
                     raise NotImplementedError(
                             ("Only penalization = 'subsampling', "
@@ -250,13 +265,27 @@ class ModelAverage(BaseEstimator):
             else:
                 raise ValueError("Estimator returned invalid precision_.")
 
+            # estimate support locations
+            threshold = self.support_thresh * self.n_trials
+            self.support_ = np.zeros(self.proportion_.shape)
+            self.support_[self.proportion_ > threshold] = 1.0
+
+            self.lam_ += np.mean(new_estimator.lam_.flat)
             if self.use_cache:
                 self.estimators_.append(new_estimator)
                 self.subsets_.append(rp)
                 if lam is not None:
                     self.lams_.append(lam)
 
+        self.lam_ /= self.n_trials
         if self.normalize:
             self.proportion_ /= self.n_trials
 
 
+    @property
+    def precision_(self):
+        '''Convenience property to make compatible with AdaptiveGraphLasso.
+        This is not a very good precision estimate.
+        '''
+        return self.support_
+    
