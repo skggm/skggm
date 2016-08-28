@@ -234,8 +234,8 @@ def _count_support_diff(m, m_hat):
 
 
 if __name__ == "__main__":
-    n_samples = 100
-    n_features = 20
+    n_samples = 100 
+    n_features = 20 
     cv_folds = 3
 
     # make data
@@ -367,13 +367,14 @@ if __name__ == "__main__":
         plot_precs.append((name, prec, ''))
         error = np.linalg.norm(true_cov - cov, ord='fro')
         supp_diff = _count_support_diff(true_prec, prec)
-        results.append([name, error, supp_diff, ctime, lam])
+        results.append([name, error, supp_diff, ctime, ''])
         print '   frobenius error: {}'.format(error)
         print ''
 
     # tabulate errors
     print tabulate.tabulate(results,
-                            headers=['Estimator', 'Error (Frobenius)', 'Support Diff', 'Time', 'Lambda'],
+                            headers=['Estimator', 'Error (Frobenius)',
+                                     'Support Diff', 'Time', 'Lambda'],
                             tablefmt='pipe')
     print ''
 
