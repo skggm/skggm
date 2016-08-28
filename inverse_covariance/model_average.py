@@ -28,7 +28,7 @@ class ModelAverage(BaseEstimator):
         Determines whether the proportion_ matrix should be normalized to have
         values in the range (0, 1) or should be absolute.
 
-    penalty : string (default='lam')
+    penalty_name : string (default='lam')
         Name of the penalty kwarg in the estimator.  This parameter is 
         unimportant if use_scalar_penalty=True.
         e.g., 'lam' for QuicGraphLasso, 'alpha' for GraphLasso
@@ -73,14 +73,14 @@ class ModelAverage(BaseEstimator):
     """
     def __init__(self, estimator=None, n_trials=100, normalize=True,
                  penalization='random', subsample=0.3, use_cache=True,
-                 penalty='lam', use_scalar_penalty=False):
+                 penalty_name='lam', use_scalar_penalty=False):
         self.estimator = estimator 
         self.n_trials = n_trials
         self.normalize = normalize
         self.penalization = penalization
         self.subsample = subsample
         self.use_cache = use_cache
-        self.penalty = penalty
+        self.penalty_name = penalty_name
         self.use_scalar_penalty = use_scalar_penalty
 
         self.proportion_ = None
@@ -92,9 +92,9 @@ class ModelAverage(BaseEstimator):
             raise ValueError("ModelAvergae must be instantiated with an ",
                              "estimator.")
 
-        if not self.use_scalar_penalty and not hasattr(self.estimator, self.penalty):
+        if not self.use_scalar_penalty and not hasattr(self.estimator, self.penalty_name):
             raise ValueError("Must specify valid penalty for estimator: {}.".format(
-                self.penalty))
+                self.penalty_name))
 
 
     def _random_weights(self, n_features):
@@ -140,7 +140,7 @@ class ModelAverage(BaseEstimator):
             # patch estimator args with new penalty
             if lam is not None:
                 new_estimator.set_params(**{
-                    self.penalty: lam,
+                    self.penalty_name: lam,
                 }) 
 
             # fit estimator

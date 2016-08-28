@@ -90,7 +90,7 @@ def quic_graph_lasso(X, num_folds, metric):
     print '   metric: {}'.format(metric)
     search_grid = {
       'lam': np.logspace(np.log10(0.01), np.log10(1.0), num=100, endpoint=True),
-      'init_method': ['cov', 'corrcoef'],
+      'init_method': ['cov'],
       'score_metric': [metric], 
     }
     model = GridSearchCV(QuicGraphLasso(),
