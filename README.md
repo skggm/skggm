@@ -40,7 +40,7 @@ Download the test data file `ER_692.mat` from `http://www.cs.utexas.edu/~sustik/
 
 ### Adaptive refitting (two-step methods)
 
-* ["High dimensional covariance estimation based on Gaussian graphical models"](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf) S. Zhou, P. R{u}htimann, M. Xu, and P. B{u}hlmann
+* ["High dimensional covariance estimation based on Gaussian graphical models"](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf) S. Zhou, P. R{\"u}htimann, M. Xu, and P. B{\"u}hlmann
 
 * ["Relaxed Lasso"](http://stat.ethz.ch/~nicolai/relaxo.pdf) N. Meinshausen, December 2006.
 
