@@ -483,7 +483,7 @@ if __name__ == "__main__":
 
     # Adaptive ModelAverage
     params = [
-        ('Adaptive MA : fully-random, binary', 'fully-random', 'binary'),
+        ('Adaptive MA : random, binary', 'random', 'binary'),
     ]
     for name, model_selector, method in params:
         start_time = time.time()
