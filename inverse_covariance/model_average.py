@@ -6,8 +6,7 @@ from .inverse_covariance import _init_coefs
 
 
 def _check_psd(m):
-    w, v = np.linalg.eig(m)
-    return np.all(w >= 0)
+    return np.all(np.linalg.eigvals(m) >= 0)
 
 
 def _fully_random_weights(n_features, lam_scale):
@@ -30,23 +29,36 @@ def _random_weights(n_features, lam, lam_perturb):
     weights = np.zeros((n_features, n_features))
     n_off_diag = (n_features ** 2 - n_features) / 2
     berns = np.random.binomial(1, 0.5, size=n_off_diag)
-    b_0 = berns == 0
-    b_1 = berns == 1
-    berns[b_0] = 1. * lam * lam_perturb
-    berns[b_1] = 1. * lam / lam_perturb
-    weights[np.triu_indices(n_features, k=1)] = berns
+    vals = np.zeros(berns.shape)
+    vals[berns == 0] = 1. * lam * lam_perturb
+    vals[berns == 1] = 1. * lam / lam_perturb
+    weights[np.triu_indices(n_features, k=1)] = vals
     weights[weights < 0] = 0
     weights = weights + weights.T
     return weights
 
 
-def _generate_until_valid(weight_fun, *args):
-    """Generate weight matrices until find a positive semi-definite one.
+def _fix_weights(weight_fun, *args):
+    """Ensure random weight matrix is valid.
+
+    TODO:  The diagonally dominant tuning currently doesn't make sense.  
+           Our weight matrix has zeros along the diagonal, so multiplying by 
+           a diagonal matrix results in a zero-matrix.
     """
-    while True:
-        new_weights = weight_fun(*args)
-        if _check_psd(new_weights):
-            return new_weights
+    weights = weight_fun(*args)
+
+    # TODO: fix this
+    # disable checks for now
+    return weights
+
+    # if positive semidefinite, then we're good as is
+    if _check_psd(weights):
+        return weights
+
+    # make diagonally dominant
+    off_diag_sums = np.sum(weights, axis=1) # NOTE: assumes diag is zero
+    mod_mat = np.linalg.inv(np.sqrt(np.diag(off_diag_sums)))
+    return np.dot(mod_mat, weights, mod_mat)
 
 
 class ModelAverage(BaseEstimator):
@@ -181,13 +193,18 @@ class ModelAverage(BaseEstimator):
             prec_is_real = False
             while not prec_is_real:
                 lam = None
-                if self.penalization == 'random':
-                    lam = _generate_until_valid(_random_weights, n_features)
-                elif self.penalization == 'full-random':
-                    lam_scale = _init_coefs(X, method='cov')
-                    lam = _generate_until_valid(_fully_random_weights,
-                                                n_features,
-                                                lam_scale)
+                if self.penalization == 'subsampling':
+                    pass
+                elif self.penalization == 'random':
+                    lam = _fix_weights(_random_weights, 
+                                       n_features,
+                                       self.lam,
+                                       self.lam_perturb)
+                elif self.penalization == 'fully-random':
+                    _, lam_scale = _init_coefs(X, method='cov')
+                    lam = _fix_weights(_fully_random_weights,
+                                       n_features,
+                                       lam_scale)
                 else:
                     raise NotImplementedError(
                             ("Only penalization = 'subsampling', "
@@ -209,9 +226,11 @@ class ModelAverage(BaseEstimator):
                 # check that new_estimator.precision_ is real
                 # if not, skip this lam and try again
                 if isinstance(new_estimator.precision_, list):
-                    prec_is_real = True
+                    prec_real_bools = []
                     for prec in new_estimator.precision_:
-                        prec_is_real *= np.all(np.isreal(prec))
+                        prec_real_bools.append(np.all(np.isreal(prec)))
+
+                    prec_is_real = np.all(np.array(prec_real_bools) == True)
                 
                 elif isinstance(new_estimator.precision_, np.ndarray):
                     prec_is_real = np.all(np.isreal(new_estimator.precision_))
@@ -233,7 +252,7 @@ class ModelAverage(BaseEstimator):
             if self.use_cache:
                 self.estimators_.append(new_estimator)
                 self.subsets_.append(rp)
-                if not self.use_scalar_penalty:
+                if lam is not None:
                     self.lams_.append(lam)
 
         if self.normalize:
