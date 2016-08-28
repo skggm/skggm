@@ -184,6 +184,11 @@ class QuicGraphLasso(InverseCovarianceEstimator):
     init_method : one of 'corrcoef', 'cov'
         Computes initial covariance and scales lambda appropriately.
 
+    auto_scale : bool
+        If True, will compute self.lam_scale_ = max off-diagonal value when 
+        init_method='cov'. 
+        If false, then self.lam_scale_ = 1.
+        lam_scale_ is used to scale user-supplied self.lam during fit.
 
     Methods
     ----------
@@ -405,6 +410,12 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
 
     init_method : one of 'corrcoef', 'cov'
         Computes initial covariance and scales lambda appropriately.
+
+    auto_scale : bool
+        If True, will compute self.lam_scale_ = max off-diagonal value when 
+        init_method='cov'. 
+        If false, then self.lam_scale_ = 1.
+        lam_scale_ is used to scale user-supplied self.lam during fit.
 
     Attributes
     ----------    
@@ -648,6 +659,11 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
     init_method : one of 'corrcoef', 'cov'
         Computes initial covariance and scales lambda appropriately.
 
+    auto_scale : bool
+        If True, will compute self.lam_scale_ = max off-diagonal value when 
+        init_method='cov'. 
+        If false, then self.lam_scale_ = 1.
+        lam_scale_ is used to scale user-supplied self.lam during fit.
 
     Attributes
     ----------
