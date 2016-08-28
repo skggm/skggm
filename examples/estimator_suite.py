@@ -435,8 +435,8 @@ if __name__ == "__main__":
 
     # Default ModelAverage
     params = [
-        ('ModelAverage CV : random\nProportions or Support', 'random'),
-        ('ModelAverage CV : fully-random\nProportions or Support', 'fully-random'),
+        ('ModelAverage CV : random', 'random'),
+        ('ModelAverage CV : fully-random', 'fully-random'),
     ]
     for name, model_selector in params:
         start_time = time.time()
