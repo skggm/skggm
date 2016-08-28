@@ -34,7 +34,9 @@ In `examples/estimator_suite.py` we reproduce the [plot_sparse_cov](http://sciki
 An example run for `n_examples=100` and `n_features=20` yielded the following results. 
 
 <img src="images/estimator_suite_scorecard_100x20.png" alt="(n_examples, n_features) = (100, 20)" width="400">
+
 <img src="images/estimator_suite_plots_100x20.png" alt="(n_examples, n_features) = (100, 20)" width="400">
+
 <img src="images/estimator_suite_plots_page2_100x20.png" alt="(n_examples, n_features) = (100, 20)" width="400">
 
 For slightly higher dimensions of `n_examples=600` and `n_features=120` we obtained:
