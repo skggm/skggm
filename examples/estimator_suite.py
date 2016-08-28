@@ -222,9 +222,15 @@ def graph_lasso(X, num_folds):
 def sk_ledoit_wolf(X):
     '''Estimate inverse covariance via scikit-learn ledoit_wolf function.
     '''
+    print 'Ledoit-Wolf (sklearn)'
     lw_cov_, _ = ledoit_wolf(X)
     lw_prec_ = np.linalg.inv(lw_cov_)
     return lw_cov_, lw_prec_
+
+
+def _count_support_diff(m, m_hat):
+    n_nnz_same = len(np.intersect1d(np.nonzero(m.flat)[0], np.nonzero(m_hat.flat)[0]))
+    return len(np.nonzero(m.flat)[0]) + len(np.nonzero(m_hat.flat)[0]) - n_nnz_same
 
 
 if __name__ == "__main__":
@@ -252,7 +258,8 @@ if __name__ == "__main__":
     plot_covs.append((name, cov))
     plot_precs.append((name, prec, ''))
     error = np.linalg.norm(true_cov - cov, ord='fro')
-    results.append([name, error, '', ctime])
+    supp_diff = _count_support_diff(true_prec, prec)
+    results.append([name, error, supp_diff, ctime, ''])
     print '   frobenius error: {}'.format(error)
     print ''
 
@@ -265,7 +272,8 @@ if __name__ == "__main__":
     plot_covs.append((name, cov))
     plot_precs.append((name, prec, ''))
     error = np.linalg.norm(true_cov - cov, ord='fro')
-    results.append([name, error, '', ctime])
+    supp_diff = _count_support_diff(true_prec, prec)
+    results.append([name, error, supp_diff, ctime, ''])
     print '   frobenius error: {}'.format(error)
     print ''
 
@@ -278,7 +286,8 @@ if __name__ == "__main__":
     plot_covs.append((name, cov))
     plot_precs.append((name, prec, lam))
     error = np.linalg.norm(true_cov - cov, ord='fro')
-    results.append([name, error, lam, ctime])
+    supp_diff = _count_support_diff(true_prec, prec)
+    results.append([name, error, supp_diff, ctime, lam])
     print '   frobenius error: {}'.format(error)
     print ''
     
@@ -296,7 +305,8 @@ if __name__ == "__main__":
         plot_covs.append((name, cov))
         plot_precs.append((name, prec, lam))
         error = np.linalg.norm(true_cov - cov, ord='fro')
-        results.append([name, error, lam, ctime])
+        supp_diff = _count_support_diff(true_prec, prec)
+        results.append([name, error, supp_diff, ctime, lam])
         print '   frobenius error: {}'.format(error)
         print ''
 
@@ -314,7 +324,8 @@ if __name__ == "__main__":
         plot_covs.append((name, cov))
         plot_precs.append((name, prec, lam))
         error = np.linalg.norm(true_cov - cov, ord='fro')
-        results.append([name, error, lam, ctime])
+        supp_diff = _count_support_diff(true_prec, prec)
+        results.append([name, error, supp_diff, ctime, lam])
         print '   frobenius error: {}'.format(error)
         print ''
 
@@ -333,7 +344,8 @@ if __name__ == "__main__":
         plot_covs.append((name, cov))
         plot_precs.append((name, prec, lam))
         error = np.linalg.norm(true_cov - cov, ord='fro')
-        results.append([name, error, lam, ctime])
+        supp_diff = _count_support_diff(true_prec, prec)
+        results.append([name, error, supp_diff, ctime, lam])
         print '   error: {}'.format(error)
         print ''
 
@@ -354,13 +366,14 @@ if __name__ == "__main__":
         plot_covs.append((name, cov))
         plot_precs.append((name, prec, ''))
         error = np.linalg.norm(true_cov - cov, ord='fro')
-        results.append([name, error, '', ctime])
+        supp_diff = _count_support_diff(true_prec, prec)
+        results.append([name, error, supp_diff, ctime, lam])
         print '   frobenius error: {}'.format(error)
         print ''
 
     # tabulate errors
     print tabulate.tabulate(results,
-                            headers=['Estimator', 'Error (Frobenius)', 'Lambda', 'Time'],
+                            headers=['Estimator', 'Error (Frobenius)', 'Support Diff', 'Time', 'Lambda'],
                             tablefmt='pipe')
     print ''
 
