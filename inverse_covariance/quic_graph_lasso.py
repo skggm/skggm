@@ -484,7 +484,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
             n_refinements = 1
         else:
             n_refinements = self.n_refinements
-            lam_1 = np.max(np.abs(self.sample_covariance_.flat)) 
+            lam_1 = self.lam_scale_
             lam_0 = 1e-2 * lam_1
             path = np.logspace(np.log10(lam_0), np.log10(lam_1), self.lams)[::-1]
 
