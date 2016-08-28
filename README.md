@@ -3,8 +3,9 @@
 
 # Included in this package
 - QuicGraphLasso 
--- QuicGraphLassoCV
--- QuicGraphLassoEBIC
+    - QuicGraphLassoCV
+    - QuicGraphLassoEBIC
+    
 - AdaptiveInverseCovariance (two stage adaptive meta estimator) [TODO: better name]
 - Ensemble meta estimator
 - Numerous usage examples
