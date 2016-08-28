@@ -220,9 +220,25 @@ def model_average(X, penalization):
     print '   estimator: QuicGraphLassoCV (default)'
     print '   n_trials: {}'.format(n_trials)
     print '   penalization: {}'.format(penalization)
+    
+    # if penalization is random, first find a decent scalar lam_ to build
+    # random perturbation matrix around.  lam doesn't matter for fully-random.
+    lam = 0.5 
+    if penalization == 'random':
+        cv_model = QuicGraphLassoCV(
+            cv=2, 
+            n_refinements=6,
+            n_jobs=1,
+            init_method='cov',
+            score_metric=metric)
+        cv_model.fit(X)
+        lam = cv_model.lam_    
+        print '   lam: {}'.format(lam)    
+
     model = ModelAverage(
         n_trials=n_trials,
-        penalization=penalization)
+        penalization=penalization,
+        lam=lam)
     model.fit(X)
     print '   lam_: {}'.format(model.lam_)
     return model.proportion_, model.support_, model.lam_
@@ -240,10 +256,26 @@ def adaptive_model_average(X, penalization, method):
     print '   n_trials: {}'.format(n_trials)
     print '   penalization: {}'.format(penalization)
     print '   adaptive-method: {}'.format(method)  
+
+    # if penalization is random, first find a decent scalar lam_ to build
+    # random perturbation matrix around. lam doesn't matter for fully-random.
+    lam = 0.5
+    if penalization == 'random':
+        cv_model = QuicGraphLassoCV(
+            cv=2, 
+            n_refinements=6,
+            n_jobs=1,
+            init_method='cov',
+            score_metric=metric)
+        cv_model.fit(X)
+        lam = cv_model.lam_    
+        print '   lam: {}'.format(lam)  
+
     model = AdaptiveGraphLasso(
             estimator = ModelAverage(
                 n_trials=n_trials,
-                penalization=penalization),
+                penalization=penalization,
+                lam=lam),
             method=method,
     )
     model.fit(X)
@@ -411,6 +443,22 @@ if __name__ == "__main__":
         print '   error: {}'.format(error)
         print ''
 
+    # Default ModelAverage
+    params = [
+        ('ModelAverage CV : random', 'random'),
+        ('ModelAverage CV : fully-random', 'fully-random'),
+    ]
+    for name, model_selector in params:
+        start_time = time.time()
+        cov, prec, lam = model_average(X, model_selector)
+        end_time = time.time()
+        ctime = end_time - start_time
+        plot_covs.append((name, cov))
+        plot_precs.append((name, prec, ''))
+        supp_diff = _count_support_diff(true_prec, prec)
+        results.append([name, '', supp_diff, ctime, lam])
+        print ''
+
     # Adaptive QuicGraphLassoCV and QuicGraphLassoEBIC
     params = [
         ('Adaptive CV : binary', 'QuicGraphLassoCV', 'binary'),
@@ -431,22 +479,6 @@ if __name__ == "__main__":
         supp_diff = _count_support_diff(true_prec, prec)
         results.append([name, error, supp_diff, ctime, ''])
         print '   frobenius error: {}'.format(error)
-        print ''
-
-    # Default ModelAverage
-    params = [
-        ('ModelAverage CV : random', 'random'),
-        ('ModelAverage CV : fully-random', 'fully-random'),
-    ]
-    for name, model_selector in params:
-        start_time = time.time()
-        cov, prec, lam = model_average(X, model_selector)
-        end_time = time.time()
-        ctime = end_time - start_time
-        plot_covs.append((name, cov))
-        plot_precs.append((name, prec, ''))
-        supp_diff = _count_support_diff(true_prec, prec)
-        results.append([name, '', supp_diff, ctime, lam])
         print ''
 
     # Adaptive ModelAverage
