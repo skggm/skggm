@@ -23,6 +23,7 @@ http://scikit-learn.org/stable/auto_examples/covariance/plot_sparse_cov.html
 '''
 plt.ion()
 
+
 def make_data(n_samples, n_features):
     prng = np.random.RandomState(1)
     prec = make_sparse_spd_matrix(n_features, alpha=.98,
@@ -41,29 +42,27 @@ def make_data(n_samples, n_features):
     return X, cov, prec
 
 
-def estimate_via_quic(X, num_folds, metric='log_likelihood'):
-    print '\n-- QUIC CV'
+def quic_graph_lasso(X, num_folds, metric='log_likelihood'):
+    '''Run QuicGraphLasso with mode='default' and use standard scikit  
+    GridSearchCV to find the best lambda.  
+
+    Primarily demonstrates compatibility with existing scikit tooling. 
+    '''
+    print 'GraphLasso + GridSearchCV with:'
+    print '   metric={}'.format(metric)
+    print '   '
     search_grid = {
       'lam': np.logspace(np.log10(0.01), np.log10(1.0), num=100, endpoint=True),
       'init_method': ['cov', 'corrcoef'],
       'score_metric': [metric], # note: score_metrics are not comparable
     }
-
-    # search for best parameters
-    estimator = GridSearchCV(QuicGraphLasso(),
-                            search_grid,
-                            cv=num_folds,
-                            refit=True,
-                            verbose=1)
-    estimator.fit(X)
-    ic_estimator = estimator.best_estimator_
-    ic_score = ic_estimator.score(X) # must score() to find best lambda index
-
-    print 'Best parameters:'
-    pprint.pprint(estimator.best_params_)
-    print 'Best score: {}'.format(ic_score)
-
-    return ic_estimator.covariance_, ic_estimator.precision_, estimator.best_params_['lam']
+    model = GridSearchCV(QuicGraphLasso(),
+                         search_grid,
+                         cv=num_folds,
+                         refit=True)
+    model.fit(X)
+    model = model.best_estimator_
+    return model.covariance_, model.precision_, model.lam_
 
 
 def estimate_via_quic_cv(X, num_folds, metric='log_likelihood'):
