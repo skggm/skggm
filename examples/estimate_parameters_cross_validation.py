@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import tabulate
+import time
 
 from sklearn.grid_search import GridSearchCV
 from sklearn.datasets import make_sparse_spd_matrix
@@ -241,34 +242,44 @@ if __name__ == "__main__":
     plot_precs = [('True', true_prec, ''),
                   ('True', true_prec, ''),
                   ('True', true_prec, '')]
-
-    all_names = []
-    all_errors = []
+    results = []
 
     # Empirical
+    start_time = time.time()
     cov, prec = empirical(X)
+    end_time = time.time()
+    ctime = end_time - start_time
     name = 'Empirical'
     plot_covs.append((name, cov))
     plot_precs.append((name, prec, ''))
     error = _compute_error(true_cov, cov, prec)
-    print '   frobenius error: {}'.format(error)
-    print ''
-
-    # sklearn GraphLassoCV
-    cov, prec, lam = graph_lasso(X, cv_folds)
-    name = 'GraphLassoCV (sklearn)'
-    plot_covs.append((name, cov))
-    plot_precs.append((name, prec, lam))
-    error = _compute_error(true_cov, cov, prec)
+    results.append([name, error, '', ctime])
     print '   frobenius error: {}'.format(error)
     print ''
 
     # sklearn LedoitWolf
+    start_time = time.time()
     cov, prec = sk_ledoit_wolf(X)
+    end_time = time.time()
+    ctime = end_time - start_time
     name = 'Ledoit-Wolf (sklearn)'
     plot_covs.append((name, cov))
     plot_precs.append((name, prec, ''))
     error = _compute_error(true_cov, cov, prec)
+    results.append([name, error, '', ctime])
+    print '   frobenius error: {}'.format(error)
+    print ''
+
+    # sklearn GraphLassoCV
+    start_time = time.time()
+    cov, prec, lam = graph_lasso(X, cv_folds)
+    end_time = time.time()
+    ctime = end_time - start_time
+    name = 'GraphLassoCV (sklearn)'
+    plot_covs.append((name, cov))
+    plot_precs.append((name, prec, lam))
+    error = _compute_error(true_cov, cov, prec)
+    results.append([name, error, lam, ctime])
     print '   frobenius error: {}'.format(error)
     print ''
     
@@ -279,10 +290,14 @@ if __name__ == "__main__":
         ('QuicGraphLasso GSCV : fro', 'frobenius'),
     ]
     for name, metric in params:
+        start_time = time.time()
         cov, prec, lam = quic_graph_lasso(X, cv_folds, metric=metric)
+        end_time = time.time()
+        ctime = end_time - start_time
         plot_covs.append((name, cov))
         plot_precs.append((name, prec, lam))
         error = _compute_error(true_cov, cov, prec)
+        results.append([name, error, lam, ctime])
         print '   frobenius error: {}'.format(error)
         print ''
 
@@ -293,10 +308,14 @@ if __name__ == "__main__":
         ('QuicGraphLassoCV : fro', 'frobenius'),
     ]
     for name, metric in params:
+        start_time = time.time()
         cov, prec, lam = quic_graph_lasso_cv(X, metric=metric)
+        end_time = time.time()
+        ctime = end_time - start_time
         plot_covs.append((name, cov))
         plot_precs.append((name, prec, lam))
         error = _compute_error(true_cov, cov, prec)
+        results.append([name, error, lam, ctime])
         print '   frobenius error: {}'.format(error)
         print ''
 
@@ -307,11 +326,15 @@ if __name__ == "__main__":
         ('QuicGraphLassoEBIC : g=0.1', 0.1),
     ]
     for name, gamma in params:
+        start_time = time.time()
         # cov, prec, lam = quic_graph_lasso_ebic_manual(X, gamma=gamma)
         cov, prec, lam = quic_graph_lasso_ebic(X, gamma=gamma)
+        end_time = time.time()
+        ctime = end_time - start_time
         plot_covs.append((name, cov))
         plot_precs.append((name, prec, lam))
         error = _compute_error(true_cov, cov, prec)
+        results.append([name, error, lam, ctime])
         print '   error: {}'.format(error)
         print ''
 
@@ -325,12 +348,23 @@ if __name__ == "__main__":
         ('Adaptive BIC : inv**2', 'QuicGraphLassoEBIC', 'inverse_squared'),
     ]
     for name, model_selector, method in params:
+        start_time = time.time()
         cov, prec, lam = adaptive_graph_lasso(X, model_selector, method)
+        end_time = time.time()
+        ctime = end_time - start_time
         plot_covs.append((name, cov))
         plot_precs.append((name, prec, ''))
         error = _compute_error(true_cov, cov, prec)
+        results.append([name, error, '', ctime])
         print '   frobenius error: {}'.format(error)
         print ''
 
+    # tabulate errors
+    print tabulate.tabulate(results,
+                            headers=['Estimator', 'Error (Frobenius)', 'Lambda', 'Time'],
+                            tablefmt='pipe')
+    print ''
+
+    # display results
     show_results(plot_covs, plot_precs)
     raw_input('Press any key to exit...')
