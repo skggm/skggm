@@ -1,6 +1,7 @@
 import sys
-import pprint
 import numpy as np
+import tabulate
+
 from sklearn.grid_search import GridSearchCV
 from sklearn.datasets import make_sparse_spd_matrix
 from sklearn.covariance import GraphLassoCV, ledoit_wolf
@@ -13,12 +14,13 @@ from inverse_covariance import (
     QuicGraphLassoEBIC,
     AdaptiveGraphLasso,
 )
+from inverse_covariance.inverse_covariance import _compute_error
 
 
 '''
-Example of brute-force parameter search with InverseCovariance
+Compare inverse covariance estimators and model selection methods.
 
-Mimic example from:    
+Derived from example in:    
 http://scikit-learn.org/stable/auto_examples/covariance/plot_sparse_cov.html
 '''
 plt.ion()
@@ -40,116 +42,6 @@ def make_data(n_samples, n_features):
     X -= X.mean(axis=0)
     X /= X.std(axis=0)
     return X, cov, prec
-
-
-def quic_graph_lasso(X, num_folds, metric='log_likelihood'):
-    '''Run QuicGraphLasso with mode='default' and use standard scikit  
-    GridSearchCV to find the best lambda.  
-
-    Primarily demonstrates compatibility with existing scikit tooling. 
-    '''
-    print 'GraphLasso + GridSearchCV with:'
-    print '   metric={}'.format(metric)
-    print '   '
-    search_grid = {
-      'lam': np.logspace(np.log10(0.01), np.log10(1.0), num=100, endpoint=True),
-      'init_method': ['cov', 'corrcoef'],
-      'score_metric': [metric], # note: score_metrics are not comparable
-    }
-    model = GridSearchCV(QuicGraphLasso(),
-                         search_grid,
-                         cv=num_folds,
-                         refit=True)
-    model.fit(X)
-    model = model.best_estimator_
-    return model.covariance_, model.precision_, model.lam_
-
-
-def estimate_via_quic_cv(X, num_folds, metric='log_likelihood'):
-    print '\n-- QUIC QuicGraphLassoCV'
-    model = QuicGraphLassoCV(
-            cv=2, # cant deal w more folds at small size
-            n_refinements=6,
-            n_jobs=1,
-            init_method='cov',
-            score_metric=metric)
-    model.fit(X)
-
-    print 'Best parameters:'
-    print 'Best lambda: {}'.format(model.lam_)
-    print 'CV lams: {}'.format(model.cv_lams_)
-
-    return model.covariance_, model.precision_, model.lam_
-
-
-def estimate_via_adaptive(X, num_folds, msel, method):
-    print '\n-- AdaptiveGraphLasso'
-    
-    if msel == 'cv':
-        model = AdaptiveGraphLasso(
-                estimator=QuicGraphLassoCV(score_metric='frobenius'),
-                method=method,
-        )
-    
-    elif msel == 'ebic':
-        model = AdaptiveGraphLasso(
-                estimator=QuicGraphLassoEBIC(),
-                method=method,
-        )
-
-    model.fit(X)
-    lam_ = np.linalg.norm(model.estimator_.lam_)
-    return model.estimator_.covariance_, model.estimator_.precision_, lam_
-
-
-def estimate_via_quic_ebic(X, gamma=0):
-    print '\n-- QUIC EBIC'
-    ic_estimator = QuicGraphLasso(
-        lam=1.0,
-        mode='path',
-        init_method='cov',
-        path=np.logspace(np.log10(0.01), np.log10(1.0), num=100, endpoint=True))
-    ic_estimator.fit(X)
-
-    # ebic model selection
-    ebic_index = ic_estimator.ebic_select(gamma=gamma)
-    print 'Best lambda path scale {} (index= {}), lam = {}'.format(
-        ic_estimator.path[ebic_index],
-        ebic_index,
-        ic_estimator.lam_at_index(ebic_index))
-
-    cov = ic_estimator.covariance_[ebic_index]
-    prec = ic_estimator.precision_[ebic_index]
-
-    return cov, prec, ic_estimator.lam_at_index(ebic_index)
-
-
-def estimate_via_quic_ebic_convenience(X, gamma=0):
-    print '\n-- QUIC EBIC (Convenience)'
-    ic_estimator = QuicGraphLassoEBIC(
-        lam=1.0,
-        init_method='cov',
-        gamma=gamma)
-    ic_estimator.fit(X)
-
-    print 'Best lambda = {}'.format(ic_estimator.lam_)
-    return ic_estimator.covariance_, ic_estimator.precision_, ic_estimator.lam_
-
-def estimate_via_empirical(X):
-    cov = np.dot(X.T, X) / n_samples
-    return cov, np.linalg.inv(cov)
-
-
-def estimate_via_graph_lasso(X, num_folds):
-    model = GraphLassoCV(cv=num_folds)
-    model.fit(X)
-    return model.covariance_, model.precision_
-
-
-def estimate_via_ledoit_wolf(X):
-    lw_cov_, _ = ledoit_wolf(X)
-    lw_prec_ = np.linalg.inv(lw_cov_)
-    return lw_cov_, lw_prec_
 
 
 def show_results(covs, precs):
@@ -182,12 +74,157 @@ def show_results(covs, precs):
         if lam == '':
             plt.title('{}'.format(name))
         else:
-            plt.title('{} (lam={:.2f})'.format(name, lam))
+            plt.title('{}\n(lam={:.2f})'.format(name, lam))
         ax.set_axis_bgcolor('.7')
 
     plt.show()
 
-    raw_input('Press any key to exit...')
+
+def quic_graph_lasso(X, num_folds, metric):
+    '''Run QuicGraphLasso with mode='default' and use standard scikit  
+    GridSearchCV to find the best lambda.  
+
+    Primarily demonstrates compatibility with existing scikit tooling. 
+    '''
+    print 'QuicGraphLasso + GridSearchCV with:'
+    print '   metric: {}'.format(metric)
+    search_grid = {
+      'lam': np.logspace(np.log10(0.01), np.log10(1.0), num=100, endpoint=True),
+      'init_method': ['cov', 'corrcoef'],
+      'score_metric': [metric], 
+    }
+    model = GridSearchCV(QuicGraphLasso(),
+                         search_grid,
+                         cv=num_folds,
+                         refit=True)
+    model.fit(X)
+    bmodel = model.best_estimator_
+    print '   len(cv_lams): {}'.format(len(search_grid['lam']))
+    print '   cv-lam: {}'.format(model.best_params_['lam'])
+    print '   lam_scale_: {}'.format(bmodel.lam_scale_)
+    print '   lam_: {}'.format(bmodel.lam_)
+    return bmodel.covariance_, bmodel.precision_, bmodel.lam_
+
+
+def quic_graph_lasso_cv(X, metric):
+    '''Run QuicGraphLassoCV on data with metric of choice.
+
+    Compare results with GridSearchCV + quic_graph_lasso.  The number of lambdas
+    tested should be much lower with similar final lam_ selected.
+    '''
+    print 'QuicGraphLassoCV with:'
+    print '   metric: {}'.format(metric)
+    model = QuicGraphLassoCV(
+            cv=2, # cant deal w more folds at small size
+            n_refinements=6,
+            n_jobs=1,
+            init_method='cov',
+            score_metric=metric)
+    model.fit(X)
+    print '   len(cv_lams): {}'.format(len(model.cv_lams_))
+    print '   lam_scale_: {}'.format(model.lam_scale_)
+    print '   lam_: {}'.format(model.lam_)
+    return model.covariance_, model.precision_, model.lam_
+
+
+def adaptive_graph_lasso(X, model_selector, method):
+    '''Run QuicGraphLassoCV or QuicGraphLassoEBIC as a two step adaptive fit
+    with method of choice (currently: 'binary', 'inverse', 'inverse_squared').
+
+    Compare the support and values to the model-selection estimator.
+    '''
+    metric = 'frobenius'
+    print 'Adaptive {} with:'.format(model_selector)
+    print '   metric: {}'.format(metric)  
+    print '   adaptive-method: {}'.format(method)  
+    if model_selector == 'QuicGraphLassoCV':
+        model = AdaptiveGraphLasso(
+                estimator=QuicGraphLassoCV(score_metric=metric),
+                method=method,
+        )
+    
+    elif model_selector == 'QuicGraphLassoEBIC':
+        model = AdaptiveGraphLasso(
+                estimator=QuicGraphLassoEBIC(),
+                method=method,
+        )
+    model.fit(X)
+    lam_norm_ = np.linalg.norm(model.estimator_.lam_)
+    print '   ||lam_||_2: {}'.format(lam_norm_)
+    return model.estimator_.covariance_, model.estimator_.precision_, lam_norm_
+
+
+def quic_graph_lasso_ebic_manual(X, gamma=0):
+    '''Run QuicGraphLasso with mode='path' and gamma; use EBIC criteria for model 
+    selection.  
+
+    The EBIC criteria is built into InverseCovarianceEstimator base class 
+    so we demonstrate those utilities here.  
+    '''
+    print 'QuicGraphLasso (manual EBIC) with:'
+    print '   mode: path'
+    print '   gamma: {}'.format(gamma)
+    model = QuicGraphLasso(
+        lam=1.0,
+        mode='path',
+        init_method='cov',
+        path=np.logspace(np.log10(0.01), np.log10(1.0), num=100, endpoint=True))
+    model.fit(X)
+    ebic_index = model.ebic_select(gamma=gamma)
+    covariance_ = model.covariance_[ebic_index]
+    precision_ = model.precision_[ebic_index]
+    lam_ = model.lam_at_index(ebic_index)
+    print '   len(path lams): {}'.format(len(model.path))
+    print '   lam_scale_: {}'.format(model.lam_scale_)
+    print '   lam_: {}'.format(lam_)
+    print '   ebic_index: {}'.format(ebic_index)
+    return covariance_, precision_, lam_
+
+
+def quic_graph_lasso_ebic(X, gamma=0):
+    '''Run QuicGraphLassoEBIC with gamma.
+
+    QuicGraphLassoEBIC is a convenience class.  Results should be identical to
+    those obtained via quic_graph_lasso_ebic_manual.
+    '''
+    print 'QuicGraphLassoEBIC with:'
+    print '   mode: path'
+    print '   gamma: {}'.format(gamma)
+    model = QuicGraphLassoEBIC(
+        lam=1.0,
+        init_method='cov',
+        gamma=gamma)
+    model.fit(X)
+    print '   len(path lams): {}'.format(len(model.path))
+    print '   lam_scale_: {}'.format(model.lam_scale_)
+    print '   lam_: {}'.format(model.lam_)
+    return model.covariance_, model.precision_, model.lam_
+
+
+def empirical(X):
+    '''Compute empirical covariance as baseline estimator.
+    '''
+    print 'Empirical'
+    cov = np.dot(X.T, X) / n_samples
+    return cov, np.linalg.inv(cov)
+
+
+def graph_lasso(X, num_folds):
+    '''Estimate inverse covariance via scikit-learn GraphLassoCV class.
+    '''
+    print 'GraphLasso (sklearn)'
+    model = GraphLassoCV(cv=num_folds)
+    model.fit(X)
+    print '   lam_: {}'.format(model.alpha_)
+    return model.covariance_, model.precision_, model.alpha_
+
+
+def sk_ledoit_wolf(X):
+    '''Estimate inverse covariance via scikit-learn ledoit_wolf function.
+    '''
+    lw_cov_, _ = ledoit_wolf(X)
+    lw_prec_ = np.linalg.inv(lw_cov_)
+    return lw_cov_, lw_prec_
 
 
 if __name__ == "__main__":
@@ -196,89 +233,104 @@ if __name__ == "__main__":
     cv_folds = 3
 
     # make data
-    X, cov, prec = make_data(n_samples, n_features)
+    X, true_cov, true_prec = make_data(n_samples, n_features)
     
-    # run estimators
-    emp_cov, emp_prec = estimate_via_empirical(X)
-    gl_cov, gl_prec = estimate_via_graph_lasso(X, cv_folds)
-    lw_cov, lw_prec = estimate_via_ledoit_wolf(X)
-    
-    quic_ll_cov, quic_ll_prec, quic_ll_lam = estimate_via_quic(X,
-            cv_folds, metric='log_likelihood')
-    quic_kl_cov, quic_kl_prec, quic_kl_lam = estimate_via_quic(X,
-            cv_folds, metric='kl')
-    quic_fro_cov, quic_fro_prec, quic_fro_lam = estimate_via_quic(X,
-            cv_folds, metric='frobenius')
-    
-    quic_cv_ll_cov, quic_cv_ll_prec, quic_cv_ll_lam = estimate_via_quic_cv(X,
-            cv_folds, metric='log_likelihood')
-    quic_cv_kl_cov, quic_cv_kl_prec, quic_cv_kl_lam = estimate_via_quic_cv(X,
-            cv_folds, metric='kl')
-    quic_cv_fro_cov, quic_cv_fro_prec, quic_cv_fro_lam = estimate_via_quic_cv(X,
-            cv_folds, metric='frobenius')
-    
-    quic_bic_cov, quic_bic_prec, quic_bic_lam = estimate_via_quic_ebic(X, gamma=0)
-    quic_ebic_cov_01, quic_ebic_prec_01, quic_ebic_lam_01 = estimate_via_quic_ebic_convenience(X, gamma=0.01)
-    quic_ebic_cov, quic_ebic_prec, quic_ebic_lam = estimate_via_quic_ebic_convenience(X, gamma=0.1)
-    
-    quic_adaptive_cov_b, quic_adaptive_prec_b, quic_adaptive_lam = estimate_via_adaptive(
-        X, cv_folds, 'cv', 'binary')
-    quic_adaptive_cov_i, quic_adaptive_prec_i, quic_adaptive_lam = estimate_via_adaptive(
-        X, cv_folds, 'cv', 'inverse')
-    quic_adaptive_cov_is, quic_adaptive_prec_is, quic_adaptive_lam = estimate_via_adaptive(
-        X, cv_folds, 'cv', 'inverse_squared')
+    plot_covs = [('True', true_cov),
+                 ('True', true_cov),
+                 ('True', true_cov)]
+    plot_precs = [('True', true_prec, ''),
+                  ('True', true_prec, ''),
+                  ('True', true_prec, '')]
 
-    quic_adaptive_ebic_cov_b, quic_adaptive_ebic_prec_b, quic_adaptive_lam = estimate_via_adaptive(
-        X, cv_folds, 'ebic', 'binary')
-    quic_adaptive_ebic_cov_i, quic_adaptive_ebic_prec_i, quic_adaptive_lam = estimate_via_adaptive(
-        X, cv_folds, 'ebic', 'inverse')
-    quic_adaptive_ebic_cov_is, quic_adaptive_ebic_prec_is, quic_adaptive_lam = estimate_via_adaptive(
-        X, cv_folds, 'ebic', 'inverse_squared')
+    all_names = []
+    all_errors = []
 
+    # Empirical
+    cov, prec = empirical(X)
+    name = 'Empirical'
+    plot_covs.append((name, cov))
+    plot_precs.append((name, prec, ''))
+    error = _compute_error(true_cov, cov, prec)
+    print '   frobenius error: {}'.format(error)
+    print ''
 
-    # Show results
-    covs = [('True', cov),
-            ('True', cov),
-            ('True', cov),
-            ('Empirical', emp_cov),
-            ('GraphLassoCV', gl_cov),
-            ('Ledoit-Wolf', lw_cov),
-            ('QuicGraphLasso GSCV (ll)', quic_ll_cov),
-            ('QuicGraphLasso GSCV (kl)', quic_kl_cov),
-            ('QuicGraphLasso GSCV (fro)', quic_fro_cov),
-            ('QuicGraphhLassoCV (ll)', quic_cv_ll_cov),
-            ('QuicGraphhLassoCV (kl)', quic_cv_kl_cov),
-            ('QuicGraphhLassoCV (fro)', quic_cv_fro_cov),
-            ('QuicGraphLassoEBIC (bic)', quic_bic_cov),
-            ('QuicGraphLassoEBIC (gamma = 0.01)', quic_ebic_cov_01),
-            ('QuicGraphLassoEBIC (gamma = 0.1)', quic_ebic_cov),
-            ('Adaptive (cv, binary)', quic_adaptive_cov_b),
-            ('Adaptive (cv, inv)', quic_adaptive_cov_i),
-            ('Adaptive (cv, inv**2)', quic_adaptive_cov_is),
-            ('Adaptive (ebic, binary)', quic_adaptive_ebic_cov_b),
-            ('Adaptive (ebic, inv)', quic_adaptive_ebic_cov_i),
-            ('Adaptive (ebic, inv**2)', quic_adaptive_ebic_cov_is)]
-    precs = [('True', prec, ''),
-            ('True', prec, ''),
-            ('True', prec, ''),
-            ('Empirical', emp_prec, ''),
-            ('GraphLassoCV', gl_prec, ''),
-            ('Ledoit-Wolf', lw_prec, ''),
-            ('QuicGraphLasso GSCV (ll)', quic_ll_prec, quic_ll_lam),
-            ('QuicGraphLasso GSCV (kl)', quic_kl_prec, quic_kl_lam),
-            ('QuicGraphLasso GSCV (fro)', quic_fro_prec, quic_fro_lam),
-            ('QuicGraphhLassoCV (ll)', quic_cv_ll_prec, quic_cv_ll_lam),
-            ('QuicGraphhLassoCV (kl)', quic_cv_kl_prec, quic_cv_kl_lam),
-            ('QuicGraphhLassoCV (fro)', quic_cv_fro_prec, quic_cv_fro_lam),
-            ('QuicGraphLassoEBIC (bic)', quic_bic_prec, quic_bic_lam),
-            ('QuicGraphLassoEBIC (gamma = 0.01)', quic_ebic_prec_01, quic_ebic_lam_01),
-            ('QuicGraphLassoEBIC (gamma = 0.1)', quic_ebic_prec, quic_ebic_lam),
-            ('Adaptive (cv, binary)', quic_adaptive_prec_b, ''),
-            ('Adaptive (cv, inv)', quic_adaptive_prec_i, ''),
-            ('Adaptive (cv, inv**2)', quic_adaptive_prec_is, ''),
-            ('Adaptive (bic, binary)', quic_adaptive_ebic_prec_b, ''),
-            ('Adaptive (bic, inv)', quic_adaptive_ebic_prec_i, ''),
-            ('Adaptive (bic, inv**2)', quic_adaptive_ebic_prec_is, '')]
-    show_results(covs, precs)
+    # sklearn GraphLassoCV
+    cov, prec, lam = graph_lasso(X, cv_folds)
+    name = 'GraphLassoCV (sklearn)'
+    plot_covs.append((name, cov))
+    plot_precs.append((name, prec, lam))
+    error = _compute_error(true_cov, cov, prec)
+    print '   frobenius error: {}'.format(error)
+    print ''
 
-  
+    # sklearn LedoitWolf
+    cov, prec = sk_ledoit_wolf(X)
+    name = 'Ledoit-Wolf (sklearn)'
+    plot_covs.append((name, cov))
+    plot_precs.append((name, prec, ''))
+    error = _compute_error(true_cov, cov, prec)
+    print '   frobenius error: {}'.format(error)
+    print ''
+    
+    # QuicGraphLasso + GridSearchCV
+    params = [
+        ('QuicGraphLasso GSCV : ll', 'log_likelihood'),
+        ('QuicGraphLasso GSCV : kl', 'kl'),
+        ('QuicGraphLasso GSCV : fro', 'frobenius'),
+    ]
+    for name, metric in params:
+        cov, prec, lam = quic_graph_lasso(X, cv_folds, metric=metric)
+        plot_covs.append((name, cov))
+        plot_precs.append((name, prec, lam))
+        error = _compute_error(true_cov, cov, prec)
+        print '   frobenius error: {}'.format(error)
+        print ''
+
+    # QuicGraphLassoCV
+    params = [
+        ('QuicGraphLassoCV : ll', 'log_likelihood'),
+        ('QuicGraphLassoCV : kl', 'kl'),
+        ('QuicGraphLassoCV : fro', 'frobenius'),
+    ]
+    for name, metric in params:
+        cov, prec, lam = quic_graph_lasso_cv(X, metric=metric)
+        plot_covs.append((name, cov))
+        plot_precs.append((name, prec, lam))
+        error = _compute_error(true_cov, cov, prec)
+        print '   frobenius error: {}'.format(error)
+        print ''
+
+    # QuicGraphLassoEBIC
+    params = [
+        ('QuicGraphLassoEBIC : BIC', 0),
+        ('QuicGraphLassoEBIC : g=0.01', 0.01),
+        ('QuicGraphLassoEBIC : g=0.1', 0.1),
+    ]
+    for name, gamma in params:
+        # cov, prec, lam = quic_graph_lasso_ebic_manual(X, gamma=gamma)
+        cov, prec, lam = quic_graph_lasso_ebic(X, gamma=gamma)
+        plot_covs.append((name, cov))
+        plot_precs.append((name, prec, lam))
+        error = _compute_error(true_cov, cov, prec)
+        print '   error: {}'.format(error)
+        print ''
+
+    # Adaptive QuicGraphLassoCV and QuicGraphLassoEBIC
+    params = [
+        ('Adaptive CV : binary', 'QuicGraphLassoCV', 'binary'),
+        ('Adaptive CV : inv', 'QuicGraphLassoCV', 'inverse'),
+        ('Adaptive CV : inv**2', 'QuicGraphLassoCV', 'inverse_squared'),
+        ('Adaptive BIC : binary', 'QuicGraphLassoEBIC', 'binary'),
+        ('Adaptive BIC : inv', 'QuicGraphLassoEBIC', 'inverse'),
+        ('Adaptive BIC : inv**2', 'QuicGraphLassoEBIC', 'inverse_squared'),
+    ]
+    for name, model_selector, method in params:
+        cov, prec, lam = adaptive_graph_lasso(X, model_selector, method)
+        plot_covs.append((name, cov))
+        plot_precs.append((name, prec, ''))
+        error = _compute_error(true_cov, cov, prec)
+        print '   frobenius error: {}'.format(error)
+        print ''
+
+    show_results(plot_covs, plot_precs)
+    raw_input('Press any key to exit...')
