@@ -3,11 +3,13 @@
 
 # Included in this package
 - `QuicGraphLasso`
+
     This class wraps the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm for GraphLasso estimation as a scikit-learn compatible estimator. 
 
     Notable advantages of this implementation over sklearn's built-in implementation are: a) support for a matrix penalization term, and b) speed.
 
     - `QuicGraphLassoCV`
+        
         The 
 
     - `QuicGraphLassoEBIC`
