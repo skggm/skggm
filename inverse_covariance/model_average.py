@@ -281,7 +281,6 @@ class ModelAverage(BaseEstimator):
         if self.normalize:
             self.proportion_ /= self.n_trials
 
-
     @property
     def precision_(self):
         '''Convenience property to make compatible with AdaptiveGraphLasso.
