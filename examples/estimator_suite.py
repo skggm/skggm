@@ -433,7 +433,7 @@ if __name__ == "__main__":
         print '   frobenius error: {}'.format(error)
         print ''
 
-    # Default ModelAverag
+    # Default ModelAverage
     params = [
         ('ModelAverage CV : random', 'random'),
         ('ModelAverage CV : fully-random', 'fully-random'),
@@ -446,7 +446,7 @@ if __name__ == "__main__":
         plot_covs.append((name, cov))
         plot_precs.append((name, prec, ''))
         supp_diff = _count_support_diff(true_prec, prec)
-        results.append([name, '', supp_diff, ctime, ''])
+        results.append([name, '', supp_diff, ctime, lam])
         print ''
 
     # Adaptive ModelAverage
