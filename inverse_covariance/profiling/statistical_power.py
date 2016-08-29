@@ -12,12 +12,7 @@ from .. import QuicGraphLasso
 plt.ion()
 prng = np.random.RandomState(1)
 
-'''
-TODO:  
-    This needs to become something that can measure performance of the 
-    randomized ModelAverage method since thresholding the output there is 
-    appropriate.
-'''
+
 
 def _new_graph(n_features, alpha):
     global prng
