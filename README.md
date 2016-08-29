@@ -2,19 +2,23 @@
 
 
 # Included in this package
-- **QuicGraphLasso**
+- **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L138-L216)
 
-    This `InverseCovarianceEstimator` wraps the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm as a scikit-learn compatible estimator. In general, this can be used interchangeably with the built-in `GraphLasso` by swaping `alpha` for `lam`.  See full documentation [here](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L138-L216).
+    This `InverseCovarianceEstimator` wraps the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm as a scikit-learn compatible estimator. In general, this can be used interchangeably with the built-in `GraphLasso` by swaping `alpha` for `lam`.  
 
     Notable advantages of this implementation over sklearn's built-in implementation are support for a matrix penalization term and speed.
 
-    - **QuicGraphLassoCV**
+    - **QuicGraphLassoCV** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L360-L427)
         
         Provides an optimized implementation for cross-validation model selection in similar fashion to sklearn's [GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).  While `QuicGraphLasso` can be used with [GridSearchCV](http://scikit-learn.org/stable/modules/generated/sklearn.grid_search.GridSearchCV.html), this implementation yields similar results in less time.
 
-    - **QuicGraphLassoEBIC**
+    - **QuicGraphLassoEBIC** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L605-L664)
 
         Provided as a convenience class to use the extended Bayesian information criteria for model selection.  This criteria can also be applied directly to `QuicGraphLasso` after being run in `path` mode.
+
+    - **quic**
+
+        Python function to run QUIC algorithm (independent of sklearn estimator).
 
 - AdaptiveInverseCovariance (two stage adaptive meta estimator) [TODO: better name]
 - Ensemble meta estimator
