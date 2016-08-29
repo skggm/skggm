@@ -1,7 +1,7 @@
 # skggm : Gaussian graphical models in scikit-learn.
 
 
-# Included in this package
+## Included in this package
 - **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L138-L216)
 
     This `InverseCovarianceEstimator` wraps the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm as a scikit-learn compatible estimator. We expect this to be used interchangeably with the built-in `GraphLasso` (and changing some param names, e.g., `alpha` to `lam`).  
@@ -44,7 +44,7 @@
     Submodule that includes `AverageError`, `StatisticalPower`, etc. to compare performance between methods.
 
 
-### Installation
+## Installation
 
 - Note about pip
 
@@ -53,7 +53,7 @@
 If you would like to work with a forked branch directly, you will need to run  `python build_deps.py (from /scikitquic)` to compile pyquic.
 
 
-### Tests
+## Tests
 To run the tests, execute the following lines.  
 
     python -m pytest inverse_covariance/tests/
