@@ -49,14 +49,57 @@ def _plot_avg_error(results, grid, ks):
     plt.show()
 
 
+def _support_diff(m, m_hat):
+    '''Count the number of different elements in the support in one triangle,
+    not including the diagonal. 
+    '''
+    n_features, _ = m.shape
+
+    m_no_diag = m.copy()
+    m_no_diag[np.diag_indices(n_features)] = 0
+    m_hat_no_diag = m_hat.copy()
+    m_hat_no_diag[np.diag_indices(n_features)] = 0
+
+    m_nnz = len(np.nonzero(m_no_diag.flat)[0])
+    m_hat_nnz = len(np.nonzero(m_hat_no_diag.flat)[0])
+
+    nnz_intersect = len(np.intersect1d(np.nonzero(m_no_diag.flat)[0],
+                                       np.nonzero(m_hat_no_diag.flat)[0]))
+    return (m_nnz + m_hat_nnz - (2 * nnz_intersect)) / 2.0
+
+
+def _false_support(m, m_hat):
+    '''Count the number of false positive and false negatives supports in 
+    m_hat in one triangle, not including the diagonal.
+    '''
+    n_features, _ = m.shape
+
+    m_no_diag = m.copy()
+    m_no_diag[np.diag_indices(n_features)] = 0
+    m_hat_no_diag = m_hat.copy()
+    m_hat_no_diag[np.diag_indices(n_features)] = 0
+
+    m_nnz = len(np.nonzero(m_no_diag.flat)[0])
+    m_hat_nnz = len(np.nonzero(m_hat_no_diag.flat)[0])
+
+    nnz_intersect = len(np.intersect1d(np.nonzero(m_no_diag.flat)[0],
+                                       np.nonzero(m_hat_no_diag.flat)[0]))
+
+    false_positives = (m_hat_nnz - nnz_intersect) / 2.0
+    false_negatives = (m_nnz - nnz_intersect) / 2.0
+    return false_positives, false_negatives
+
+
 def _ae_trial(trial_estimator, n_samples, n_features, cov, prec):
     X = _new_sample(n_samples, n_features, cov)
     new_estimator = clone(trial_estimator)
     new_estimator.fit(X)
 
-    # force forbenius 
-    pdiff = prec - new_estimator.precision_
-    return np.sum(pdiff ** 2)
+    error_fro = np.linalg.norm(prec - new_estimator.precision_, ord='fro')
+    error_supp = _support_diff(prec, new_estimator.precision_)
+    error_fp, error_fn = _false_support(prec, new_estimator.precision_)
+
+    return error_fro, error_supp, error_fp, error_fn
 
 
 class AverageError(object):
@@ -128,7 +171,10 @@ class AverageError(object):
         self.n_jobs = n_jobs
 
         self.is_fitted = False
-        self.results_ = None
+        self.error_fro_ = None
+        self.error_supp_ = None
+        self.error_fp_ = None
+        self.error_fn_ = None
         self.alphas_ = None
         self.ks_ = None
         self.grid_ = None
@@ -136,7 +182,11 @@ class AverageError(object):
     def fit(self, X=None, y=None):
         n_alpha_grid_points = 5
 
-        self.results_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
+        self.error_fro_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
+        self.error_supp_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
+        self.error_fp_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
+        self.error_fn_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
+
         self.grid_ = np.linspace(0.25, 4, self.n_grid_points)
         self.alphas_ = np.linspace(0.95, 0.99, n_alpha_grid_points)[::-1]
         self.ks_ = []
@@ -193,7 +243,11 @@ class AverageError(object):
                     )
                     for nn in range(self.n_trials))
 
-                self.results_[aidx, sidx] = np.mean(errors)
+                error_fro, error_supp, error_fp, error_fn = zip(*errors)
+                self.error_fro_[aidx, sidx] = np.mean(error_fro)
+                self.error_supp_[aidx, sidx] = np.mean(error_supp)
+                self.error_fp_[aidx, sidx] = np.mean(error_fp)
+                self.error_fn_[aidx, sidx] = np.mean(error_fn)
 
             if self.verbose:
                 print 'Results at this row: {}'.format(self.results_[aidx, :])
@@ -206,5 +260,13 @@ class AverageError(object):
             print 'Not fitted.'
             return
 
-        _plot_avg_error(self.results_, self.grid_, self.ks_)
+        errors_to_plot = [
+            ('Frobenius', self.error_fro_),
+            ('Support', self.error_supp_),
+            ('False Positive', self.error_fp_),
+            ('False Negative', self.error_fn_),
+        ]
+        for name, result in errors_to_plot:
+            _plot_avg_error(result, self.grid_, self.ks_)
+            plt.title(name)
 
