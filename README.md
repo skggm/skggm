@@ -4,11 +4,9 @@
 ## Included in this package
 - **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L138-L216)
 
-    This `InverseCovarianceEstimator` wraps the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm as a scikit-learn compatible estimator. We expect this to be used interchangeably with the built-in `GraphLasso` (and changing some param names, e.g., `alpha` to `lam`).  
+    This `InverseCovarianceEstimator` wraps the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm as a scikit-learn compatible estimator. The primary output parameters of interest are: `covariance_`, `precision_`, and `lam_`.
 
-    The primary output parameters of interest are: `covariance_`, `precision_`, and `lam_`.
-
-    Notable advantages of this implementation over sklearn's built-in implementation are
+    We expect this to be used interchangeably with the built-in `GraphLasso` (and changing some param names, e.g., `alpha` to `lam`). Some notable advantages of this implementation over `GraphLasso` are:
 
     - support for a matrix penalization term
 
