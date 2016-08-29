@@ -155,8 +155,20 @@ class AverageError(object):
     ks_ : array of size (n_alpha_grid_points, )
         The sparsity of each test graph.
 
-    results_ : matrix of size (n_alpha_grid_points, n_grid_points)
-        The statisical power, P(exact support recovery) for each alpha and 
+    error_fro_ : matrix of size (n_alpha_grid_points, n_grid_points)
+        The average Frobenius error for each alpha and 
+        n_samples / n_features grid point.
+
+    error_supp_ : matrix of size (n_alpha_grid_points, n_grid_points)
+        The average support difference for each alpha and 
+        n_samples / n_features grid point.
+
+    error_fp_ : matrix of size (n_alpha_grid_points, n_grid_points)
+        The average false positive difference for each alpha and 
+        n_samples / n_features grid point.
+
+    error_fn_ : matrix of size (n_alpha_grid_points, n_grid_points)
+        The average false negative difference for each alpha and 
         n_samples / n_features grid point.
     """
     def __init__(self, model_selection_estimator=None, n_features=50, 
