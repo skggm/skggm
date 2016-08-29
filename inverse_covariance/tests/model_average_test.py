@@ -4,7 +4,7 @@ import pytest
 from sklearn import datasets
 from sklearn.covariance import GraphLassoCV
 
-from .. import QuicGraphLassoCV, QuicGraphLasso, ModelAverage
+from inverse_covariance import QuicGraphLassoCV, QuicGraphLasso, ModelAverage
 
 
 class TestModelAverage(object):
@@ -21,13 +21,15 @@ class TestModelAverage(object):
             'n_trials': 15,
             'normalize': False,
             'subsample': 0.6,
-            'penalization': 'random',
+            'penalization': 'fully-random',
         }),
         ({
             'estimator': QuicGraphLassoCV(),
             'n_trials': 10,
             'normalize': True,
             'subsample': 0.3,
+            'lam': 0.1,
+            'lam_perturb': 0.1,
             'penalization': 'random',
             'use_cache': True,
         }),
@@ -36,10 +38,9 @@ class TestModelAverage(object):
             'n_trials': 10,
             'normalize': True,
             'subsample': 0.3,
-            'penalization': 'random',
+            'penalization': 'subsampling',
             'use_cache': True,
-            'penalty': 'alpha',
-            'use_scalar_penalty': True,
+            'penalty_name': 'alpha',
         }),
     ])
     def test_integration_quic_graph_lasso_cv(self, params_in):
@@ -56,7 +57,7 @@ class TestModelAverage(object):
         if ma.use_cache:
             assert len(ma.estimators_) == ma.n_trials
             assert len(ma.subsets_) == ma.n_trials
-            if not ma.use_scalar_penalty:
+            if not ma.penalization == 'subsampling':
                 assert len(ma.lams_) == ma.n_trials
             else:
                 assert len(ma.lams_) == 0
@@ -73,7 +74,7 @@ class TestModelAverage(object):
                 assert e.is_fitted == True
 
             # check that all lambdas used where different
-            if not ma.use_scalar_penalty and eidx > 0:
+            if not ma.penalization == 'subsampling' and eidx > 0:
                 if hasattr(e, 'lam'):
                     prev_e = ma.estimators_[eidx - 1]
                     assert np.linalg.norm((prev_e.lam - e.lam).flat) > 0

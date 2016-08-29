@@ -15,6 +15,7 @@ from inverse_covariance import (
     QuicGraphLassoCV,
     QuicGraphLassoEBIC,
     AdaptiveGraphLasso,
+    ModelAverage,
 )
 
 
@@ -90,7 +91,7 @@ def quic_graph_lasso(X, num_folds, metric):
     print '   metric: {}'.format(metric)
     search_grid = {
       'lam': np.logspace(np.log10(0.01), np.log10(1.0), num=100, endpoint=True),
-      'init_method': ['cov', 'corrcoef'],
+      'init_method': ['cov'],
       'score_metric': [metric], 
     }
     model = GridSearchCV(QuicGraphLasso(),
@@ -206,6 +207,83 @@ def quic_graph_lasso_ebic(X, gamma=0):
     return model.covariance_, model.precision_, model.lam_
 
 
+def model_average(X, penalization):
+    '''Run ModelAverage in default mode (QuicGraphLassoCV) to obtain proportion
+    matrix.
+
+    NOTE:  This returns precision_ proportions, not cov, prec estimates, so we 
+           return the raw proportions for "cov" and the threshold support estimate
+           for prec.
+    '''
+    n_trials = 20
+    print 'ModelAverage with:'
+    print '   estimator: QuicGraphLassoCV (default)'
+    print '   n_trials: {}'.format(n_trials)
+    print '   penalization: {}'.format(penalization)
+    
+    # if penalization is random, first find a decent scalar lam_ to build
+    # random perturbation matrix around.  lam doesn't matter for fully-random.
+    lam = 0.5 
+    if penalization == 'random':
+        cv_model = QuicGraphLassoCV(
+            cv=2, 
+            n_refinements=6,
+            n_jobs=1,
+            init_method='cov',
+            score_metric=metric)
+        cv_model.fit(X)
+        lam = cv_model.lam_    
+        print '   lam: {}'.format(lam)    
+
+    model = ModelAverage(
+        n_trials=n_trials,
+        penalization=penalization,
+        lam=lam)
+    model.fit(X)
+    print '   lam_: {}'.format(model.lam_)
+    return model.proportion_, model.support_, model.lam_
+
+
+def adaptive_model_average(X, penalization, method):
+    '''Run ModelAverage in default mode (QuicGraphLassoCV) to obtain proportion
+    matrix.
+
+    NOTE:  Only method = 'binary' really makes sense in this case.
+    '''
+    n_trials = 20
+    print 'Adaptive ModelAverage with:'
+    print '   estimator: QuicGraphLassoCV (default)'
+    print '   n_trials: {}'.format(n_trials)
+    print '   penalization: {}'.format(penalization)
+    print '   adaptive-method: {}'.format(method)  
+
+    # if penalization is random, first find a decent scalar lam_ to build
+    # random perturbation matrix around. lam doesn't matter for fully-random.
+    lam = 0.5
+    if penalization == 'random':
+        cv_model = QuicGraphLassoCV(
+            cv=2, 
+            n_refinements=6,
+            n_jobs=1,
+            init_method='cov',
+            score_metric=metric)
+        cv_model.fit(X)
+        lam = cv_model.lam_    
+        print '   lam: {}'.format(lam)  
+
+    model = AdaptiveGraphLasso(
+            estimator = ModelAverage(
+                n_trials=n_trials,
+                penalization=penalization,
+                lam=lam),
+            method=method,
+    )
+    model.fit(X)
+    lam_norm_ = np.linalg.norm(model.estimator_.lam_)
+    print '   ||lam_||_2: {}'.format(lam_norm_)
+    return model.estimator_.covariance_, model.estimator_.precision_, lam_norm_
+
+
 def empirical(X):
     '''Compute empirical covariance as baseline estimator.
     '''
@@ -234,8 +312,19 @@ def sk_ledoit_wolf(X):
 
 
 def _count_support_diff(m, m_hat):
-    n_nnz_same = len(np.intersect1d(np.nonzero(m.flat)[0], np.nonzero(m_hat.flat)[0]))
-    return len(np.nonzero(m.flat)[0]) + len(np.nonzero(m_hat.flat)[0]) - n_nnz_same
+    n_features, _ = m.shape
+
+    m_no_diag = m.copy()
+    m_no_diag[np.diag_indices(n_features)] = 0
+    m_hat_no_diag = m_hat.copy()
+    m_hat_no_diag[np.diag_indices(n_features)] = 0
+
+    m_nnz = len(np.nonzero(m_no_diag.flat)[0])
+    m_hat_nnz = len(np.nonzero(m_hat_no_diag.flat)[0])
+
+    nnz_intersect = len(np.intersect1d(np.nonzero(m_no_diag.flat)[0],
+                                       np.nonzero(m_hat_no_diag.flat)[0]))
+    return m_nnz + m_hat_nnz - (2 * nnz_intersect)
 
 
 if __name__ == "__main__":
@@ -354,6 +443,22 @@ if __name__ == "__main__":
         print '   error: {}'.format(error)
         print ''
 
+    # Default ModelAverage
+    params = [
+        ('ModelAverage CV : random', 'random'),
+        ('ModelAverage CV : fully-random', 'fully-random'),
+    ]
+    for name, model_selector in params:
+        start_time = time.time()
+        cov, prec, lam = model_average(X, model_selector)
+        end_time = time.time()
+        ctime = end_time - start_time
+        plot_covs.append((name, cov))
+        plot_precs.append((name, prec, ''))
+        supp_diff = _count_support_diff(true_prec, prec)
+        results.append([name, '', supp_diff, ctime, lam])
+        print ''
+
     # Adaptive QuicGraphLassoCV and QuicGraphLassoEBIC
     params = [
         ('Adaptive CV : binary', 'QuicGraphLassoCV', 'binary'),
@@ -366,6 +471,23 @@ if __name__ == "__main__":
     for name, model_selector, method in params:
         start_time = time.time()
         cov, prec, lam = adaptive_graph_lasso(X, model_selector, method)
+        end_time = time.time()
+        ctime = end_time - start_time
+        plot_covs.append((name, cov))
+        plot_precs.append((name, prec, ''))
+        error = np.linalg.norm(true_cov - cov, ord='fro')
+        supp_diff = _count_support_diff(true_prec, prec)
+        results.append([name, error, supp_diff, ctime, ''])
+        print '   frobenius error: {}'.format(error)
+        print ''
+
+    # Adaptive ModelAverage
+    params = [
+        ('Adaptive MA : random, binary', 'random', 'binary'),
+    ]
+    for name, model_selector, method in params:
+        start_time = time.time()
+        cov, prec, lam = adaptive_model_average(X, model_selector, method)
         end_time = time.time()
         ctime = end_time - start_time
         plot_covs.append((name, cov))

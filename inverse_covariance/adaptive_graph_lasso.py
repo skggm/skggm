@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.base import clone
+from sklearn.utils import check_array, as_float_array
 
 from . import (
     QuicGraphLasso,
@@ -22,12 +23,10 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
     See:
         "High dimensional covariance estimation based on Gaussian graphical
         models"
-        S. Zhou, P. R{u}htimann, M. Xu, and P. B{u}hlmann
-        ftp://ess.r-project.org/Manuscripts/buhlmann/gelato.pdf
+        S. Zhou, P. R{\"u}htimann, M. Xu, and P. B{\"u}hlmann
 
         "Relaxed Lasso"
         N. Meinshausen, December 2006.
-        http://stat.ethz.ch/~nicolai/relaxo.pdf
 
     Parameters
     -----------        
@@ -96,6 +95,9 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         X : ndarray, shape (n_samples, n_features)
             Data from which to compute the proportion matrix.
         """
+        X = check_array(X, ensure_min_features=2, estimator=self)
+        X = as_float_array(X, copy=False, force_all_finite=False)
+
         n_samples, n_features = X.shape
 
         # perform first estimate
