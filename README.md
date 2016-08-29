@@ -53,8 +53,8 @@
 If you would like to work with a forked branch directly, you will need to run  `python build_deps.py (from /scikitquic)` to compile pyquic.
 
 
-### Runing tests:
-Download the test data file `ER_692.mat` from `http://www.cs.utexas.edu/~sustik/QUIC/`.  The file is contained in the MEX archive.  Move this file to `/scikitquic/inverse_covariance/tests`.
+### Tests
+To run the tests, execute the following lines.  
 
     python -m pytest inverse_covariance/tests/
     python -m pytest inverse_covariance/profiling/tests
