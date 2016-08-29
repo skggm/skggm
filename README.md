@@ -6,7 +6,7 @@
 
     This `InverseCovarianceEstimator` wraps the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm as a scikit-learn compatible estimator. The primary output parameters of interest are: `covariance_`, `precision_`, and `lam_`.
 
-    We expect this to be used interchangeably with the built-in `GraphLasso` (and changing some param names, e.g., `alpha` to `lam`). Some notable advantages of this implementation over `GraphLasso` are:
+    We expect this to be used interchangeably with the built-in `GraphLasso` (by changing some param names, e.g., `alpha` to `lam`). Some notable advantages of this implementation over `GraphLasso` are:
 
     - support for a matrix penalization term
 
