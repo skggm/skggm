@@ -5,6 +5,7 @@ from sklearn.datasets import make_sparse_spd_matrix
 sys.path.append('..')
 from inverse_covariance import QuicGraphLasso, trace_plot 
 
+
 def make_data(n_samples, n_features):
     prng = np.random.RandomState(1)
     prec = make_sparse_spd_matrix(n_features, alpha=.98,
@@ -24,7 +25,7 @@ def make_data(n_samples, n_features):
 
 
 def show_quic_coefficient_trace(X):
-    path = np.logspace(np.log10(0.01), np.log10(1.0), num=20, endpoint=True)[::-1]
+    path = np.logspace(np.log10(0.01), np.log10(1.0), num=50, endpoint=True)[::-1]
     estimator = QuicGraphLasso(
             lam=1.0,
             path=path,
@@ -34,11 +35,7 @@ def show_quic_coefficient_trace(X):
 
 
 if __name__ == "__main__":
-    n_samples = 60
-    n_features = 20
-
+    n_samples = 10
+    n_features = 5
     X, cov, prec = make_data(n_samples, n_features)
-
     show_quic_coefficient_trace(X)
-
-    show_quic_coefficient_trace_on_class(X)
