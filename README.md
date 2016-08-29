@@ -10,11 +10,11 @@
 
     Notable advantages of this implementation over sklearn's built-in implementation are support for a matrix penalization term and speed.
 
-    - **QuicGraphLassoCV** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L360-L427)
+    - **QuicGraphLassoCV** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L365-L439)
         
         Provides an optimized implementation for cross-validation model selection in similar fashion to sklearn's [GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).  While `QuicGraphLasso` can be used with [GridSearchCV](http://scikit-learn.org/stable/modules/generated/sklearn.grid_search.GridSearchCV.html), this implementation yields similar results in less time.
 
-    - **QuicGraphLassoEBIC** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L605-L664)
+    - **QuicGraphLassoEBIC** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L616-L681)
 
         Provided as a convenience class to use the extended Bayesian information criteria for model selection.  This criteria can also be applied directly to `QuicGraphLasso` after being run in `path` mode.
 
@@ -22,17 +22,26 @@
 
         Python function to run QUIC algorithm (independent of sklearn estimator).
 
-- **AdaptiveGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/adaptive_graph_lasso.py#L12-L48)
+- **AdaptiveGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/adaptive_graph_lasso.py#L13-L48)
 
     This `InverseCovarianceEstimator` performs a two step estimation procedure.  It obtains an initial sparse estimate (QuicGraphLassoCV by default), derives a new penalization matrix from the result, and refits.  This technique works well to refine the non-zero precision values once a reasonable support is estimated.
 
-- **ModelAverage** [[doc]]()
+- **ModelAverage** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/model_average.py#L66-L162)
     
     This ensemble estimator computes several fits with random penalties and random subsamples (similar to sklearn's [RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html).  The result is a `proportion_` matrix indicating the probability of a non-zero at each index. This can be used in conjunction with the `AdaptiveGraphLasso` for a final estimate.
 
 
-- **InverseCovarianceEstimator** [[doc]]()
+- **InverseCovarianceEstimator** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/inverse_covariance.py#L80-L123)
+    
     Base class with common metrics and EBIC model selection criteria.
+
+- **trace_plot**
+
+    Utility to plot `lam_` paths.
+
+- **profiling**
+
+    Submodule that includes `AverageError`, `StatisticalPower`, etc. to compare performance between methods.
 
 
 ### Installation
