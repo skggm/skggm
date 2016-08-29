@@ -24,7 +24,7 @@ ae = AverageError(
     )
 ae.fit()
 ae.show()
-plt.suptitle('EBIC, gamma = 0')
+plt.suptitle('QuicGraphLassoEBIC (BIC)')
 
 # average plots for QuicGraphLassoCV
 ae = AverageError(
@@ -35,7 +35,7 @@ ae = AverageError(
     )
 ae.fit()
 ae.show()
-plt.suptitle('CV')
+plt.suptitle('QuicGraphLassoCV')
 
 # average plots for ModelAverage + CV
 ae = AverageError(
@@ -49,6 +49,6 @@ ae = AverageError(
     )
 ae.fit()
 ae.show()
-plt.suptitle('Model Average')
+plt.suptitle('ModelAverage CV')
 
 raw_input()
