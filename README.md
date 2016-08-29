@@ -37,7 +37,7 @@
 
 - **InverseCovarianceEstimator** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/inverse_covariance.py#L80-L123)
     
-    Base class with common metrics and EBIC model selection criteria.
+    Base class with common scoring metrics (`log_likelihood`, `frobenius`, `kl-loss`) and EBIC model selection criteria.
 
 - **trace_plot**
 

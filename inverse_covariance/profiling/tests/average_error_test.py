@@ -39,7 +39,13 @@ class TestAverageError(object):
         ae = AverageError(**params_in)
         ae.fit(X)
 
-        assert np.sum(ae.results_.flat) > 0
-        assert ae.results_.shape == (5, ae.n_grid_points)
+        assert np.sum(ae.error_fro_.flat) > 0
+        assert ae.error_fro_.shape == (5, ae.n_grid_points)
+        assert np.sum(ae.error_supp_.flat) > 0
+        assert ae.error_supp_.shape == (5, ae.n_grid_points)
+        assert np.sum(ae.error_fp_.flat) > 0
+        assert ae.error_fp_.shape == (5, ae.n_grid_points)
+        assert np.sum(ae.error_fn_.flat) > 0
+        assert ae.error_fn_.shape == (5, ae.n_grid_points)
         assert len(ae.ks_) == 5
         assert len(ae.grid_) == ae.n_grid_points

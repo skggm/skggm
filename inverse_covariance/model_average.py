@@ -287,4 +287,11 @@ class ModelAverage(BaseEstimator):
         This is not a very good precision estimate.
         '''
         return self.support_
+
+    @property
+    def covariance_(self):
+        '''Convenience property to make compatible with AdaptiveGraphLasso.
+        This is not a very good covariance estimate.
+        '''
+        return np.linalg.inv(self.support_)
     
