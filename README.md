@@ -10,17 +10,19 @@
 
     Notable advantages of this implementation over sklearn's built-in implementation are support for a matrix penalization term and speed.
 
-    - **QuicGraphLassoCV** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L365-L439)
-        
-        Provides an optimized implementation for cross-validation model selection in similar fashion to sklearn's [GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).  While `QuicGraphLasso` can be used with [GridSearchCV](http://scikit-learn.org/stable/modules/generated/sklearn.grid_search.GridSearchCV.html), this implementation yields similar results in less time.
+- **QuicGraphLassoCV** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L365-L439)
+    
+    Provides an optimized implementation for cross-validation model selection in similar fashion to sklearn's [GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).  This implementation also supports matrix penalization.
 
-    - **QuicGraphLassoEBIC** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L616-L681)
+    While `QuicGraphLasso` can be used with [GridSearchCV](http://scikit-learn.org/stable/modules/generated/sklearn.grid_search.GridSearchCV.html), this implementation yields similar results in less time.
 
-        Provided as a convenience class to use the extended Bayesian information criteria for model selection.  This criteria can also be applied directly to `QuicGraphLasso` after being run in `path` mode.
+- **QuicGraphLassoEBIC** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L616-L681)
 
-    - **quic**
+    Provided as a convenience class to use the extended Bayesian information criteria for model selection.  This criteria can also be applied directly to `QuicGraphLasso` after being run in `path` mode.
 
-        Python function to run QUIC algorithm (independent of sklearn estimator).
+- **quic**
+
+    Python function to run QUIC algorithm (independent of sklearn estimator).
 
 - **AdaptiveGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/adaptive_graph_lasso.py#L13-L48)
 
