@@ -250,7 +250,11 @@ class AverageError(object):
                 self.error_fn_[aidx, sidx] = np.mean(error_fn)
 
             if self.verbose:
-                print 'Results at this row: {}'.format(self.results_[aidx, :])
+                print 'Results at this row:'
+                print '   fro = {}'.format(self.error_fro_[aidx, :])
+                print '   supp = {}'.format(self.error_supp_[aidx, :])
+                print '   fp = {}'.format(self.error_fp_[aidx, :])
+                print '   fn = {}'.format(self.error_fn_[aidx, :])
 
         self.is_fitted = True
         return self

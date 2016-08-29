@@ -4,27 +4,31 @@ sys.path.append('..')
 from inverse_covariance import (
     QuicGraphLassoCV, 
     QuicGraphLassoEBIC,
+    ModelAverage
 )
-from inverse_covariance.profiling import AverageError
+from inverse_covariance.profiling import AverageError 
 from matplotlib import pyplot as plt
 
 
-n_features = 50
-n_trials = 100
+n_features = 50 # 50
+n_trials = 5 #100
 verbose = True
 
-
 ae = AverageError(
-        model_selection_estimator=QuicGraphLassoEBIC(
-            gamma=0.3),
+        model_selection_estimator=ModelAverage(
+            n_trials=20,
+            penalization='random',
+            subsample=0.9),
         n_features=n_features,
         n_trials=n_trials,
         verbose=verbose,
     )
 ae.fit()
 ae.show()
-plt.title('EBIC, gamma = 0.3')
+plt.suptitle('Model Average')
 
+
+'''
 ae = AverageError(
         model_selection_estimator=QuicGraphLassoEBIC(
             gamma=0.0),
@@ -34,7 +38,7 @@ ae = AverageError(
     )
 ae.fit()
 ae.show()
-plt.title('EBIC, gamma = 0')
+plt.suptitle('EBIC, gamma = 0')
 
 ae = AverageError(
         model_selection_estimator=QuicGraphLassoCV(),
@@ -44,6 +48,7 @@ ae = AverageError(
     )
 ae.fit()
 ae.show()
-plt.title('CV')
+plt.suptitle('CV')
+'''
 
 raw_input()
