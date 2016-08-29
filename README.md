@@ -4,7 +4,9 @@
 # Included in this package
 - **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L138-L216)
 
-    This `InverseCovarianceEstimator` wraps the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm as a scikit-learn compatible estimator. In general, this can be used interchangeably with the built-in `GraphLasso` by swaping `alpha` for `lam`.  
+    This `InverseCovarianceEstimator` wraps the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm as a scikit-learn compatible estimator. We expect this to be used interchangeably with the built-in `GraphLasso` (and changing some param names, e.g., `alpha` to `lam`).  
+
+    The primary output parameters of interest are: `covariance_`, `precision_`, and `lam_`.
 
     Notable advantages of this implementation over sklearn's built-in implementation are support for a matrix penalization term and speed.
 
@@ -20,13 +22,17 @@
 
         Python function to run QUIC algorithm (independent of sklearn estimator).
 
-- AdaptiveInverseCovariance (two stage adaptive meta estimator) [TODO: better name]
-- Ensemble meta estimator
-- Numerous usage examples
-- InverseCovarianceEstimator with common model selection metrics (such as EBIC and metrics for cross validation)
+- **AdaptiveGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/adaptive_graph_lasso.py#L12-L48)
+
+    This `InverseCovarianceEstimator` performs a two step estimation procedure.  It obtains an initial sparse estimate (QuicGraphLassoCV by default), derives a new penalization matrix from the result, and refits.  This technique works well to refine the non-zero precision values once a reasonable support is estimated.
+
+- **ModelAverage** [[doc]]()
+    
+    This ensemble estimator computes several fits with random penalties and random subsamples (similar to sklearn's [RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html).  The result is a `proportion_` matrix indicating the probability of a non-zero at each index. This can be used in conjunction with the `AdaptiveGraphLasso` for a final estimate.
 
 
-^ These are notes, will clean up later.
+- **InverseCovarianceEstimator** [[doc]]()
+    Base class with common metrics and EBIC model selection criteria.
 
 
 ### Installation
@@ -46,8 +52,8 @@ Download the test data file `ER_692.mat` from `http://www.cs.utexas.edu/~sustik/
 
 # Examples
 
-## Estimator Suite
-In `examples/estimator_suite.py` we reproduce the [plot_sparse_cov](http://scikit-learn.org/stable/auto_examples/covariance/plot_sparse_cov.html) example from the scikit-learn documentation for each method provided.
+## Usage 
+In `examples/estimator_suite.py` we reproduce the [plot_sparse_cov](http://scikit-learn.org/stable/auto_examples/covariance/plot_sparse_cov.html) example from the scikit-learn documentation for each method provided (however, the variations chosen are not exhaustive).
 
 An example run for `n_examples=100` and `n_features=20` yielded the following results. 
 
