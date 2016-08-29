@@ -8,7 +8,11 @@
 
     The primary output parameters of interest are: `covariance_`, `precision_`, and `lam_`.
 
-    Notable advantages of this implementation over sklearn's built-in implementation are support for a matrix penalization term and speed.
+    Notable advantages of this implementation over sklearn's built-in implementation are
+
+    - support for a matrix penalization term
+
+    - speed
 
 - **QuicGraphLassoCV** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L365-L439)
     
