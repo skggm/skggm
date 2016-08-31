@@ -1,6 +1,6 @@
 # skggm : Gaussian graphical models in scikit-learn
 
-Given **n** independently drawn, **p**-dimensional Gaussian random samples <img src="images/X.png" alt="X" width="80">, the maximum likelihood estimate of the inverse covariance matrix **S** can be computed via the _graphical lasso_, i.e., the program
+Given **n** independently drawn, **p**-dimensional Gaussian random samples <img src="images/S.png" alt="X" width="80">, the maximum likelihood estimate of the inverse covariance matrix <img src="images/Theta.png" alt="\lambda" width="12"> can be computed via the _graphical lasso_, i.e., the program
 
 <img src="images/graphlasso_program.png" alt="\ell_1 penalized inverse covariance estimation" width="500">
 
