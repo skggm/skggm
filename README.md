@@ -76,7 +76,7 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
 - **InverseCovarianceEstimator** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/inverse_covariance.py#L80-L123)
     
-    Base class with common scoring metrics (`log_likelihood`, `frobenius`, `kl-loss`) and EBIC model selection criteria.
+    Base class with `score` class method (with common metrics: `log_likelihood`, `frobenius`, `kl-loss`) and EBIC class methods.
 
 - **trace_plot**
 
@@ -84,7 +84,7 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
 - **.profiling**
 
-    Submodule that includes `profiling.AverageError`, `profiling.StatisticalPower`, etc. to compare performance between methods.
+    Submodule that includes `profiling.AverageError`, `profiling.StatisticalPower` to compare performance between methods.
 
 - **quic**
 
