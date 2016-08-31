@@ -1,4 +1,4 @@
-# skggm : Gaussian graphical models in scikit-learn.
+# skggm : Gaussian graphical models in scikit-learn
 
 Given **n**, **p**-dimensional independently drawn Gaussian random samples **X \in R^{n, p}**, the maximum likelihood estimate of the inverse covariance matrix **S** can be computed via the _graphical lasso_, i.e., the program
 
