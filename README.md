@@ -68,7 +68,7 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
     
     _ModelAverage_ is an ensemble meta-estimator that computes several fits with a user-specified `estimator` and averages the support of the resulting precision estimates.  The result is a `proportion_` matrix indicating the sample probability of a non-zero at each index. In each trial, this class will:
 
-    1. Randomly subsample the given examples in **X** (similar to scikit-learn's _[RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html)_.
+    1. Randomly subsample the given examples in **X** (similar to scikit-learn's _[RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html)_).
 
     2. Choose a random matrix penalty.
 
