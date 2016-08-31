@@ -38,7 +38,7 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
     The primary outputs of interest are: `covariance_`, `precision_`, and `lam_`.  _QuicGraphLasso_ also includes the `score(X_test)`, `ebic(gamma=0)`, and `ebic_select(gamma=0)` class methods.
 
-    The interface largely mirrors the built-in _GraphLasso_ although some param names have been changed (e.g., `alpha` -> `lam`). Some notable advantages of this implementation over _GraphLasso_ are:
+    The interface largely mirrors the built-in _GraphLasso_ although some param names have been changed (e.g., `alpha` to `lam`). Some notable advantages of this implementation over _GraphLasso_ are:
 
     - support for a matrix penalization term
 
