@@ -1,14 +1,14 @@
 # skggm : Gaussian graphical models in scikit-learn
 
-Given **n** independently drawn, **p**-dimensional Gaussian random samples <img src="images/X.png" alt="X" width="50">, the maximum likelihood estimate of the inverse covariance matrix **S** can be computed via the _graphical lasso_, i.e., the program
+Given **n** independently drawn, **p**-dimensional Gaussian random samples <img src="images/X.png" alt="X" width="70">, the maximum likelihood estimate of the inverse covariance matrix **S** can be computed via the _graphical lasso_, i.e., the program
 
 <img src="images/graphlasso_program.png" alt="\ell_1 penalized inverse covariance estimation" width="500">
 
-where <img src="images/Lambda.png" alt="\Lambda" width="50"> is a symmetric non-negative weight matrix and
+where <img src="images/Lambda.png" alt="\Lambda" width="70"> is a symmetric non-negative weight matrix and
 
 <img src="images/weighted_ell_1.png" alt="\ell_1 penalized inverse covariance estimation" width="200"> 
 
-is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. This is a generalization of the scalar <img src="images/scalar_lambda.png" alt="\lambda" width="50"> formulation found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
+is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. This is a generalization of the scalar <img src="images/scalar_lambda.png" alt="\lambda" width="10"> formulation found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
 The graphical lasso finds diverse applications in **TODO X, Y, Z**.
 
