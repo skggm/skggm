@@ -6,6 +6,7 @@ from inverse_covariance import (
     QuicGraphLassoEBIC,
 )
 
+
 def test_quic_graph_lasso():
     return check_estimator(QuicGraphLasso)
 
