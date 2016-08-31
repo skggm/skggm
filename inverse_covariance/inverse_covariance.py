@@ -196,6 +196,8 @@ class InverseCovarianceEstimator(BaseEstimator):
 
     def cov_error(self, comp_cov, score_metric='frobenius'):
         """Computes the covariance error vs. comp_cov.
+
+        May require self.path_
         
         Parameters
         ----------
@@ -237,7 +239,7 @@ class InverseCovarianceEstimator(BaseEstimator):
                                 score_metric)
 
         path_errors = []
-        for lidx, lam in enumerate(self.path):
+        for lidx, lam in enumerate(self.path_):
             path_errors.append(_compute_error(comp_cov,
                                             self.covariance_[lidx],
                                             self.precision_[lidx],
@@ -248,7 +250,9 @@ class InverseCovarianceEstimator(BaseEstimator):
 
     def ebic(self, gamma=0):
         """Compute EBIC scores for each model. If model is not "path" then 
-        returns a scalar score value. Uses an expected self.path_ parameter.
+        returns a scalar score value. 
+
+        May require self.path_
 
         See:
             Extended Bayesian Information Criteria for Gaussian Graphical Models
