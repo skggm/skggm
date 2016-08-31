@@ -29,7 +29,6 @@ and then head over to `examples/estimator_suite.py` for other example usage.
 >
 > [@jasonlaska](https://github.com/jasonlaska) and [@mnarayn](https://github.com/mnarayan)
 
----
 
 ## Included in `inverse_covariance` 
 - **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L138-L216)
