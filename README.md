@@ -26,8 +26,8 @@ In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible 
 and then head over to `examples/estimator_suite.py` for other example usage.
 
 > This is an ongoing effort. We'd love your feedback on which algorithms we should provide bindings for next and how you're using the package. We also welcome contributions. 
-
-[@jasonlaska](https://github.com/jasonlaska) and [@mnarayn](https://github.com/mnarayan)
+>
+>> [@jasonlaska](https://github.com/jasonlaska) and [@mnarayn](https://github.com/mnarayan)
 
 ---
 
