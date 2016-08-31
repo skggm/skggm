@@ -16,7 +16,7 @@ In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible 
 
     from inverse_covariance import QuicGraphLassoCV
     model = QuicGraphLassoCV()
-    model.fit(X)  # X is n_samples x n_features data matrix
+    model.fit(X)  # X is data matrix of shape (n_samples, n_features) 
 
 and then head over to `examples/estimator_suite.py` for other example usage.
 
