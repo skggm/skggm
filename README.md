@@ -1,5 +1,13 @@
 # skggm : Gaussian graphical models in scikit-learn.
 
+Given a set of **p**-dimensional independently drawn Gaussian random samples **X**, the maximum likelihood estimate for the inverse covariance matrix **S** can be estimated via the program
+
+<img src="images/graphlasso_program.png" alt="\ell_1 penalized inverse covariance estimation" width="200">
+
+where  **Lambda** is a symmetric non-negative weight matrix and
+<img src="images/weighted_ell_1.png" alt="\ell_1 penalized inverse covariance estimation" width="50">
+is a regularization term (generalized from the scalar **lambda** case) that proposes sparsity.
+
 
 ## Included in this package
 - **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L138-L216)
