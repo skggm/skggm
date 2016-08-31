@@ -10,7 +10,7 @@ where  **Lambda \in R^{p, p}** is a symmetric non-negative weight matrix and
 
 is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. This is a generalization of the scalar-**lambda** formulation found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html) .
 
-The graph lasso has application in X, Y, Z.
+The graphical lasso finds diverse applications in **TODO X, Y, Z**.
 
 In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program above and a collection of modern best practices for working with the graphical lasso.  To get started, test out 
 
