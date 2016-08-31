@@ -40,7 +40,7 @@ and then head over to `examples/estimator_suite.py` for other example usage.
 
 - **QuicGraphLassoEBIC** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L616-L681)
 
-    Provided as a convenience class to use the extended Bayesian information criteria for model selection.  This criteria can also be applied directly to `QuicGraphLasso` after being run in `path` mode.
+    Provided as a convenience class to use the _extended Bayesian information criteria_ (EBIC) for model selection.  This criteria can also be applied directly to `QuicGraphLasso` after being run in `path` mode.
 
 - **quic**
 
