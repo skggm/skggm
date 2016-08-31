@@ -8,7 +8,7 @@ where  **Lambda \in R^{p, p}** is a symmetric non-negative weight matrix and
 
 <img src="images/weighted_ell_1.png" alt="\ell_1 penalized inverse covariance estimation" width="200"> 
 
-is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\] (this generalizes the conventional scalar **lambda** formulation implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html) \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\]).
+is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. This generalizes the conventional scalar **lambda** formulation founfd in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\]) and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html) .
 
 The graph lasso has application in X, Y, Z.
 
