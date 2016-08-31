@@ -10,8 +10,6 @@ where <img src="images/Lambda.png" alt="\Lambda" width="80"> is a symmetric non-
 
 is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. This is a generalization of the scalar <img src="images/scalar_lambda.png" alt="\lambda" width="12"> formulation found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
-The graphical lasso finds diverse applications in **TODO X, Y, Z**.
-
 In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program above and a collection of modern best practices for working with the graphical lasso.  To get started, test out 
 
     
