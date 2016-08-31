@@ -5,7 +5,10 @@ Given a set of **p**-dimensional independently drawn Gaussian random samples **X
 <img src="images/graphlasso_program.png" alt="\ell_1 penalized inverse covariance estimation" width="500">
 
 where  **Lambda** is a symmetric non-negative weight matrix and
-<img src="images/weighted_ell_1.png" alt="\ell_1 penalized inverse covariance estimation" width="100"> is a regularization term (generalized from the scalar **lambda** case) that proposes sparsity.
+
+<img src="images/weighted_ell_1.png" alt="\ell_1 penalized inverse covariance estimation" width="200"> 
+
+is a regularization term (generalized from the scalar **lambda** case) that proposes sparsity.
 
 
 ## Included in this package
