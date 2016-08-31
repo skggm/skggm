@@ -40,11 +40,7 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
     The primary outputs of interest are: `covariance_`, `precision_`, and `lam_`.  _QuicGraphLasso_ also includes the `score(X_test)`, `ebic(gamma=0)`, and `ebic_select(gamma=0)` class methods.
 
-    The interface largely mirrors the built-in _[GraphLasso](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLasso.html)_ although some param names have been changed (e.g., `alpha` to `lam`). Some notable advantages of this implementation over _GraphLasso_ are:
-
-    - support for a matrix penalization term
-
-    - speed
+    The interface largely mirrors the built-in _[GraphLasso](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLasso.html)_ although some param names have been changed (e.g., `alpha` to `lam`). Some notable advantages of this implementation over _GraphLasso_ are support for a matrix penalization term and speed.
 
 - **QuicGraphLassoCV** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L365-L439)
     
