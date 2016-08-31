@@ -45,7 +45,7 @@
 
 - **profiling**
 
-    Submodule that includes `AverageError`, `StatisticalPower`, etc. to compare performance between methods.
+    Submodule that includes `profiling.AverageError`, `profiling.StatisticalPower`, etc. to compare performance between methods.
 
 
 ## Installation
