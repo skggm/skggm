@@ -34,7 +34,7 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 ## Included in `inverse_covariance` 
 - **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L138-L216)
 
-    _QuicGraphLasso_ provides an implementation of [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) wrapped into a scikit-learn compatible estimator. The estimator can be run in `default` mode for a fixed penalty or in `path` mode to explore a sequence of penalties efficiently.  The penalty `lam` can be a scalar or matrix.
+    _QuicGraphLasso_ is an implementation of [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) wrapped as a scikit-learn compatible estimator. The estimator can be run in `default` mode for a fixed penalty or in `path` mode to explore a sequence of penalties efficiently.  The penalty `lam` can be a scalar or matrix.
 
     The primary outputs of interest are: `covariance_`, `precision_`, and `lam_`.  _QuicGraphLasso_ also includes the `score(X_test)`, `ebic(gamma=0)`, and `ebic_select(gamma=0)` class methods.
 
