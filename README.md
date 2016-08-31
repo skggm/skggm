@@ -64,7 +64,13 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
 - **AdaptiveGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/adaptive_graph_lasso.py#L13-L48)
 
-    This `InverseCovarianceEstimator` performs a two step estimation procedure.  It obtains an initial sparse estimate (QuicGraphLassoCV by default), derives a new penalization matrix from the result, and refits.  This technique works well to refine the non-zero precision values once a reasonable support is estimated.
+    _AdaptiveGraphLasso_ performs a two step estimation procedure.  
+    
+    1. Obtain an initial sparse estimate.  By default QuicGraphLassoCV be used for the initial estimate but you can pass in your own estimator instance via the parameter `estimator`. 
+
+    2. Derive a new penalization matrix from the original estimate.  We currently provide three methods for this: `binary`, `1/|coeffs|`, and `1/|coeffs|^2`.  The `binary` method only requires the initial estimate's support (and this can be be used with _ModelAverage_ below).
+
+    This technique works well to refine the non-zero precision values given a reasonable initial support estimate.
 
 - **ModelAverage** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/model_average.py#L66-L162)
     
