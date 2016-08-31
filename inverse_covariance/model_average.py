@@ -270,7 +270,11 @@ class ModelAverage(BaseEstimator):
             self.support_ = np.zeros(self.proportion_.shape)
             self.support_[self.proportion_ > threshold] = 1.0
 
-            self.lam_ += np.mean(new_estimator.lam_.flat)
+            # currently, dont estimate self.lam_ if penalty_name is different
+            if self.penalty_name == 'lam':
+                self.lam_ += np.mean(new_estimator.lam_.flat)
+            
+            # save estimators, subsets, and lambdas
             if self.use_cache:
                 self.estimators_.append(new_estimator)
                 self.subsets_.append(rp)
