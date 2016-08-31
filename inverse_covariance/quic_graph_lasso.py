@@ -265,7 +265,6 @@ class QuicGraphLasso(InverseCovarianceEstimator):
                 init_method=init_method,
                 auto_scale=auto_scale)
 
-
     def fit(self, X, y=None, **fit_params):
         """Fits the inverse covariance model according to the given training 
         data and parameters.
@@ -299,7 +298,6 @@ class QuicGraphLasso(InverseCovarianceEstimator):
 
         self.is_fitted = True
         return self
-
 
     def lam_at_index(self, lidx):
         """Compute the scaled lambda used at index lidx.
@@ -471,7 +469,6 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                 score_metric=score_metric,
                 init_method=init_method,
                 auto_scale=auto_scale)
-
 
     def fit(self, X, y=None):
         """Fits the GraphLasso covariance model to X.
@@ -710,7 +707,6 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
                 init_method=init_method,
                 score_metric=score_metric,
                 auto_scale=auto_scale)
-
 
     def fit(self, X, y=None, **fit_params):
         """Fits the inverse covariance model according to the given training 
