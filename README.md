@@ -1,17 +1,20 @@
 # skggm : Gaussian graphical models in scikit-learn.
 
-Given a set of **p**-dimensional independently drawn Gaussian random samples **X**, the maximum likelihood estimate for the inverse covariance matrix **S** can be estimated via the program
+Given **n** **p**-dimensional independently drawn Gaussian random samples **X \in R^{n, p}**, the maximum likelihood estimate for the inverse covariance matrix **S** can be computed via the __graphical lasso__, i.e., the program
 
 <img src="images/graphlasso_program.png" alt="\ell_1 penalized inverse covariance estimation" width="500">
 
-where  **Lambda** is a symmetric non-negative weight matrix and
+where  **Lambda \in R^{p, p}** is a symmetric non-negative weight matrix and
 
 <img src="images/weighted_ell_1.png" alt="\ell_1 penalized inverse covariance estimation" width="200"> 
 
-is a regularization term (generalized from the scalar **lambda** case) that proposes sparsity.
+is a regularization term that promotes sparsity.  Note that this generalizes the conventional scalar **lambda** formulation implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
+The graph lasso has application in X, Y, Z.
 
-## Included in this package
+In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program above and a collection of modern best practices for working with the graphical lasso.
+
+## Included in the `inverse_covariance` module
 - **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L138-L216)
 
     This `InverseCovarianceEstimator` wraps the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm as a scikit-learn compatible estimator. The primary output parameters of interest are: `covariance_`, `precision_`, and `lam_`.
