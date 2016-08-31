@@ -482,9 +482,9 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
             Data from which to compute the covariance estimate
         """
         # initialize
-        cv = check_cv(self.cv, X, y, classifier=False)
         X = check_array(X, ensure_min_features=2, estimator=self)
         X = as_float_array(X, copy=False, force_all_finite=False)
+        cv = check_cv(self.cv, X, y, classifier=False)
         self.init_coefs(X)
 
         # get path
