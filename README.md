@@ -12,7 +12,14 @@ is a regularization term that promotes sparsity (this generalizes the convention
 
 The graph lasso has application in X, Y, Z.
 
-In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program above and a collection of modern best practices for working with the graphical lasso.
+In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program above and a collection of modern best practices for working with the graphical lasso.  To get started, test out 
+
+    from inverse_covariance import QuicGraphLassoCV
+    model = QuicGraphLassoCV()
+    model.fit(X)  # X is n_samples x n_features data matrix
+
+and then head over to `examples/estimator_suite.py` for other example usage.
+
 
 ## Included in `inverse_covariance` 
 - **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L138-L216)
