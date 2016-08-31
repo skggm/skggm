@@ -85,6 +85,15 @@ We've provided a utility function `trace_plot` that can be used to display the c
 
 <img src="images/trace_plot.png" alt="Trace plot" width="400">
 
+## Profiling utilities
+We've provided some utilities in `inverse_covariance.profiling` to compare performance across the estimators. 
+
+For example, below is the comparison of the average support error between `QuicGraphLassoCV` and its randomized model average equivalent (the example found in `examples/compare_model_selection.py`).  The support error of `QuicGraphLassoCV` is dominated by the false-positive rate which grows substantially as the number of samples grows.
+
+<img src="images/model_avg_support.png" alt="" width="300">
+<img src="images/quicgraphlassocv_support.png" alt="" width="300">
+
+
 # References
 
 ### BIC / EBIC Model Selection
