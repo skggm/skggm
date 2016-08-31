@@ -20,7 +20,7 @@ In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible 
     model = QuicGraphLassoCV()
     model.fit(X)  # X is data matrix of shape (n_samples, n_features) 
     
-    # see: model.precision_, model.covariance_, model.lam_
+    # see: model.covariance_, model.precision_, model.lam_
     
 
 and then head over to `examples/estimator_suite.py` for other example usage.
@@ -34,9 +34,11 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 ## Included in `inverse_covariance` 
 - **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L138-L216)
 
-    This `InverseCovarianceEstimator` wraps the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm as a scikit-learn compatible estimator. The primary output parameters of interest are: `covariance_`, `precision_`, and `lam_`.
+    _QuicGraphLasso_ provides an implementation of [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) wrapped into a scikit-learn compatible estimator. The estimator can be run in `default` mode for a fixed penalty or in `path` mode to explore a sequence of penalties efficiently.  The penalty `lam` can be a scalar or matrix.
 
-    We expect this to be used interchangeably with the built-in `GraphLasso` (by changing some param names, e.g., `alpha` to `lam`). Some notable advantages of this implementation over `GraphLasso` are:
+    The primary outputs of interest are: `covariance_`, `precision_`, and `lam_`.  _QuicGraphLasso_ also includes the `score(X_test)`, `ebic(gamma=0)`, and `ebic_select(gamma=0)` class methods.
+
+    The interface largely mirrors the built-in _GraphLasso_ although some param names have been changed (e.g., `alpha` -> `lam`). Some notable advantages of this implementation over _GraphLasso_ are:
 
     - support for a matrix penalization term
 
@@ -44,13 +46,15 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
 - **QuicGraphLassoCV** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L365-L439)
     
-    Provides an optimized implementation for cross-validation model selection in similar fashion to sklearn's [GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).  This implementation also supports matrix penalization.
+    _QuicGraphLassoCV_ is an optimized cross-validation model selection implementation in similar fashion to sklearn's [GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html). While _QuicGraphLasso_ can be used with [GridSearchCV](http://scikit-learn.org/stable/modules/generated/sklearn.grid_search.GridSearchCV.html), this estimator yields similar results in less time.
 
-    While `QuicGraphLasso` can be used with [GridSearchCV](http://scikit-learn.org/stable/modules/generated/sklearn.grid_search.GridSearchCV.html), this implementation yields similar results in less time.
+    As with _QuicGraphLasso_, this implementation also supports matrix penalization.
 
 - **QuicGraphLassoEBIC** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L616-L681)
 
-    Provided as a convenience class to use the _extended Bayesian information criteria_ (EBIC) for model selection.  This criteria can also be applied directly to `QuicGraphLasso` after being run in `path` mode.
+    _QuicGraphLassoEBIC_ is provided as a convenience class to use the _Extended Bayesian Information Criteria_ (EBIC) \[["Foygel et al."](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\] for model selection.  
+
+    As noted earlier, for class methods are provided with _QuicGraphLasso_ to compute EBIC scores and select the best penalty when used in `path` mode. This may be a faster, more flexible approach when experimenting with several model selection methods.
 
 - **quic**
 
