@@ -7,7 +7,7 @@ from sklearn.utils.testing import assert_raises
 from sklearn.utils.testing import assert_allclose
 from sklearn import datasets
 
-from .. import (
+from inverse_covariance import (
     QuicGraphLasso,
     quic,
     QuicGraphLassoCV,

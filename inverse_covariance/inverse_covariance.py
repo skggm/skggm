@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.base import BaseEstimator 
 
-import metrics
+from . import metrics
 
 
 def _init_coefs(X, method='corrcoef'):
@@ -136,6 +136,7 @@ class InverseCovarianceEstimator(BaseEstimator):
         self.lam_scale_ = None
         self.n_samples = None
         self.n_features = None
+        self.path_ = None
         self.is_fitted = False 
 
         super(InverseCovarianceEstimator, self).__init__()
@@ -247,7 +248,7 @@ class InverseCovarianceEstimator(BaseEstimator):
 
     def ebic(self, gamma=0):
         """Compute EBIC scores for each model. If model is not "path" then 
-        returns a scalar score value.
+        returns a scalar score value. Uses an expected self.path_ parameter.
 
         See:
             Extended Bayesian Information Criteria for Gaussian Graphical Models
@@ -275,7 +276,7 @@ class InverseCovarianceEstimator(BaseEstimator):
                                 gamma=gamma)
 
         ebic_scores = []
-        for lidx, lam in enumerate(self.path):
+        for lidx, lam in enumerate(self.path_):
             ebic_scores.append(metrics.ebic(
                     self.sample_covariance_,
                     self.precision_[lidx],

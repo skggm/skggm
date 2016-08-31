@@ -180,7 +180,7 @@ def quic_graph_lasso_ebic_manual(X, gamma=0):
     covariance_ = model.covariance_[ebic_index]
     precision_ = model.precision_[ebic_index]
     lam_ = model.lam_at_index(ebic_index)
-    print '   len(path lams): {}'.format(len(model.path))
+    print '   len(path lams): {}'.format(len(model.path_))
     print '   lam_scale_: {}'.format(model.lam_scale_)
     print '   lam_: {}'.format(lam_)
     print '   ebic_index: {}'.format(ebic_index)
@@ -201,7 +201,7 @@ def quic_graph_lasso_ebic(X, gamma=0):
         init_method='cov',
         gamma=gamma)
     model.fit(X)
-    print '   len(path lams): {}'.format(len(model.path))
+    print '   len(path lams): {}'.format(len(model.path_))
     print '   lam_scale_: {}'.format(model.lam_scale_)
     print '   lam_: {}'.format(model.lam_)
     return model.covariance_, model.precision_, model.lam_
