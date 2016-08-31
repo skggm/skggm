@@ -39,7 +39,9 @@ class TestStatisticalPower(object):
         sp = StatisticalPower(**params_in)
         sp.fit(X)
 
+        num_k = 5
+
         assert np.sum(sp.results_.flat) > 0
-        assert sp.results_.shape == (5, sp.n_grid_points)
-        assert len(sp.ks_) == 5
+        assert sp.results_.shape == (num_k, sp.n_grid_points)
+        assert len(sp.ks_) == num_k
         assert len(sp.grid_) == sp.n_grid_points

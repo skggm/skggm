@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.base import BaseEstimator 
 
-import metrics
+from . import metrics
 
 
 def _init_coefs(X, method='corrcoef'):
@@ -132,10 +132,10 @@ class InverseCovarianceEstimator(BaseEstimator):
 
         # these must be updated upon self.fit()
         # the first 4 will be set if self.init_coefs is used.
-        self.sample_covariance_ = None
-        self.lam_scale_ = None
-        self.n_samples = None
-        self.n_features = None
+        #   self.sample_covariance_
+        #   self.lam_scale_
+        #   self.n_samples
+        #   self.n_features
         self.is_fitted = False 
 
         super(InverseCovarianceEstimator, self).__init__()
@@ -195,6 +195,8 @@ class InverseCovarianceEstimator(BaseEstimator):
 
     def cov_error(self, comp_cov, score_metric='frobenius'):
         """Computes the covariance error vs. comp_cov.
+
+        May require self.path_
         
         Parameters
         ----------
@@ -236,7 +238,7 @@ class InverseCovarianceEstimator(BaseEstimator):
                                 score_metric)
 
         path_errors = []
-        for lidx, lam in enumerate(self.path):
+        for lidx, lam in enumerate(self.path_):
             path_errors.append(_compute_error(comp_cov,
                                             self.covariance_[lidx],
                                             self.precision_[lidx],
@@ -247,7 +249,9 @@ class InverseCovarianceEstimator(BaseEstimator):
 
     def ebic(self, gamma=0):
         """Compute EBIC scores for each model. If model is not "path" then 
-        returns a scalar score value.
+        returns a scalar score value. 
+
+        May require self.path_
 
         See:
             Extended Bayesian Information Criteria for Gaussian Graphical Models
@@ -275,7 +279,7 @@ class InverseCovarianceEstimator(BaseEstimator):
                                 gamma=gamma)
 
         ebic_scores = []
-        for lidx, lam in enumerate(self.path):
+        for lidx, lam in enumerate(self.path_):
             ebic_scores.append(metrics.ebic(
                     self.sample_covariance_,
                     self.precision_[lidx],

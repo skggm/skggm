@@ -31,7 +31,7 @@ def show_quic_coefficient_trace(X):
             path=path,
             mode='path')
     estimator.fit(X)
-    trace_plot(estimator.precision_, estimator.path)
+    trace_plot(estimator.precision_, estimator.path_)
 
 
 if __name__ == "__main__":
