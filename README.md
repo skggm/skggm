@@ -46,7 +46,7 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
 - **QuicGraphLassoCV** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L365-L439)
     
-    _QuicGraphLassoCV_ is an optimized cross-validation model selection implementation in similar fashion to sklearn's _[GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html)_. While _QuicGraphLasso_ can be used with _[GridSearchCV](http://scikit-learn.org/stable/modules/generated/sklearn.grid_search.GridSearchCV.html)_, this estimator yields similar results in less time.
+    _QuicGraphLassoCV_ is an optimized cross-validation model selection implementation in similar fashion to scikit-learn's _[GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html)_. While _QuicGraphLasso_ can be used with _[GridSearchCV](http://scikit-learn.org/stable/modules/generated/sklearn.grid_search.GridSearchCV.html)_, this estimator yields similar results in less time.
 
     As with _QuicGraphLasso_, this implementation also supports matrix penalization.
 
