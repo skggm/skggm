@@ -80,8 +80,8 @@ For slightly higher dimensions of `n_examples=600` and `n_features=120` we obtai
 
 <img src="images/estimator_suite_scorecard_600x120.png" alt="(n_examples, n_features) = (600, 120)" width="650">
 
-## Trace Plot
-We've provided a utility function `trace_plot` that can be used to display the coefficients as a function of `lam_`.  This can be used with any estimator that returns a path.  The example in `examples/trace_plot_example.py` yields:
+## Plotting the regularization path
+We've provided a utility function `inverse_covariance.trace_plot` that can be used to display the coefficients as a function of `lam_`.  This can be used with any estimator that returns a path.  The example in `examples/trace_plot_example.py` yields:
 
 <img src="images/trace_plot.png" alt="Trace plot" width="400">
 
