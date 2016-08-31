@@ -58,13 +58,9 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
     As noted earlier, for class methods are provided with _QuicGraphLasso_ to compute EBIC scores and select the best penalty when used in `path` mode. This may be a faster, more flexible approach when experimenting with several model selection methods.
 
-- **quic**
-
-    Python function to run QUIC algorithm (independent of sklearn estimator).
-
 - **AdaptiveGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/adaptive_graph_lasso.py#L13-L48)
 
-    _AdaptiveGraphLasso_ performs a two step estimation procedure.  
+    _AdaptiveGraphLasso_ performs a two step estimation procedure: 
     
     1. Obtain an initial sparse estimate.  By default QuicGraphLassoCV be used for the initial estimate but you can pass in your own estimator instance via the parameter `estimator`. 
 
@@ -74,8 +70,13 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
 - **ModelAverage** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/model_average.py#L66-L162)
     
-    This ensemble estimator computes several fits with random penalties and random subsamples (similar to sklearn's [RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html).  The result is a `proportion_` matrix indicating the probability of a non-zero at each index. This can be used in conjunction with the `AdaptiveGraphLasso` for a final estimate.
+    _ModelAverage_ is an ensemble meta-estimator that computes several fits with a user-specified `estimator` and averages the support of the resulting precision estimates.  The result is a `proportion_` matrix indicating the probability of a non-zero at each index. In each trial, this class will:
 
+    1. Randomly subsample the given examples in **X** (similar to scikit-learn's _[RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html)_.
+
+    2. Choose a random matrix penalty.
+
+    The random penalty can be chosen in a variety of ways, specified by the `penalization` parameter.  This technique is also known as _stability selection_ or _random lasso_.
 
 - **InverseCovarianceEstimator** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/inverse_covariance.py#L80-L123)
     
@@ -89,6 +90,9 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
     Submodule that includes `profiling.AverageError`, `profiling.StatisticalPower`, etc. to compare performance between methods.
 
+- **quic**
+
+    Python function to run QUIC algorithm (independent of sklearn estimator).
 
 ## Installation
 
