@@ -14,9 +14,13 @@ The graphical lasso finds diverse applications in **TODO X, Y, Z**.
 
 In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program above and a collection of modern best practices for working with the graphical lasso.  To get started, test out 
 
+    
     from inverse_covariance import QuicGraphLassoCV
     model = QuicGraphLassoCV()
     model.fit(X)  # X is data matrix of shape (n_samples, n_features) 
+    
+    # see: model.precision_, model.covariance_, model.lam_
+    
 
 and then head over to `examples/estimator_suite.py` for other example usage.
 
