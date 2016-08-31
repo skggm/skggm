@@ -14,7 +14,7 @@ The graph lasso has application in X, Y, Z.
 
 In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program above and a collection of modern best practices for working with the graphical lasso.
 
-## Included in the `inverse_covariance` module
+## Included in `inverse_covariance` 
 - **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L138-L216)
 
     This `InverseCovarianceEstimator` wraps the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm as a scikit-learn compatible estimator. The primary output parameters of interest are: `covariance_`, `precision_`, and `lam_`.
@@ -56,7 +56,7 @@ In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible 
 
     Utility to plot `lam_` paths.
 
-- **profiling**
+- **.profiling**
 
     Submodule that includes `profiling.AverageError`, `profiling.StatisticalPower`, etc. to compare performance between methods.
 
