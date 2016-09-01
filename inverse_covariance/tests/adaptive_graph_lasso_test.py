@@ -16,7 +16,7 @@ class TestAdaptiveGraphLasso(object):
     @pytest.mark.parametrize("params_in", [
         ({
             'estimator': QuicGraphLassoCV(
-                        cv=2, # cant deal w more folds at small size
+                        cv=2, 
                         n_refinements=6,
                         init_method='cov',
                         score_metric='log_likelihood',
@@ -25,7 +25,7 @@ class TestAdaptiveGraphLasso(object):
         }),
         ({
             'estimator': QuicGraphLassoCV(
-                        cv=2, # cant deal w more folds at small size
+                        cv=2, 
                         n_refinements=6,
                         init_method='cov',
                         score_metric='log_likelihood',
@@ -34,7 +34,7 @@ class TestAdaptiveGraphLasso(object):
         }),
         ({
             'estimator': QuicGraphLassoCV(
-                        cv=2, # cant deal w more folds at small size
+                        cv=2, 
                         n_refinements=6,
                         init_method='cov',
                         score_metric='log_likelihood',
