@@ -10,7 +10,7 @@ from sklearn.externals.joblib import Parallel, delayed
 #from sklearn.model_selection import check_cv, cross_val_score # >= 0.18
 from sklearn.cross_validation import check_cv, cross_val_score # < 0.18
 
-import pyquic
+from . import pyquic
 from .inverse_covariance import (
     InverseCovarianceEstimator,
     _init_coefs,
