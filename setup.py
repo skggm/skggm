@@ -16,6 +16,12 @@ except ImportError:
     print('scipy is required during installation')
     sys.exit(1)
 
+try:
+    import Cython
+except ImportError:
+    print('Cython is required during installation')
+    sys.exit(1)
+
 import numpy as np
 
 if platform.system() == 'Darwin':
