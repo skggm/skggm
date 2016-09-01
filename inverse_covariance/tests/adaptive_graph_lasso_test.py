@@ -1,9 +1,6 @@
-import os
 import numpy as np
 import pytest
 
-from sklearn.utils.testing import assert_raises
-from sklearn.utils.testing import assert_allclose
 from sklearn import datasets
 
 from inverse_covariance import (
@@ -77,5 +74,3 @@ class TestAdaptiveGraphLasso(object):
                 params_in['method'] == 'inverse_squared':
             uvals = set(model.lam_.flat[model.lam_.flat != 0])
             assert len(uvals) > 0
-
-
