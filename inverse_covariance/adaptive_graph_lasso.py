@@ -132,8 +132,8 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
             self.estimator_.fit(X)
 
         else:
-            raise NotImplementedError(("Only method='binary', 'glasso', or",
-                    "'inverse' have been implemented."))
+            raise NotImplementedError(("Only method='binary', 'inverse_squared', or",
+                                       "'inverse' have been implemented."))
 
         self.is_fitted = True
         return self
