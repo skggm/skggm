@@ -54,16 +54,12 @@ class TestQuicGraphLasso(object):
         print result_vec
         assert_allclose(expected, result_vec)
 
-
     @pytest.mark.parametrize("params_in, expected", [
-        ({'n_refinements': 1}, [4.69, 79.24, 2.67, 8.23e-05, 0.001]),
-        ({'lam': 0.1 * np.ones((10,10)),
-          'n_refinements': 1}, [4.69, 82.23, 2.64, 0.00069]),
+        ({'n_refinements': 1}, [4.6528, 32.335, 3.822, 1.5581289048993696e-06, 0.01]),
+        ({'lam': 0.5 * np.ones((10,10)) - 0.5 * np.diag(np.ones((10,))),
+          'n_refinements': 1}, [4.6765, 49.24459, 3.26151, 6.769744583801085e-07]),
     ])
     def test_integration_quic_graph_lasso_cv(self, params_in, expected):
-        '''
-        Just tests inputs/outputs (not validity of result).
-        '''
         X = datasets.load_diabetes().data
         ic = QuicGraphLassoCV(**params_in)
         ic.fit(X)
@@ -84,10 +80,9 @@ class TestQuicGraphLasso(object):
 
         assert len(ic.grid_scores) == len(ic.cv_lams_)
 
-
     @pytest.mark.parametrize("params_in, expected", [
         ({}, [3.1622776601683795, 3.1622776601683795, 0.91116275611548958]),
-        ({'lam': 0.1 * np.ones((10, 10))}, [4.4495761722050329, 5.5097138516796109]),
+        ({'lam': 0.5 * np.ones((10, 10))}, [4.797, 2.1849]),
     ])
     def test_integration_quic_graph_lasso_ebic(self, params_in, expected):
         '''
