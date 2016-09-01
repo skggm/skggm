@@ -1,0 +1,4 @@
+include build_deps.py
+include requirements.txt
+include README.md
+recursive-include inverse_covariance/pyquic/*
