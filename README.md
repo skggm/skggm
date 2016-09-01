@@ -90,11 +90,17 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
 ## Installation
 
-- Note about pip
+Clone this repo and run
 
-- Note about setup
+    python setup.py install
 
-If you would like to work with a forked branch directly, you will need to run  `python build_deps.py (from /scikitquic)` to compile pyquic.
+or via PyPI
+
+    pip install skggm
+
+The package requires that `numpy`, `scipy`, and `cython` are installed independently first.
+
+If you would like to fork the pyquic bindings directly, use the Makefile provided in `inverse_covariance/pyquic`.
 
 
 ## Tests
