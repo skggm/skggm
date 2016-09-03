@@ -21,7 +21,12 @@ from nilearn import datasets, plotting, input_data
 
 import sys
 sys.path.append('..')
-from inverse_covariance import QuicGraphLasso, QuicGraphLassoCV
+from inverse_covariance import (
+    #QuicGraphLasso,
+    #QuicGraphLassoCV,
+    QuicGraphLassoEBIC,
+    AdaptiveGraphLasso,
+)
 
 plt.ion()
 
@@ -66,11 +71,22 @@ timeseries = masker.fit_transform(abide.func[0])
 #    mode='default',
 #    verbose=1)
 
-# Compute the sparse inverse covariance via QuicGraphLassoCV
-estimator = QuicGraphLassoCV(
-    init_method='cov',
-    verbose=1)
-estimator.fit(timeseries)
+# Compute the sparse inverse covariance via QuicGraphLassoEBIC
+#estimator = QuicGraphLassoEBIC(
+#    init_method='cov',
+#    verbose=1)
+#estimator.fit(timeseries)
+
+# Compute the sparse inverse covariance via 
+# AdaptiveGraphLasso + QuicGraphLassoEBIC + method='binary'
+model = AdaptiveGraphLasso(
+        estimator=QuicGraphLassoEBIC(
+            init_method='cov',
+        ),
+        method='binary',
+    )
+model.fit(timeseries)
+estimator = model.estimator_
 
 # Display the sparse inverse covariance
 plt.figure(figsize=(7.5, 7.5))
