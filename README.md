@@ -144,8 +144,8 @@ In `examples/plot_functional_brain_networks.py` and the corresponding Jupyter no
 
 Specifically, we extract the time-series from the ABIDE dataset, with nodes defined using regions of interest from the [Power-264 atlas (Power, 2011)](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3222858/). The image on the left shows the resulting precision matrix and the image on the right depicts the functional connectivity between different locations on XXX.
 
+<img src="images/functional_connectivity_brain.png" alt="" width="400">
 <img src="images/functional_connectivity_precision.png" alt="" width="300">
-<img src="images/functional_connectivity_brain.png" alt="" width="200">
 
 # References
 
