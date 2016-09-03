@@ -61,7 +61,7 @@ timeseries = masker.fit_transform(abide.func[0])
 
 # Compute the sparse inverse covariance
 estimator = QuicGraphLasso(
-    initialize_method='cov',
+    init_method='cov',
     lam=0.5,
     mode='default',
     verbose=1)
