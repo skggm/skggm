@@ -22,7 +22,6 @@ sys.path.append('..')
 from inverse_covariance import QuicGraphLasso
 
 
-
 # Fetch the coordinates of power atlas
 power = datasets.fetch_coords_power_2011()
 coords = np.vstack((
@@ -30,8 +29,6 @@ coords = np.vstack((
     power.rois['y'],
     power.rois['z'],
 )).T
-
-
 
 # Loading the functional datasets
 abide = datasets.fetch_abide_pcp(n_subjects=1)
@@ -70,7 +67,7 @@ estimator.fit(np.transpose(timeseries))
 # Display the sparse inverse covariance
 plt.figure(figsize=(7.5, 7.5))
 plt.imshow(
-    np.triu(-estimator.precision_,1),
+    np.triu(-estimator.precision_, 1),
     interpolation="nearest",
     vmax=1,
     vmin=-1,
