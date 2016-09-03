@@ -1,15 +1,17 @@
 """
 Estimate Functional Connectivity using an estimator for Sparse Inverse Covariances
 ==================================================================================
-This example constructs a functional connectome using the sparse penalized MLE estimator implemented using QUIC.
+This example constructs a functional connectome using the sparse penalized MLE 
+estimator implemented using QUIC.
 
-This function extracts time-series from the ABIDE dataset, with nodes defined using regions of interest from the 
-Power-264 atlas (Power, 2011).
-Power, Jonathan D., et al. "Functional network organization of the
-human brain." Neuron 72.4 (2011): 665-678.
+This function extracts time-series from the ABIDE dataset, with nodes defined 
+using regions of interest from the 
+  Power-264 atlas (Power, 2011).
+  Power, Jonathan D., et al. "Functional network organization of the human 
+  brain." 
+  Neuron 72.4 (2011): 665-678.
 
 Then we estimate separate inverse covariance matrices for one subject
-
 """
 ##############################################################################
 
@@ -21,6 +23,7 @@ import sys
 sys.path.append('..')
 from inverse_covariance import QuicGraphLasso
 
+plt.ion()
 
 # Fetch the coordinates of power atlas
 power = datasets.fetch_coords_power_2011()
@@ -62,15 +65,13 @@ estimator = QuicGraphLasso(
     lam=0.5,
     mode='default',
     verbose=1)
-estimator.fit(np.transpose(timeseries))
+estimator.fit(timeseries)
 
 # Display the sparse inverse covariance
 plt.figure(figsize=(7.5, 7.5))
 plt.imshow(
     np.triu(-estimator.precision_, 1),
     interpolation="nearest",
-    vmax=1,
-    vmin=-1,
     cmap=plt.cm.PRGn)
 plt.title('Precision (Sparse Inverse Covariance) matrix')
 plt.colorbar()
@@ -81,3 +82,4 @@ plotting.plot_connectome(estimator.precision_, coords,
                          edge_threshold="99.2%",
                          node_size=20)
 plotting.show()
+raw_input()
