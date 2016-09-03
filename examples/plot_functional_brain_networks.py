@@ -21,7 +21,7 @@ from nilearn import datasets, plotting, input_data
 
 import sys
 sys.path.append('..')
-from inverse_covariance import QuicGraphLasso
+from inverse_covariance import QuicGraphLasso, QuicGraphLassoCV
 
 plt.ion()
 
@@ -59,11 +59,16 @@ timeseries = masker.fit_transform(abide.func[0])
 ###############################################################################
 # Extract and plot sparse inverse covariance
 
-# Compute the sparse inverse covariance
-estimator = QuicGraphLasso(
+# Compute the sparse inverse covariance via QuicGraphLasso
+#estimator = QuicGraphLasso(
+#    init_method='cov',
+#    lam=0.5,
+#    mode='default',
+#    verbose=1)
+
+# Compute the sparse inverse covariance via QuicGraphLassoCV
+estimator = QuicGraphLassoCV(
     init_method='cov',
-    lam=0.5,
-    mode='default',
     verbose=1)
 estimator.fit(timeseries)
 
@@ -72,12 +77,12 @@ plt.figure(figsize=(7.5, 7.5))
 plt.imshow(
     np.triu(-estimator.precision_, 1),
     interpolation="nearest",
-    cmap=plt.cm.PRGn)
+    cmap=plt.cm.RdBu_r)
 plt.title('Precision (Sparse Inverse Covariance) matrix')
 plt.colorbar()
 
 # And now display the corresponding graph
-plotting.plot_connectome(estimator.precision_, coords,
+plotting.plot_connectome(-estimator.precision_, coords,
                          title='Functional Connectivity using Precision Matrix',
                          edge_threshold="99.2%",
                          node_size=20)
