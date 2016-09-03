@@ -140,16 +140,20 @@ For example, below is the comparison of the average support error between `QuicG
 <img src="images/quicgraphlassocv_support.png" alt="" width="300">
 
 ## Brain network functional connectivity
-In `examples/plot_functional_brain_networks.py` and the corresponding Jupyter notebook `example/ABIDE_Example`, we plot the functional connectivity of brain-wide networks learned from the observation data.
+In `examples/plot_functional_brain_networks.py` and the corresponding Jupyter notebook `example/ABIDE_Example`, we plot the functional connectivity of brain-wide networks learned from the observation data (reproduces [this example](http://nilearn.github.io/auto_examples/03_connectivity/plot_inverse_covariance_connectome.html#sphx-glr-auto-examples-03-connectivity-plot-inverse-covariance-connectome-py)).
 
-Specifically, we extract the time-series from the ABIDE dataset, with nodes defined using regions of interest from the [Power-264 atlas (Power, 2011)](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3222858/). The image on the left shows the resulting precision matrix and the image on the right depicts the functional connectivity between different locations on XXX.  
+Specifically, we extract the time-series from the ABIDE dataset, with nodes defined using regions of interest from the [Power-264 atlas (Power, 2011)](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3222858/). The image on the left shows the resulting precision matrix and the image on the right shows a top-of-brain connectome depicting the functional connectivity between different locations on XXX.  
 
 <img src="images/functional_connectivity_precision.png" alt="" width="300">
 <img src="images/functional_connectivity_brain.png" alt="" width="400">
 
 We see that XXX.
 
+_Something seems off, should the inverse covariance matrix be symmetric?_
+
 _Manjari, is there some thing we can point out in the plot on the on right that people in this area would recognize?  It just looks like a bunch of scrambled lines to me_
+
+_Manjari, maybe we want to use one of the other methods in this example instead of the straight up QuicGraphLasso since we have many estimators to choose from_
 
 # References
 
