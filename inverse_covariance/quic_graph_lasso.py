@@ -148,6 +148,12 @@ class QuicGraphLasso(InverseCovarianceEstimator):
     -----------        
     lam : scalar or 2D ndarray, shape (n_features, n_features) (default=0.5)
         Regularization parameters per element of the inverse covariance matrix.
+        
+        If a scalar lambda is used, a penalty matrix will be generated 
+        containing lambda for all values in both upper and lower triangles
+        and zeros along the diagonal.  This differs from the scalar graphical 
+        lasso by the diagonal. To replicate the scalar formulation you must 
+        manualy pass in lam * np.ones((n_features, n_features)).
     
     mode : one of 'default', 'path', or 'trace'
         Computation mode.
@@ -372,6 +378,12 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
     lam : scalar or 2D ndarray, shape (n_features, n_features) (default=0.5)
         Regularization parameters per element of the inverse covariance matrix.
         The next parameter 'lams' scale this matrix as the lasso path is learned.
+
+        If a scalar lambda is used, a penalty matrix will be generated 
+        containing lambda for all values in both upper and lower triangles
+        and zeros along the diagonal.  This differs from the scalar graphical 
+        lasso by the diagonal. To replicate the scalar formulation you must 
+        manualy pass in lam * np.ones((n_features, n_features)).
 
     lams : integer, or list positive float, optional
         If an integer is given, it fixes the number of points on the
@@ -626,6 +638,12 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
     lam : scalar or 2D ndarray, shape (n_features, n_features) (default=0.5)
         Regularization parameters per element of the inverse covariance matrix.
     
+        If a scalar lambda is used, a penalty matrix will be generated 
+        containing lambda for all values in both upper and lower triangles
+        and zeros along the diagonal.  This differs from the scalar graphical 
+        lasso by the diagonal. To replicate the scalar formulation you must 
+        manualy pass in lam * np.ones((n_features, n_features)).
+
     path : array of floats or int (default=100)
         An array of float values for scaling lam.
         An int will choose the number of log-scale points to fit.
