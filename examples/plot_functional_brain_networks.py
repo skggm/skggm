@@ -22,8 +22,8 @@ from nilearn import datasets, plotting, input_data
 import sys
 sys.path.append('..')
 from inverse_covariance import (
-    #QuicGraphLasso,
-    #QuicGraphLassoCV,
+    QuicGraphLasso,
+    QuicGraphLassoCV,
     QuicGraphLassoEBIC,
     AdaptiveGraphLasso,
 )
@@ -64,29 +64,41 @@ timeseries = masker.fit_transform(abide.func[0])
 ###############################################################################
 # Extract and plot sparse inverse covariance
 
-# Compute the sparse inverse covariance via QuicGraphLasso
-#estimator = QuicGraphLasso(
-#    init_method='cov',
-#    lam=0.5,
-#    mode='default',
-#    verbose=1)
+estimator_type = 'QuicGraphLasso'
 
-# Compute the sparse inverse covariance via QuicGraphLassoEBIC
-#estimator = QuicGraphLassoEBIC(
-#    init_method='cov',
-#    verbose=1)
-#estimator.fit(timeseries)
+if estimator_type == 'QuicGraphLasso':
+    # Compute the sparse inverse covariance via QuicGraphLasso
+    estimator = QuicGraphLasso(
+        init_method='cov',
+        lam=0.5,
+        mode='default',
+        verbose=1)
 
-# Compute the sparse inverse covariance via 
-# AdaptiveGraphLasso + QuicGraphLassoEBIC + method='binary'
-model = AdaptiveGraphLasso(
-        estimator=QuicGraphLassoEBIC(
-            init_method='cov',
-        ),
-        method='binary',
-    )
-model.fit(timeseries)
-estimator = model.estimator_
+elif estimator_type == 'QuicGraphLassoCV':
+    # Compute the sparse inverse covariance via QuicGraphLassoCV
+    estimator = QuicGraphLassoCV(
+        init_method='cov',
+        verbose=1)
+    estimator.fit(timeseries)
+
+elif estimator_type == 'QuicGraphLassoEBIC':
+    # Compute the sparse inverse covariance via QuicGraphLassoEBIC
+    estimator = QuicGraphLassoEBIC(
+        init_method='cov',
+        verbose=1)
+    estimator.fit(timeseries)
+
+elif estimator_type == 'AdaptiveQuicGraphLasso':
+    # Compute the sparse inverse covariance via 
+    # AdaptiveGraphLasso + QuicGraphLassoEBIC + method='binary'
+    model = AdaptiveGraphLasso(
+            estimator=QuicGraphLassoEBIC(
+                init_method='cov',
+            ),
+            method='binary',
+        )
+    model.fit(timeseries)
+    estimator = model.estimator_
 
 # Display the sparse inverse covariance
 plt.figure(figsize=(7.5, 7.5))
