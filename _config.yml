@@ -27,4 +27,4 @@ github_username:  jekyll
 markdown: kramdown
 theme: minima 
 
-gems: ['jekyll-github-metadata']
+# gems: ['jekyll-github-metadata']
