@@ -9,6 +9,8 @@ After checking out `gh-pages-develop` for the first time.
     ruby 2.X.X
     ```
 
+    if not, then [https://www.ruby-lang.org/en/downloads/](https://www.ruby-lang.org/en/downloads/)
+
 - gem install bundler
 
 - `bundle update`
@@ -18,3 +20,7 @@ After checking out `gh-pages-develop` for the first time.
 After
 
 - `bundle exec jekyll serve --config _config.yml,_config_dev.yml`
+
+Further reading
+
+[https://help.github.com/articles/using-jekyll-as-a-static-site-generator-with-github-pages/](https://help.github.com/articles/using-jekyll-as-a-static-site-generator-with-github-pages/)
