@@ -46,4 +46,6 @@ authors:
 markdown: kramdown
 theme: minima 
 
+include: ['_pages']
+
 # gems: ['jekyll-github-metadata']
