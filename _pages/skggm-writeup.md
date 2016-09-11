@@ -48,19 +48,21 @@ model.fit(X)            # X is data matrix of shape (n_samples, n_features)
 
 If the input penalty `lam` is a scalar, it will be converted to a matrix with zeros along the diagonal and `lam` for all other entries. A matrix `lam` is used as-is, although it may be scaled.
 
-After the model is fit, the estimator object will contain the covariance estimate `model.covariance_`$$\in \mathbb{R}^{p\times p}$$, the sparse inverse covariance estimate `model.precision_`$$\in \mathbb{R}^{p\times p}$$, and the penalty `model.lam_` used to obtain these estimates.  When `auto_scale=False`, the output pentalty will be identical to the input penalty, however, by default the penalty is scaled for best performance with the data scale. If `mode='path'` is used, then the `path` parameter must be provided and both `model.covariance_` and `model.precision_` will be a list of $$p\times p$$ matrices of length `len(path)` and `lam_` remains a scalar. More details can be found via `help(QuicGraphLasso)`. In general, the estimators introduced here will follow this interface unless otherwise noted.  
+After the model is fit, the estimator object will contain the covariance estimate `model.covariance_`$$\in \mathbb{R}^{p\times p}$$, the sparse inverse covariance estimate `model.precision_`$$\in \mathbb{R}^{p\times p}$$, and the penalty `model.lam_` used to obtain these estimates.  When `auto_scale=False`, the output pentalty will be identical to the input penalty, however, by default the penalty is scaled for best performance for the given data. If `mode='path'` is used, then the `path` parameter must be provided and both `model.covariance_` and `model.precision_` will be a list of $$p\times p$$ matrices of length `len(path)` and `lam_` remains a scalar. More details can be found via `help(QuicGraphLasso)`. In general, the estimators introduced here will follow this interface unless otherwise noted.  
 
 The choice of the penalty $$\Lambda$$ can have a large impact on the kind of result obtained.  If a good $$\Lambda$$ is known _a priori_, e.g., when reproducing existing results from the literature, then look no further than this estimator (with `auto_scale='False'`).  
 
-However, for a new data or new problems, we provide several methods for selecting an appropriate $$\Lambda$$. Selection methods roughly fall into two categories of performance:  we can bias away from sparsity, resulting in estimates with false positive edges and where the true underlying graph is a subset of the estimate, or we can bias toward sparsity, resulting in estatimes with missing edges and where the estimate is a subset of the true underlying graph.
+For a new data or new problems, we provide several methods for selecting an appropriate $$\Lambda$$. Selection methods roughly fall into two categories of performance: a) biased away from sparsity, resulting in estimates with false positive edges and where the true underlying graph is a subset of the estimate; or b) biased toward sparsity, resulting in estimates with missing edges and where the estimate is a subset of the true underlying graph.
 
-We explore this a bit further in depth now.
+# Less sparse model selection 
 
-# True network as as subset of the estimated network
+`QuicGraphLassoCV`
 
-# Estimate network as a subset of the true network
+# More sparse model selection
 
-# Refining coefficient support and values via adaptive methods
+<!-- `QuicGraphLassoEBIC` and `ModelAverage`-->
+
+# Refining coefficients via adaptive methods
 
 
 
