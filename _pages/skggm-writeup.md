@@ -50,13 +50,44 @@ we can optimize for network to be a subset of the true network i.e. penalize fal
 
 Depending on how far we get, we can have the model recovery/statistical power examples on some simulated graph types for the different estimators we have (naive, two stage, ensemble model). 
 
+
+# Study Forest
+
 Show off how to use some of our features using the studyforrest data
+
 Initial: Fit a GGM to one subject. Get ensemble model. Do the same for all 19 subjects. Discuss what things look like.  Edges are biased and cannot be interpreted. 
+
 Make it adaptive: 
 Create a group wide weight matrix.  Eg. if edges have a low stability proportion across all subjects, make the penalty weight high, otherwise reduce the penalty to something low or near zero.  
+
 Now do an adaptive fit on each of the subjects. 
+
 Do some discussion of the results and what we see. 
+
 This kind of shows off how to leverage the naive, adaptive and ensemble components. We can end with discussing that toolbox will be expanded to account for non-independence of data, more sophisticated regularizers that do sparsity/group-sparsity, etc... This makes it nice to revisit the dataset with improvements. 
+
+Earlier notes on this data 
+
+Goal: Explore how brain networks differ by 
+
+emotional arousal (high versus low arousal)
+emotional valence (positive or negative valence). 
+
+- Forrest gump movie has 10 second segments annotated by emotion
+- 2 hour fMRI data throughout for ~ 20 subjects
+
+Really rich dataset of subjects listening to forrest gump movie. 
+http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4416536/
+http://studyforrest.org/
+
+- Exceedingly well organized data and totally open; making the analysis fully automated will be easy 
+- Preprocessed data available, or I wouldn't have time to do this
+- Opportunity to have cool pictures/visualization/novel results
+
+I think we will need to have the sparse + group-sparse version of QUIC available to make this analysis really work. Sample sizes are small and subjects are all healthy so we can borrow strength across subjects. 
+
+Recent paper used the dataset to think about brain networks involved in interoception, so we both have some basis for interpreting our results
+http://www.sciencedirect.com/science/article/pii/S1053811915008174
 -->
 
 <!--
