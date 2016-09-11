@@ -46,6 +46,8 @@ model = QuicGraphLasso(
 model.fit(X)            # X is data matrix of shape (n_samples, n_features) 
 {% endhighlight %}
 
+If the input penalty `lam` is a scalar, it will be converted to a matrix with zeros along the diagonal and `lam` for all other entries. A matrix `lam` is used as-is, although it may be scaled.
+
 After the model is fit, the estimator object will contain the covariance estimate `model.covariance_`$$\in \mathbb{R}^{p\times p}$$, the sparse inverse covariance estimate `model.precision_`$$\in \mathbb{R}^{p\times p}$$, and the penalty `model.lam_` used to obtain these estimates.  When `auto_scale=False`, the output pentalty will be identical to the input penalty, however, by default the penalty is scaled for best performance with the data scale. If `mode='path'` is used, then the `path` parameter must be provided and both `model.covariance_` and `model.precision_` will be a list of $$p\times p$$ matrices of length `len(path)` and `lam_` remains a scalar. More details can be found via `help(QuicGraphLasso)`. In general, the estimators introduced here will follow this interface unless otherwise noted.  
 
 The choice of the penalty $$\Lambda$$ can have a large impact on the kind of result obtained.  If a good $$\Lambda$$ is known _a priori_, e.g., when reproducing existing results from the literature, then look no further than this estimator (with `auto_scale='False'`).  
