@@ -26,11 +26,13 @@ The core estimator provided in [skggm](https://github.com/jasonlaska/skggm) is `
 from inverse_covariance import QuicGraphLasso
 
 model = QuicGraphLasso(
-    lam=,               # Graph lasso penalty $$\Lambda$$ (scalar or matrix) 
-    mode=,              # If 'default': single estimate, If 'path': estimates over sequence of scaled penalties 
+    lam=,               # Graph lasso penalty (scalar or matrix) 
+    mode=,              # If 'default': single estimate, 
+                        # if 'path': estimates over sequence of scaled penalties 
     path=,              # Sequence of penalty scales (scalars) mode='path'
     init_method=,       # Inital covariance estimate: 'corrcoef' or 'cov'
-    auto_scale=True,    # If True, scales penalty by max off-diagonal entry of the sample covariance
+    auto_scale=True,    # If True, scales penalty by max off-diagonal entry 
+                        # of the sample covariance
 )
 model.fit(X)  # X is data matrix of shape (n_samples, n_features) 
 
