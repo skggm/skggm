@@ -113,6 +113,8 @@ model = QuicGraphLassoCV(
 model.fit(X)            # X is data matrix of shape (n_samples, n_features) 
 {% endhighlight %}
 
+In addition to covariance and precision estimates, this class returns the best penalty in `model.lam_` and the penalty grid `model.cv_lams_` as well as the cross-validation scores for each penalty `model.grid_scores`.
+
 //`QuicGraphLassoCV` finds a good model 
 
 An example ... is shown in...
