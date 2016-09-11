@@ -54,13 +54,102 @@ The choice of the penalty $$\Lambda$$ can have a large impact on the kind of res
 
 For a new data or new problems, we provide several methods for selecting an appropriate $$\Lambda$$. Selection methods roughly fall into two categories of performance: a) biased away from sparsity, resulting in estimates with false positive edges and where the true underlying graph is a subset of the estimate; or b) biased toward sparsity, resulting in estimates with missing edges and where the estimate is a subset of the true underlying graph.
 
-# Less sparse model selection 
+# Model selection (less sparse)
+One common way to find $$\Lambda$$ is via cross-validation.  Specifically, for a given grid of penalties, we fit the model on $$K$$ subsets of the data (folds) and measure the estimator performance.  We aggregate the score across the folds to determine a score for each $$\Lambda$$.
 
-`QuicGraphLassoCV`
+In this technique, estimator performance is measured against the sample covariance, i.e., 
+$$
+\Sigma_{\mathrm{S}} = \frac{1}{n - 1} \sum_{i=1}^{n} (s_{i} - \bar{s}) (s_{i} - \bar{s})^{T}
+$$
+for samples $$s_{i} \in S$$ and the mean of the observations $$\bar{s}$$. We provide several metrics $$d(\Sigma_{\mathrm{S}}, \Theta^{*})$$ that can be used in with cross-validation via the `score_metric` parameter:
 
-# More sparse model selection
+$$
+\begin{align}
+- \mathrm{tr}(\Sigma_{\mathrm{S}} \cdot \Theta^{*}) + \mathrm{log\,det}~\Theta^{*} - p \cdot \mathrm{log}2\pi
+\label{eqn:log_likelihood}\tag{log-likelihood}
+\end{align}
+$$
 
-<!-- `QuicGraphLassoEBIC` and `ModelAverage`-->
+$$
+\begin{align}
+\frac{1}{2}\left( 
+\mathrm{tr}(\Sigma_{\mathrm{S}} \cdot \Theta^{*})  - \mathrm{log\,det}(\Sigma_{\mathrm{S}} \cdot \Theta^{*}) - p
+\right)
+\label{eqn:kl_loss}\tag{kl-loss}
+\end{align}
+$$
+
+$$
+\begin{align}
+\sum_{ij}\left(
+\Sigma_{\mathrm{S}} - \Sigma^{*}
+\right)^{2}
+\label{eqn:frobenius}\tag{Frobenius}
+\end{align}
+$$
+
+$$
+\begin{align}
+\mathrm{tr}~\left(\Sigma_{\mathrm{S}} \cdot \Theta^{*} - I_p\right)^{2}
+\label{eqn:quadratic}\tag{quadratic}
+\end{align}
+$$
+
+Cross validation can be performed with _QuicGraphLasso_ and [GridSearchCV](http://scikit-learn.org/stable/modules/generated/sklearn.grid_search.GridSearchCV.html), however, we provide an optimized convenience class `QuicGraphLassoCV` that takes advantage of _path mode_ to adaptively estimate the search grid.  This implementation is closely modeled after scikit-learn's [GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html), but additionally supports matrix penalties.
+
+{% highlight python %}
+from inverse_covariance import QuicGraphLassoCV
+
+model = QuicGraphLassoCV(
+    lam=,               # (optional) Graph lasso penalty (scalar or matrix) 
+    lams=,              # If integer, determins the number of grid points 
+                        # per refinement
+    n_refinements=,     # Number of times the grid is refined
+    cv=,                # Number of folds or sklearn CV object
+    score_metric=,      # One of 'log_likelihood' (default), 'frobenius', 
+                        #        'kl', or 'quadratic'
+    init_method=,       # Inital covariance estimate: 'corrcoef' or 'cov'
+)
+model.fit(X)            # X is data matrix of shape (n_samples, n_features) 
+{% endhighlight %}
+
+//`QuicGraphLassoCV` finds a good model 
+
+An example ... is shown in...
+
+# Model selection (more sparse)
+An alternative to cross-validation is the _Extended Bayesian Information Criteria_ (EBIC) \[[Foygel et al.](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\],
+
+$$
+\begin{align}
+EBIC_{\gamma} := -2 \cdot l(\Sigma_{\mathrm{S}}, \Theta^{*}) + |\Theta^{*}| \cdot \mathrm{log}(n) + 4 \cdot |\Theta^{*}| \cdot \mathrm{log}(p) \cdot \gamma,
+\label{eqn:ebic}\tag{2}
+\end{align}
+$$
+
+where $$l(\Sigma_{\mathrm{S}}, \Theta^{*})$$ is the log-likelihood between the estimate and the sample covariance and $$\mid\Theta^{*}\mid$$ is sparsity of the inverse covariance estimate.  The parameter $$\gamma$$ penalizes larger graphs.  When $$\gamma = 0$$, (\ref{eqn:ebic}) reduces to the conventional Bayesian information crieteria.
+
+`QuicGraphLassoEBIC` is provided as a convenience class to use _EBIC_ for model selection.  The parameters are similar to the classes described above with the addition of $$\gamma$$.
+
+An example ... is shown in...  The EBIC selector tends to bias toward a sparser result, often leading to a subgraph of the true underlying graph.  ...
+
+# Randomized model averaging
+For some problems, the support of the sparse precision matrix is of primary interest.  In these cases, the support can be estimated robustly via the _random lasso_ or _stability selection_.
+
+This method estimates the precision over an ensemble of penalties.  Specifically, in each trial we
+
+1. produce boostrap samples by randomly subsampling $$S$$
+2. choose a random matrix penalty
+
+A final _proportion matrix_ is then estimated by summing or averaging the precision estimates from each trial.  The precision support can be estimated by thresholding the proportion matrix.
+
+The random penalty can be chosen in a variety of ways.  
+
+, specified by the `penalization` parameter.  
+`model.proportion_`
+
+(similar to scikit-learn's _[RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html)_)
+
 
 # Refining coefficients via adaptive methods
 
