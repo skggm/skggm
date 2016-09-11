@@ -9,45 +9,60 @@ permalink: /how_to
 
 Given $$n$$ independently drawn, $$p$$-dimensional Gaussian random samples $$S \in \mathbb{R}^{n \times p}$$, the maximum likelihood estimate of the inverse covariance matrix $$\Theta$$ can be computed via the _graphical lasso_, i.e., the program
 
-$$(\Sigma^{*})^{-1} = \Theta^{*} = \underset{\Theta \succ 0}{\mathrm{arg\,min}}~ -\mathrm{log\,det}\Theta + \mathrm{tr}(S\Theta) + \|\Theta\|_{1, \Lambda}$$
+$$
+\begin{align}
+(\Sigma^{*})^{-1} = \Theta^{*} = \underset{\Theta \succ 0}{\mathrm{arg\,min}}~ -\mathrm{log\,det}\Theta + \mathrm{tr}(S\Theta) + \|\Theta\|_{1, \Lambda}
+\label{eqn:graphlasso}\tag{1}
+\end{align}
+$$
 
-where $$\Lambda \in \mathbb{R}^{pxp}$$ is a symmetric non-negative weight matrix and
+where $$\Lambda \in \mathbb{R}^{p\times p}$$ is a symmetric non-negative weight matrix and
 
 $$\|\Theta\|_{1, \Lambda} = \sum_{i,j=1}^{p} \lambda_{ij}|\Theta_{ij}|$$
 
 is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. This is a generalization of the scalar $$\lambda$$ formulation found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
-In [skggm](https://github.com/jasonlaska/skggm) we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program above and a collection of modern best practices for working with the graphical lasso.   
+_Note: perhaps an image of samples and precision matrix here_
 
-# Methods and tradeoffs 
-The core estimator provided in [skggm](https://github.com/jasonlaska/skggm) is `QuicGraphLasso` which is a scikit-learn compatible interface to an implementation of the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm.
+The suport of the sparse precision matrix can be interpreted as the adjency matrix of an undirected graph (with non-zero elements as edges) for correlated components in a system (from which we obtain samples). _Thus, inverse covariance estimation finds numerous applications in X, Y, and Z._
+
+In [skggm](https://github.com/jasonlaska/skggm) we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program (\ref{eqn:graphlasso}) and a collection of modern best practices for working with the graphical lasso.   
+
+## Methods and tradeoffs 
+The core estimator provided in [skggm](https://github.com/jasonlaska/skggm) is `QuicGraphLasso` which is a scikit-learn compatible interface to an implementation of the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm.  It's example usage (and common parameters) is:
 
 {% highlight python %}
 from inverse_covariance import QuicGraphLasso
 
 model = QuicGraphLasso(
     lam=,               # Graph lasso penalty (scalar or matrix) 
-    mode=,              # If 'default': single estimate, 
-                        # if 'path': estimates over sequence of scaled penalties 
+    mode=,              # 'default': single estimate
+                        # 'path': estimates via sequence of scaled penalties 
     path=,              # Sequence of penalty scales (scalars) mode='path'
     init_method=,       # Inital covariance estimate: 'corrcoef' or 'cov'
-    auto_scale=True,    # If True, scales penalty by max off-diagonal entry 
-                        # of the sample covariance
+    auto_scale=,        # If True, scales penalty by 
+                        # max off-diagonal entry of the sample covariance
 )
-model.fit(X)  # X is data matrix of shape (n_samples, n_features) 
-
-# see: model.covariance_, model.precision_, model.lam_
+model.fit(X)            # X is data matrix of shape (n_samples, n_features) 
 {% endhighlight %}
 
-## True network as as subset of the estimated network
+After the model is fit, the estimator object will contain the covariance estimate `model.covariance_`$$\in \mathbb{R}^{p\times p}$$, the sparse inverse covariance estimate `model.precision_`$$\in \mathbb{R}^{p\times p}$$, and the penalty `model.lam_` used to obtain these estimates.  When `auto_scale=False`, the output pentalty will be identical to the input penalty, however, by default the penalty is scaled for best performance with the data scale. If `mode='path'` is used, then the `path` parameter must be provided and both `model.covariance_` and `model.precision_` will be a list of $$p\times p$$ matrices of length `len(path)` and `lam_` remains a scalar. More details can be found via `help(QuicGraphLasso)`. In general, the estimators introduced here will follow this interface unless otherwise noted.  
 
-## Estimate network as a subset of the true network
+The choice of the penalty $$\Lambda$$ can have a large impact on the kind of result obtained.  If a good $$\Lambda$$ is known _a priori_, e.g., when reproducing existing results from the literature, then look no further than this estimator (with `auto_scale='False'`).  
 
-## Refining coefficient support and values via adaptive methods
+However, for a new data or new problems, we provide several methods for selecting an appropriate $$\Lambda$$. Selection methods roughly fall into two categories of performance:  we can bias away from sparsity, resulting in estimates with false positive edges and where the true underlying graph is a subset of the estimate, or we can bias toward sparsity, resulting in estatimes with missing edges and where the estimate is a subset of the true underlying graph.
+
+We explore this a bit further in depth now.
+
+# True network as as subset of the estimated network
+
+# Estimate network as a subset of the true network
+
+# Refining coefficient support and values via adaptive methods
 
 
 
-# Example: Study Forrest data set
+## Example: Study Forrest data set
 
 ---
 
