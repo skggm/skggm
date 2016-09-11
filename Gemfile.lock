@@ -120,7 +120,7 @@ GEM
     sawyer (0.7.0)
       addressable (>= 2.3.5, < 2.5)
       faraday (~> 0.8, < 0.10)
-    terminal-table (1.7.1)
+    terminal-table (1.7.2)
       unicode-display_width (~> 1.1.1)
     thread_safe (0.3.5)
     typhoeus (0.8.0)
@@ -141,4 +141,4 @@ RUBY VERSION
    ruby 2.0.0p481
 
 BUNDLED WITH
-   1.12.5
+   1.13.0
