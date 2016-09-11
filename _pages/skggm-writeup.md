@@ -41,6 +41,24 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
 ---
 
+
+<> Introduce Gaussian Graphical Models and what sparse inverse covariance estimation looks like.  This should highlight that there are trade offs to be made in how these graphs are fit -- 
+
+<> we can optimize for true network to be a subset of the estimated network i.e minimize predictive loss and permit extra edges, or 
+
+<>we can optimize for network to be a subset of the true network i.e. penalize false positives harshly via EBIC or Thresholding ensemble model.
+
+<>Depending on how far we get, we can have the model recovery/statistical power examples on some simulated graph types for the different estimators we have (naive, two stage, ensemble model). 
+
+
+Show off how to use some of our features using the studyforrest data
+Initial: Fit a GGM to one subject. Get ensemble model. Do the same for all 19 subjects. Discuss what things look like.  Edges are biased and cannot be interpreted. 
+Make it adaptive: 
+Create a group wide weight matrix.  Eg. if edges have a low stability proportion across all subjects, make the penalty weight high, otherwise reduce the penalty to something low or near zero.  
+Now do an adaptive fit on each of the subjects. 
+Do some discussion of the results and what we see. 
+This kind of shows off how to leverage the naive, adaptive and ensemble components. We can end with discussing that toolbox will be expanded to account for non-independence of data, more sophisticated regularizers that do sparsity/group-sparsity, etc... This makes it nice to revisit the dataset with improvements. 
+
 # Example of raw escaping
 
 {% raw %}
