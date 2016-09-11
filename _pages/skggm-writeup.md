@@ -20,16 +20,30 @@ is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org
 In [skggm](https://github.com/jasonlaska/skggm) we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program above and a collection of modern best practices for working with the graphical lasso.   
 
 # Methods and tradeoffs 
-Math version (vs. github readme version).  Can include some of the same images from the estimator suite.
+The core estimator provided in [skggm](https://github.com/jasonlaska/skggm) is `QuicGraphLasso` which is a scikit-learn compatible interface to an implementation of the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm.
 
 {% highlight python %}
-from inverse_covariance import QuicGraphLassoCV
+from inverse_covariance import QuicGraphLasso
 
-model = QuicGraphLassoCV()
+model = QuicGraphLasso(
+    lam=,               # Graph lasso penalty $$\Lambda$$ (scalar or matrix) 
+    mode=,              # If 'default': single estimate, If 'path': estimates over sequence of scaled penalties 
+    path=,              # Sequence of penalty scales (scalars) mode='path'
+    init_method=,       # Inital covariance estimate: 'corrcoef' or 'cov'
+    auto_scale=True,    # If True, scales penalty by max off-diagonal entry of the sample covariance
+)
 model.fit(X)  # X is data matrix of shape (n_samples, n_features) 
 
 # see: model.covariance_, model.precision_, model.lam_
 {% endhighlight %}
+
+## True network as as subset of the estimated network
+
+## Estimate network as a subset of the true network
+
+## Refining coefficient support and values via adaptive methods
+
+
 
 # Example: Study Forrest data set
 
@@ -42,7 +56,7 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 ---
 
 <!--
-Introduce Gaussian Graphical Models and what sparse inverse covariance estimation looks like.  This should highlight that there are trade offs to be made in how these graphs are fit -- 
+Introduce Gaussian Graphical Models and what sparse inverse covariance estimation looks like.  This should highlight that there are trade offs to be made in how these graphs are fit 
 
 we can optimize for true network to be a subset of the estimated network i.e minimize predictive loss and permit extra edges, or 
 
