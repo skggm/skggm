@@ -11,9 +11,9 @@ After checking out `gh-pages-develop` for the first time.
 
     if not, then [https://www.ruby-lang.org/en/downloads/](https://www.ruby-lang.org/en/downloads/)
 
-- sudo gem install bundler
+- `sudo gem install bundler`
 
-- sudo gem install jekyll
+- `sudo gem install jekyll`
 
 - `bundle update`
 
