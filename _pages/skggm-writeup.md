@@ -29,7 +29,7 @@ The suport of the sparse precision matrix can be interpreted as the adjency matr
 In [skggm](https://github.com/jasonlaska/skggm) we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program (\ref{eqn:graphlasso}) and a collection of modern best practices for working with the graphical lasso.   
 
 ## Methods and tradeoffs 
-The core estimator provided in [skggm](https://github.com/jasonlaska/skggm) is `QuicGraphLasso` which is a scikit-learn compatible interface to an implementation of the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm.  It's example usage (and common parameters) is:
+The core estimator provided in [skggm](https://github.com/jasonlaska/skggm) is `QuicGraphLasso` which is a scikit-learn compatible interface to an implementation of the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm for (\ref{eqn:graphlasso}).  It's example usage (and common parameters) is:
 
 {% highlight python %}
 from inverse_covariance import QuicGraphLasso
@@ -54,7 +54,7 @@ The choice of the penalty $$\Lambda$$ can have a large impact on the kind of res
 
 For a new data or new problems, we provide several methods for selecting an appropriate $$\Lambda$$. Selection methods roughly fall into two categories of performance: a) biased away from sparsity, resulting in estimates with false positive edges and where the true underlying graph is a subset of the estimate; or b) biased toward sparsity, resulting in estimates with missing edges and where the estimate is a subset of the true underlying graph.
 
-# Model selection (less sparse)
+# Model selection via cross-validation (less sparse)
 One common way to find $$\Lambda$$ is via cross-validation.  Specifically, for a given grid of penalties, we fit the model on $$K$$ subsets of the data (folds) and measure the estimator performance.  We aggregate the score across the folds to determine a score for each $$\Lambda$$.
 
 In this technique, estimator performance is measured against the sample covariance, i.e., 
@@ -101,8 +101,8 @@ Cross validation can be performed with _QuicGraphLasso_ and [GridSearchCV](http:
 from inverse_covariance import QuicGraphLassoCV
 
 model = QuicGraphLassoCV(
-    lam=,               # (optional) Graph lasso penalty (scalar or matrix) 
-    lams=,              # If integer, determins the number of grid points 
+    lam=,               # (optional) Initial penalty (scalar or matrix) 
+    lams=,              # If integer, determines the number of grid points 
                         # per refinement
     n_refinements=,     # Number of times the grid is refined
     cv=,                # Number of folds or sklearn CV object
@@ -119,7 +119,7 @@ In addition to covariance and precision estimates, this class returns the best p
 
 An example ... is shown in...
 
-# Model selection (more sparse)
+# Model selection via EBIC (more sparse)
 An alternative to cross-validation is the _Extended Bayesian Information Criteria_ (EBIC) \[[Foygel et al.](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\],
 
 $$
@@ -131,7 +131,7 @@ $$
 
 where $$l(\Sigma_{\mathrm{S}}, \Theta^{*})$$ is the log-likelihood between the estimate and the sample covariance and $$\mid\Theta^{*}\mid$$ is sparsity of the inverse covariance estimate.  The parameter $$\gamma$$ penalizes larger graphs.  When $$\gamma = 0$$, (\ref{eqn:ebic}) reduces to the conventional Bayesian information crieteria.
 
-`QuicGraphLassoEBIC` is provided as a convenience class to use _EBIC_ for model selection.  The parameters are similar to the classes described above with the addition of $$\gamma$$.
+`QuicGraphLassoEBIC` is provided as a convenience class to use _EBIC_ for model selection.  The parameters are similar to the classes described above with the addition of `gamma`.
 
 An example ... is shown in...  The EBIC selector tends to bias toward a sparser result, often leading to a subgraph of the true underlying graph.  ...
 
