@@ -147,7 +147,7 @@ The random penalty can be chosen in a variety of ways.  We initially offer the f
 
 - `subsampling` (no penalty): This option does not modify the penalty and only draws bootstrapped samples from $$S$$.
 
-- `random`: This option generates a randomly perturbed penalty `lam` weight matrix.  Specifically, the off-diagonal entries take the values $$\{\lambda\eta,~ \frac{\lambda}{\eta}\}$$ (where $$\eta$$ is the class parameter `lam_perturb`).  The resulting matrix is symmetric.
+- `random`: This option generates a randomly perturbed penalty `lam` weight matrix.  Specifically, the off-diagonal entries take the values $$\{\lambda\eta,~ \frac{\lambda}{\eta}\}$$ with probability $$1/2$$ for one triangle ($$\eta$$ is the class parameter `lam_perturb`). 
 
 - `fully_random`: This option generates a symmetric matrix with Gaussian off-diagonal entries (for a single triangle).  The penalty matrix is scaled appropriately for $$S$$.
 
