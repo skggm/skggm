@@ -22,7 +22,7 @@ $$\|\Theta\|_{1, \Lambda} = \sum_{i,j=1}^{p} \lambda_{ij}|\Theta_{ij}|$$
 
 is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. This is a generalization of the scalar $$\lambda$$ formulation found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
-_Note: perhaps an image of samples and precision matrix here_
+__Note: perhaps an image of samples and precision matrix here__
 
 The suport of the sparse precision matrix can be interpreted as the adjency matrix of an undirected graph (with non-zero elements as edges) for correlated components in a system (from which we obtain samples). _Thus, inverse covariance estimation finds numerous applications in X, Y, and Z._
 
@@ -115,9 +115,7 @@ model.fit(X)            # X is data matrix of shape (n_samples, n_features)
 
 In addition to covariance and precision estimates, this class returns the best penalty in `model.lam_` and the penalty grid `model.cv_lams_` as well as the cross-validation scores for each penalty `model.grid_scores`.
 
-//`QuicGraphLassoCV` finds a good model 
-
-An example ... is shown in...
+__An example ... is shown in... `QuicGraphLassoCV` finds a__
 
 # Model selection via EBIC (more sparse)
 An alternative to cross-validation is the _Extended Bayesian Information Criteria_ (EBIC) \[[Foygel et al.](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\],
@@ -129,16 +127,16 @@ EBIC_{\gamma} := -2 \cdot l(\Sigma_{\mathrm{S}}, \Theta^{*}) + |\Theta^{*}| \cdo
 \end{align}
 $$
 
-where $$l(\Sigma_{\mathrm{S}}, \Theta^{*})$$ is the log-likelihood between the estimate and the sample covariance and $$\mid\Theta^{*}\mid$$ is sparsity of the inverse covariance estimate.  The parameter $$\gamma$$ penalizes larger graphs.  When $$\gamma = 0$$, (\ref{eqn:ebic}) reduces to the conventional Bayesian information crieteria.
+where $$l(\Sigma_{\mathrm{S}}, \Theta^{*})$$ is the log-likelihood between the estimate and the sample covariance and $$\mid\Theta^{*}\mid$$ is sparsity of the inverse covariance estimate.  The parameter $$\gamma$$ penalizes larger graphs.  When $$\gamma = 0$$, (\ref{eqn:ebic}) reduces to the conventional Bayesian information crieteria (BIC).
 
 `QuicGraphLassoEBIC` is provided as a convenience class to use _EBIC_ for model selection.  This class computes a path of estimates and selects the model that minimizes the _EBIC_ criteria.  We omit showing the interface here as it is similar to the classes described above with the addition of `gamma`.
 
-An example ... is shown in...  The EBIC selector tends to bias toward a sparser result, often leading to a subgraph of the true underlying graph.  ...
+__An example ... is shown in...  The EBIC selector tends to bias toward a sparser result, often leading to a subgraph of the true underlying graph.  ...__
 
 # Randomized model averaging
-For some problems, the support of the sparse precision matrix is of primary interest.  In these cases, the support can be estimated robustly via the [_random lasso_](https://arxiv.org/abs/1104.3398) or [_stability selection_](https://arxiv.org/pdf/0809.2932v2.pdf). The skggm `ModelAverage` class implements a meta-estimator to do this. (We note this is a similar facility to scikit-learn's [_RandomizedLasso_](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html), but for the graph lasso.)
+For some problems, the support of the sparse precision matrix is of primary interest.  In these cases, the support can be estimated robustly via the _random lasso_ or _stability selection_ [[Wang et al.](https://arxiv.org/abs/1104.3398), [Meinhausen et al.](https://arxiv.org/pdf/0809.2932v2.pdf)]. The skggm `ModelAverage` class implements a meta-estimator to do this. (We note this is a similar facility to scikit-learn's [_RandomizedLasso_](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html), but for the graph lasso.)
 
-This class estimates the precision over an ensemble of estimators with random penalties.  Specifically, in each trial we
+This technique estimates the precision over an ensemble of estimators with random penalties.  Specifically, in each trial we
 
 1. produce boostrap samples by randomly subsampling $$S$$
 2. choose a random matrix penalty
@@ -159,24 +157,45 @@ The random penalty can be chosen in a variety of ways.  We initially offer the f
 from inverse_covariance import QuicGraphLassoCV, ModelAverage
 
 model = ModelAverage(
-    estimator=QuicGraphLassoCV(),  # graph lasso estimator instance 
-    n_trials=100,                  # number of trials to average over
-    penalization='random',         # penalization method
+    estimator=QuicGraphLassoCV(),  # Graph lasso estimator instance 
+    n_trials=100,                  # Number of trials to average over
+    penalization='random',         # 'subsampling', 'random', or 'fully_random'
     lam=0.5,                        
     lam_perturb=0.5,               
-    support_thresh=0.5,            # used for support estimation
+    support_thresh=0.5,            # used for support estimation via proportions
 )
 model.fit(X)                        
 {% endhighlight %}
 
-This class will contain the matrix of support probabilities `model.proportion_`, an estimate of the support `model.support_`, the penalties used in each trial `model.lams_`, and the indeices for selecting the subset of data in each trial `model.subsets_`.  
+This class will contain the matrix of support probabilities `model.proportion_`$$\in \mathbb{R}^{p\times p}$$, an estimate of the support `model.support_`$$\in \mathbb{R}^{p\times p}$$, the penalties used in each trial `model.lams_`, and the indeices for selecting the subset of data in each trial `model.subsets_`.  
 
-The `support_` matrix is estimated by thresholding the proportions matrix by `support_thresh` and is provided primarily for convenience. 
-
-_example like missing examples earlier..._
+__example...__
 
 # Refining coefficients via adaptive methods
+Given an initial sparse estimate, we can compute a new penalty based on the estimate and refit the graph lasso with this adaptive penalty [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf), [Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)]. Currently refitting is always done with `QuicGraphLassoCV`.  We provide three ways of computing new weights before refitting:
 
+- `binary`: Generates a matrix that has zeros where where the estimator was non-zero and ones elsewhere.  This is sometimes called the _relaxed lasso_ or _gelato_ [[Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)].
+
+- `inverse`: For an element $$\theta_{i,j}$$ of $$\Theta$$, computes $$\frac{1}{\theta_{i,j}}$$ for non-zero coefficients and $$\mathrm{max}\{\frac{1}{\theta_{i,j}}\}$$ for the zero valued coefficients.  This is what is used in the _glasso_ R package.
+
+- `inverse_squared`: Computes $$\frac{1}{\theta_{i,j}^{2}}$$ for non-zero coefficients and $$\mathrm{max}\{\frac{1}{\theta_{i,j}^{2}}\}$$ for the zero valued coefficients.
+
+Since the `ModelAverage` meta-estimator produces a good support estimate, this can be used in conjunction with the `binary` option to estimate coefficient values. 
+
+{% highlight python %}
+from inverse_covariance import QuicGraphLassoCV, AdaptiveGraphLasso
+
+model = AdaptiveGraphLasso(
+    estimator=QuicGraphLassoCV(),  # Graph lasso estimator instance 
+                                   # (or ModelAverage instance) 
+    method='binary',               # 'binary', 'inverse', or 'inverse_squared'
+)
+model.fit(X)                        
+{% endhighlight %}
+
+The resulting model will contain `model.estimator_` which is a final `QuicGraphLassoCV` instance fit with the adaptive penalty `model.lam_`. 
+
+__example...__
 
 
 ## Example: Study Forrest data set
@@ -187,18 +206,8 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
 [@jasonlaska](https://github.com/jasonlaska) and [@mnarayn](https://github.com/mnarayan)
 
----
 
 <!--
-Introduce Gaussian Graphical Models and what sparse inverse covariance estimation looks like.  This should highlight that there are trade offs to be made in how these graphs are fit 
-
-we can optimize for true network to be a subset of the estimated network i.e minimize predictive loss and permit extra edges, or 
-
-we can optimize for network to be a subset of the true network i.e. penalize false positives harshly via EBIC or Thresholding ensemble model.
-
-Depending on how far we get, we can have the model recovery/statistical power examples on some simulated graph types for the different estimators we have (naive, two stage, ensemble model). 
-
-
 # Study Forest
 
 Show off how to use some of our features using the studyforrest data
