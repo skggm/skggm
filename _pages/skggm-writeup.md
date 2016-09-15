@@ -136,22 +136,44 @@ where $$l(\Sigma_{\mathrm{S}}, \Theta^{*})$$ is the log-likelihood between the e
 An example ... is shown in...  The EBIC selector tends to bias toward a sparser result, often leading to a subgraph of the true underlying graph.  ...
 
 # Randomized model averaging
-For some problems, the support of the sparse precision matrix is of primary interest.  In these cases, the support can be estimated robustly via the _random lasso_ or _stability selection_.
+For some problems, the support of the sparse precision matrix is of primary interest.  In these cases, the support can be estimated robustly via the [_random lasso_](https://arxiv.org/abs/1104.3398) or [_stability selection_](https://arxiv.org/pdf/0809.2932v2.pdf). The skggm `ModelAverage` class implements a meta-estimator to do this. (We note this is a similar facility to scikit-learn's [_RandomizedLasso_](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html), but for the graph lasso.)
 
-This method estimates the precision over an ensemble of penalties.  Specifically, in each trial we
+This class estimates the precision over an ensemble of estimators with random penalties.  Specifically, in each trial we
 
 1. produce boostrap samples by randomly subsampling $$S$$
 2. choose a random matrix penalty
 
 A final _proportion matrix_ is then estimated by summing or averaging the precision estimates from each trial.  The precision support can be estimated by thresholding the proportion matrix.
 
-The random penalty can be chosen in a variety of ways.  
+The random penalty can be chosen in a variety of ways.  We initially offer the following methods:
 
-, specified by the `penalization` parameter.  
-`model.proportion_`
+- `subsampling` (no penalty): This option does not modify the penalty and only draws bootstrapped samples from $$S$$.
 
-(similar to scikit-learn's _[RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html)_)
+- `random`: This option generates a randomly perturbed penalty `lam` weight matrix.  Specifically, the off-diagonal entries take the values $$\{\lambda\eta,~ \frac{\lambda}{\eta}\}$$ (where $$\eta$$ is the class parameter `lam_perturb`).  The resulting matrix is symmetric.
 
+- `fully_random`: This option generates a symmetric matrix with Gaussian off-diagonal entries (for a single triangle).  The penalty matrix is scaled appropriately for $$S$$.
+
+`ModelAverage` takes the parameter `estimator` as a base graph lasso estimator to average.  By default, it will use `QuicGraphLassoCV` as the base estimator.  An explicit example is as follows.
+
+{% highlight python %}
+from inverse_covariance import QuicGraphLassoCV, ModelAverage
+
+model = ModelAverage(
+    estimator=QuicGraphLassoCV(),  # graph lasso estimator instance 
+    n_trials=100,                  # number of trials to average over
+    penalization='random',         # penalization method
+    lam=0.5,                        
+    lam_perturb=0.5,               
+    support_thresh=0.5,            # used for support estimation
+)
+model.fit(X)                        
+{% endhighlight %}
+
+This class will contain the matrix of support probabilities `model.proportion_`, an estimate of the support `model.support_`, the penalties used in each trial `model.lams_`, and the indeices for selecting the subset of data in each trial `model.subsets_`.  
+
+The `support_` matrix is estimated by thresholding the proportions matrix by `support_thresh` and is provided primarily for convenience. 
+
+_example like missing examples earlier..._
 
 # Refining coefficients via adaptive methods
 
