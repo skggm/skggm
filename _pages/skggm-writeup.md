@@ -22,9 +22,7 @@ $$\|\Theta\|_{1, \Lambda} = \sum_{i,j=1}^{p} \lambda_{ij}|\Theta_{ij}|$$
 
 is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. This is a generalization of the scalar $$\lambda$$ formulation found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
-__Note: perhaps an image of samples and precision matrix here__
-
-The suport of the sparse precision matrix can be interpreted as the adjency matrix of an undirected graph (with non-zero elements as edges) for correlated components in a system (from which we obtain samples). _Thus, inverse covariance estimation finds numerous applications in X, Y, and Z._
+The suport of the sparse precision matrix can be interpreted as the adjency matrix of an undirected graph (with non-zero elements as edges) for correlated components in a system (from which we obtain samples). **Thus, inverse covariance estimation finds numerous applications in X, Y, and Z.**
 
 In [skggm](https://github.com/jasonlaska/skggm) we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program (\ref{eqn:graphlasso}) and a collection of modern best practices for working with the graphical lasso.   
 
@@ -117,6 +115,13 @@ In addition to covariance and precision estimates, this class returns the best p
 
 __An example ... is shown in... `QuicGraphLassoCV` finds a__
 
+<img style="margin: 0 auto;display: block;" src="assets/graph_lasso_cv.png" width="650" />
+<div style="margin: 0 auto;display: block; width:600px;">
+<center><i><small>
+Example inverse covariance estimates (less sparse).  From left to right:  the original inverse covariance (precision) matrix, the sample covariance, a QuicGraphLassoCV estimate with log-likelihood for scoring, and a QuicGraphLassoCV estimate with the Frobenius norm for scoring.
+</small></i></center>
+</div>
+
 # Model selection via EBIC (more sparse)
 An alternative to cross-validation is the _Extended Bayesian Information Criteria_ (EBIC) \[[Foygel et al.](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\],
 
@@ -132,6 +137,13 @@ where $$l(\Sigma_{\mathrm{S}}, \Theta^{*})$$ is the log-likelihood between the e
 `QuicGraphLassoEBIC` is provided as a convenience class to use _EBIC_ for model selection.  This class computes a path of estimates and selects the model that minimizes the _EBIC_ criteria.  We omit showing the interface here as it is similar to the classes described above with the addition of `gamma`.
 
 __An example ... is shown in...  The EBIC selector tends to bias toward a sparser result, often leading to a subgraph of the true underlying graph.  ...__
+
+<img style="margin: 0 auto;display: block;" src="assets/ebic.png" width="500" />
+<div style="margin: 0 auto;display: block; width:600px;">
+<center><i><small>
+Example inverse covariance estimates (more sparse).  From left to right:  the original inverse covariance (precision) matrix, a QuicGraphLassoEBIC estimate with gamma = 0 (BIC), and a QuicGraphLassoEBIC estimate with gamma = 0.1.
+</small></i></center>
+</div>
 
 # Randomized model averaging
 For some problems, the support of the sparse precision matrix is of primary interest.  In these cases, the support can be estimated robustly via the _random lasso_ or _stability selection_ [[Wang et al.](https://arxiv.org/abs/1104.3398), [Meinhausen et al.](https://arxiv.org/pdf/0809.2932v2.pdf)]. The skggm `ModelAverage` class implements a meta-estimator to do this. (We note this is a similar facility to scikit-learn's [_RandomizedLasso_](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html), but for the graph lasso.)
@@ -196,9 +208,16 @@ model.fit(X)
 The resulting model will contain `model.estimator_` which is a final `QuicGraphLassoCV` instance fit with the adaptive penalty `model.lam_`. 
 
 __example...__
-
+<img style="margin: 0 auto;display: block;" src="assets/adaptive.png" width="650" />
+<div style="margin: 0 auto;display: block; width:600px;">
+<center><i><small>
+Example adaptive inverse covariance estimates.  From left to right:  the original inverse covariance (precision) matrix, adaptive estimate with QuicGraphLassoCV base estimator and 'inverse' method, adaptive estimate with QuicGraphLassoEBIC (gamma = 0) base estimator and 'inverse' method, adaptive estimate with ModelAverage base estimator and 'binary' method.
+</small></i></center>
+</div>
 
 ## Example: Study Forrest data set
+
+**TODO**
 
 ---
 
