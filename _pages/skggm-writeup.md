@@ -182,6 +182,12 @@ model.fit(X)
 This class will contain the matrix of support probabilities `model.proportion_`$$\in \mathbb{R}^{p\times p}$$, an estimate of the support `model.support_`$$\in \mathbb{R}^{p\times p}$$, the penalties used in each trial `model.lams_`, and the indeices for selecting the subset of data in each trial `model.subsets_`.  
 
 __example...__
+<img style="margin: 0 auto;display: block;" src="assets/model_average.png" width="500" />
+<div style="margin: 0 auto;display: block; width:600px;">
+<center><i><small>
+Example random model averaging support estimates.  From left to right:  the original inverse covariance (precision) matrix, the ModelAverage proportions matrix, and the thresholded proportions matrix (support estimate).  The threshold used in this estimate was 0.5.
+</small></i></center>
+</div>
 
 # Refining coefficients via adaptive methods
 Given an initial sparse estimate, we can compute a new penalty based on the estimate and refit the graph lasso with this adaptive penalty [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf), [Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)]. Currently refitting is always done with `QuicGraphLassoCV`.  We provide three ways of computing new weights before refitting:
