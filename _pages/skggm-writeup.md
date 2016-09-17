@@ -33,15 +33,15 @@ The core estimator provided in [skggm](https://github.com/jasonlaska/skggm) is `
 from inverse_covariance import QuicGraphLasso
 
 model = QuicGraphLasso(
-    lam=,               # Graph lasso penalty (scalar or matrix) 
-    mode=,              # 'default': single estimate
-                        # 'path': estimates via sequence of scaled penalties 
-    path=,              # Sequence of penalty scales (scalars) mode='path'
-    init_method=,       # Inital covariance estimate: 'corrcoef' or 'cov'
-    auto_scale=,        # If True, scales penalty by 
-                        # max off-diagonal entry of the sample covariance
+    lam=int or np.ndarray,  # Graph lasso penalty (scalar or matrix) 
+    mode=str,               # 'default': single estimate
+                            # 'path': use sequence of scaled penalties 
+    path=list,              # Sequence of penalty scales mode='path'
+    init_method=str,        # Inital covariance estimate: 'corrcoef' or 'cov'
+    auto_scale=bool,        # If True, scales penalty by 
+                            # max off-diagonal entry of the sample covariance
 )
-model.fit(X)            # X is data matrix of shape (n_samples, n_features) 
+model.fit(X)                # X is data matrix (n_samples, n_features) 
 {% endhighlight %}
 
 If the input penalty `lam` is a scalar, it will be converted to a matrix with zeros along the diagonal and `lam` for all other entries. A matrix `lam` is used as-is, although it may be scaled.
@@ -99,16 +99,16 @@ Cross validation can be performed with _QuicGraphLasso_ and [GridSearchCV](http:
 from inverse_covariance import QuicGraphLassoCV
 
 model = QuicGraphLassoCV(
-    lam=,               # (optional) Initial penalty (scalar or matrix) 
-    lams=,              # If integer, determines the number of grid points 
-                        # per refinement
-    n_refinements=,     # Number of times the grid is refined
-    cv=,                # Number of folds or sklearn CV object
-    score_metric=,      # One of 'log_likelihood' (default), 'frobenius', 
-                        #        'kl', or 'quadratic'
-    init_method=,       # Inital covariance estimate: 'corrcoef' or 'cov'
+    lam=int or np.ndarray,  # (optional) Initial penalty (scalar or matrix) 
+    lams=int or list,       # If int, determines the number of grid points 
+                            # per refinement
+    n_refinements=int,      # Number of times the grid is refined
+    cv=int,                 # Number of folds or sklearn CV object
+    score_metric=str,       # One of 'log_likelihood' (default), 'frobenius', 
+                            #        'kl', or 'quadratic'
+    init_method=str,        # Inital covariance estimate: 'corrcoef' or 'cov'
 )
-model.fit(X)            # X is data matrix of shape (n_samples, n_features) 
+model.fit(X)                # X is data matrix (n_samples, n_features) 
 {% endhighlight %}
 
 In addition to covariance and precision estimates, this class returns the best penalty in `model.lam_` and the penalty grid `model.cv_lams_` as well as the cross-validation scores for each penalty `model.grid_scores`.
@@ -169,14 +169,16 @@ The random penalty can be chosen in a variety of ways.  We initially offer the f
 from inverse_covariance import QuicGraphLassoCV, ModelAverage
 
 model = ModelAverage(
-    estimator=QuicGraphLassoCV(),  # Graph lasso estimator instance 
-    n_trials=100,                  # Number of trials to average over
-    penalization='random',         # 'subsampling', 'random', or 'fully_random'
-    lam=0.5,                        
-    lam_perturb=0.5,               
-    support_thresh=0.5,            # used for support estimation via proportions
+    estimator=estimator,    # Graph lasso estimator instance 
+                            # e.g., QuicGraphLassoCV(), QuicGraphLassoEBIC()
+    n_trials=int,           # Number of trials to average over
+    penalization=str,       # One of 'subsampling', 'random' (default), 
+                            #        or 'fully_random'
+    lam=float,              # Used if penalization='random'          
+    lam_perturb=float,      # Used if penalization='random'
+    support_thresh=float,   # Estimate support via proportions (default=0.5)
 )
-model.fit(X)                        
+model.fit(X)                # X is data matrix (n_samples, n_features)             
 {% endhighlight %}
 
 This class will contain the matrix of support probabilities `model.proportion_`$$\in \mathbb{R}^{p\times p}$$, an estimate of the support `model.support_`$$\in \mathbb{R}^{p\times p}$$, the penalties used in each trial `model.lams_`, and the indeices for selecting the subset of data in each trial `model.subsets_`.  
@@ -205,16 +207,15 @@ Since the `ModelAverage` meta-estimator produces a good support estimate, this c
 from inverse_covariance import QuicGraphLassoCV, AdaptiveGraphLasso
 
 model = AdaptiveGraphLasso(
-    estimator=QuicGraphLassoCV(),  # Graph lasso estimator instance 
-                                   # (or ModelAverage instance) 
-    method='binary',               # 'binary', 'inverse', or 'inverse_squared'
+    estimator=estimator,    # Graph lasso estimator instance
+                            # e.g., QuicGraphLassoCV() or ModelAverage instance
+    method=str,             # One of 'binary', 'inverse', or 'inverse_squared'
 )
-model.fit(X)                        
+model.fit(X)                # X is data matrix (n_samples, n_features)            
 {% endhighlight %}
 
 The resulting model will contain `model.estimator_` which is a final `QuicGraphLassoCV` instance fit with the adaptive penalty `model.lam_`. 
 
-__example...__
 <img style="margin: 0 auto;display: block;" src="assets/adaptive.png" width="650" />
 <div style="margin: 0 auto;display: block; width:600px;">
 <center><i><small>
