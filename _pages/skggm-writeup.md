@@ -113,14 +113,14 @@ model.fit(X)            # X is data matrix of shape (n_samples, n_features)
 
 In addition to covariance and precision estimates, this class returns the best penalty in `model.lam_` and the penalty grid `model.cv_lams_` as well as the cross-validation scores for each penalty `model.grid_scores`.
 
-__An example ... is shown in... `QuicGraphLassoCV` finds a__
-
 <img style="margin: 0 auto;display: block;" src="assets/graph_lasso_cv.png" width="650" />
 <div style="margin: 0 auto;display: block; width:600px;">
 <center><i><small>
-Example inverse covariance estimates (less sparse).  From left to right:  the original inverse covariance (precision) matrix, the sample covariance, a QuicGraphLassoCV estimate with log-likelihood for scoring, and a QuicGraphLassoCV estimate with the Frobenius norm for scoring.
+Figure 1.  Inverse covariance estimates (less sparse).  From left to right:  the original inverse covariance (precision) matrix, the sample covariance, a QuicGraphLassoCV estimate with log-likelihood for scoring (error = 0.6, support error = 4), and a QuicGraphLassoCV estimate with the Frobenius norm for scoring (error = 0.64, support error = 2).
 </small></i></center>
 </div>
+<br>
+An example is shown in Figure 1 (code for these toy examples can be found in [skggm](https://github.com/jasonlaska/skggm) in [examples/estimator_suite.py](https://github.com/jasonlaska/skggm/blob/master/examples/estimator_suite.py)). The `QuicGraphLassoCV` estimates are much sparser than the empirical covariance, but contain a superset of the true precision support. Further, the coefficient values on the true support are not particularly accurate.  In this trial of this example, the Frobenius scoring function performed better than log-likelihood and kl-divergence, however, this does not reflect how they might compare in general.  As the dimension of the samples `n_features` grows, we find that this model selection method tends to bias toward more non-zero coefficients.
 
 # Model selection via EBIC (more sparse)
 An alternative to cross-validation is the _Extended Bayesian Information Criteria_ (EBIC) \[[Foygel et al.](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\],
@@ -136,14 +136,14 @@ where $$l(\Sigma_{\mathrm{S}}, \Theta^{*})$$ is the log-likelihood between the e
 
 `QuicGraphLassoEBIC` is provided as a convenience class to use _EBIC_ for model selection.  This class computes a path of estimates and selects the model that minimizes the _EBIC_ criteria.  We omit showing the interface here as it is similar to the classes described above with the addition of `gamma`.
 
-__An example ... is shown in...  The EBIC selector tends to bias toward a sparser result, often leading to a subgraph of the true underlying graph.  ...__
-
 <img style="margin: 0 auto;display: block;" src="assets/ebic.png" width="500" />
 <div style="margin: 0 auto;display: block; width:600px;">
 <center><i><small>
-Example inverse covariance estimates (more sparse).  From left to right:  the original inverse covariance (precision) matrix, a QuicGraphLassoEBIC estimate with gamma = 0 (BIC), and a QuicGraphLassoEBIC estimate with gamma = 0.1.
+Figure 2. Inverse covariance estimates (more sparse).  From left to right:  the original inverse covariance (precision) matrix, a QuicGraphLassoEBIC estimate with gamma = 0 (BIC) (error = 0.68, support error = 0), and a QuicGraphLassoEBIC estimate with gamma = 0.1 (error = 1.36, support error = 6).
 </small></i></center>
 </div>
+<br>
+An example is shown in Figure 2. The `QuicGraphLassoEBIC` estimates are much sparser than `QuicGraphLassoCV` estimates, and often contain a subset of the true precision support.  In this small dimensional example, `BIC` (gamma = 0) performed best as `EBIC` with gamma = 0.1 selected only the diagonal coefficients. As the dimension of the samples `n_features` grows, `BIC` will produce a less-sparse result and thus an increasing gamma parameter serves to obtain sparser solutions.
 
 # Randomized model averaging
 For some problems, the support of the sparse precision matrix is of primary interest.  In these cases, the support can be estimated robustly via the _random lasso_ or _stability selection_ [[Wang et al.](https://arxiv.org/abs/1104.3398), [Meinhausen et al.](https://arxiv.org/pdf/0809.2932v2.pdf)]. The skggm `ModelAverage` class implements a meta-estimator to do this. (We note this is a similar facility to scikit-learn's [_RandomizedLasso_](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html), but for the graph lasso.)
@@ -181,13 +181,14 @@ model.fit(X)
 
 This class will contain the matrix of support probabilities `model.proportion_`$$\in \mathbb{R}^{p\times p}$$, an estimate of the support `model.support_`$$\in \mathbb{R}^{p\times p}$$, the penalties used in each trial `model.lams_`, and the indeices for selecting the subset of data in each trial `model.subsets_`.  
 
-__example...__
 <img style="margin: 0 auto;display: block;" src="assets/model_average.png" width="500" />
 <div style="margin: 0 auto;display: block; width:600px;">
 <center><i><small>
-Example random model averaging support estimates.  From left to right:  the original inverse covariance (precision) matrix, the ModelAverage proportions matrix, and the thresholded proportions matrix (support estimate).  The threshold used in this estimate was 0.5.
+Figure 3. Random model averaging support estimates.  From left to right:  the original inverse covariance (precision) matrix, the ModelAverage proportions matrix, and the thresholded proportions matrix (support estimate).  The threshold used in this estimate was 0.5 and the support error is 0.
 </small></i></center>
 </div>
+<br>
+An example is shown in Figure 3. The dense `model.proportions_` matrix contains the sample probability of each element containing a nonzero.  Thresholding this matrix by the default value of 0.5 resulted in a correct estimate of the support.  While this will not be the case in general, this technique generally provides a more robust support estimate than the previous methods.
 
 # Refining coefficients via adaptive methods
 Given an initial sparse estimate, we can compute a new penalty based on the estimate and refit the graph lasso with this adaptive penalty [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf), [Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)]. Currently refitting is always done with `QuicGraphLassoCV`.  We provide three ways of computing new weights before refitting:
@@ -217,9 +218,12 @@ __example...__
 <img style="margin: 0 auto;display: block;" src="assets/adaptive.png" width="650" />
 <div style="margin: 0 auto;display: block; width:600px;">
 <center><i><small>
-Example adaptive inverse covariance estimates.  From left to right:  the original inverse covariance (precision) matrix, adaptive estimate with QuicGraphLassoCV base estimator and 'inverse' method, adaptive estimate with QuicGraphLassoEBIC (gamma = 0) base estimator and 'inverse' method, adaptive estimate with ModelAverage base estimator and 'binary' method.
+Figure 4. Adaptive inverse covariance estimates.  From left to right:  the original inverse covariance (precision) matrix, adaptive estimate with QuicGraphLassoCV base estimator and 'inverse' method (error = 0.32, support error = 2), adaptive estimate with QuicGraphLassoEBIC (gamma = 0) base estimator and 'inverse' method (error = 0.38, support error = 10), adaptive estimate with ModelAverage base estimator and 'binary' method (error = 0.08, support error = 0).
 </small></i></center>
 </div>
+<br>
+An example is shown in Figure 4. The adaptive estimator will not only refine the estimated coefficients but also produce a new support estimate. This can be seen in the example as the adaptive cross-validation estimator produces a smaller suppor than the adaptive BIC estimator, the opposite of what we found in the non-adaptive examples. It is clear that the estimated values of the true support are much more accurate for each method combination.  
+
 
 ## Example: Study Forrest data set
 
