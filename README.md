@@ -142,12 +142,6 @@ Specifically, we extract the time-series from the ABIDE dataset, with nodes defi
 <img src="images/functional_connectivity_precision.png" alt="" width="300">
 <img src="images/functional_connectivity_brain.png" alt="" width="400">
 
-We see that XXX.
-
-_Manjari, is there some thing we can point out in the plot on the on right that people in this area would recognize?  It just looks like a bunch of scrambled lines to me_
-
-_Manjari, maybe we want to use one of the other methods in this example instead of the straight up QuicGraphLasso since we have many estimators to choose from?  I've tried QuicGraphLassoCV, QuicGraphLassoEBIC, the results above are from QuicGraphLasso with lam = 0.5_
-
 # References
 
 ### BIC / EBIC Model Selection
