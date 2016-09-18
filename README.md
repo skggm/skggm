@@ -88,7 +88,7 @@ or via PyPI
 
     pip install skggm
 
-of from a cloned repo
+or from a cloned repo
     
     cd inverse_covariance/pyquic
     make 
