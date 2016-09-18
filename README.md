@@ -48,8 +48,6 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
     _QuicGraphLassoEBIC_ is provided as a convenience class to use the _Extended Bayesian Information Criteria_ (EBIC) for model selection \[[Foygel et al.](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\].  
 
-    As noted earlier, for class methods are provided with _QuicGraphLasso_ to compute EBIC scores and select the best penalty when used in `path` mode. This may be a faster, more flexible approach when experimenting with several model selection methods.
-
 - **ModelAverage** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/model_average.py#L66-L162)
     
     _ModelAverage_ is an ensemble meta-estimator that computes several fits with a user-specified `estimator` and averages the support of the resulting precision estimates.  The result is a `proportion_` matrix indicating the sample probability of a non-zero at each index. This is a similar facility to scikit-learn's _[RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html)_) but for the graph lasso.
