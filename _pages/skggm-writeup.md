@@ -237,7 +237,8 @@ It is clear that the estimated values of the true support are much more accurate
 
 **TODO**
 
----
+
+## Discussion
 
 This is an ongoing effort. We'd love your feedback on which algorithms we should provide bindings for next and how you're using the package. We also welcome contributions. 
 
