@@ -20,7 +20,7 @@ In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible 
     
     # outputs: model.covariance_, model.precision_, model.lam_
 
-and then head over to `examples/estimator_suite.py` for other example usage and read ou walk through at [https://jasonlaska.github.io/skggm/how_to](https://jasonlaska.github.io/skggm/how_to).
+and then head over to `examples/estimator_suite.py` for other example usage and read ou walk through at [https://jasonlaska.github.io/skggm/walkthrough](https://jasonlaska.github.io/skggm/how_to).
 
 ---
 
