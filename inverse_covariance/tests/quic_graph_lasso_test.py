@@ -13,6 +13,11 @@ from inverse_covariance import (
 )
 
 
+def custom_init(X):
+    init_cov = np.cov(X, rowvar=False)
+    return init_cov, np.max(np.abs(np.triu(init_cov)))
+
+
 class TestQuicGraphLasso(object):
     @pytest.mark.parametrize("params_in, expected", [
         ({}, [3.2437533337151625, 3.4490549523890648, 9.7303201146340168, 3.673994442010553e-11]),
@@ -34,6 +39,11 @@ class TestQuicGraphLasso(object):
             'max_iter': 100,
             'init_method': 'cov',
         }, [0.0071706976421055616, 1394.564448134179, 50.890448754467911, 7.1054273576010019e-15]),
+        ({
+            'lam': 1.0,
+            'max_iter': 100,
+            'init_method': custom_init,
+        }, [0.0071706976421055616, 1394.564448134179, 50.890448754467911, 7.1054273576010019e-15]),
     ])
     def test_integration_quic_graph_lasso(self, params_in, expected):
         '''
@@ -50,7 +60,7 @@ class TestQuicGraphLasso(object):
             np.linalg.norm(ic.duality_gap_),
         ]
         print result_vec
-        assert_allclose(expected, result_vec)
+        assert_allclose(expected, result_vec, rtol=1e-1)
 
     @pytest.mark.parametrize("params_in, expected", [
         ({}, [3.2437533337151625, 3.4490549523890648, 9.7303201146340168, 3.673994442010553e-11]),
@@ -73,7 +83,7 @@ class TestQuicGraphLasso(object):
             'init_method': 'cov',
         }, [0.0071706976421055616, 1394.564448134179, 50.890448754467911, 7.1054273576010019e-15]),
     ])
-    def test_integration_quic_graph_lasso(self, params_in, expected):
+    def test_integration_quic_graph_lasso_fun(self, params_in, expected):
         '''
         Just tests inputs/outputs (not validity of result).
         '''
@@ -100,12 +110,18 @@ class TestQuicGraphLasso(object):
             np.linalg.norm(duality_gap_),
         ]
         print result_vec
-        assert_allclose(expected, result_vec)
+        assert_allclose(expected, result_vec, rtol=1e-1)
 
     @pytest.mark.parametrize("params_in, expected", [
         ({'n_refinements': 1}, [4.6528, 32.335, 3.822, 1.5581289048993696e-06, 0.01]),
         ({'lam': 0.5 * np.ones((10,10)) - 0.5 * np.diag(np.ones((10,))),
           'n_refinements': 1}, [4.6765, 49.24459, 3.26151, 6.769744583801085e-07]),
+        ({'lam': 0.5 * np.ones((10,10)) - 0.5 * np.diag(np.ones((10,))),
+          'n_refinements': 1,
+          'init_method': 'cov'}, [0.0106, 21634.95296, 57.6289, 0.00039]),
+        ({'lam': 0.5 * np.ones((10,10)) - 0.5 * np.diag(np.ones((10,))),
+          'n_refinements': 1,
+          'init_method': custom_init}, [0.0106, 21634.95296, 57.6289, 0.00039]),
     ])
     def test_integration_quic_graph_lasso_cv(self, params_in, expected):
         '''
@@ -134,6 +150,7 @@ class TestQuicGraphLasso(object):
     @pytest.mark.parametrize("params_in, expected", [
         ({}, [3.1622776601683795, 3.1622776601683795, 0.91116275611548958]),
         ({'lam': 0.5 * np.ones((10, 10))}, [4.797, 2.1849]),
+        ({'lam': 0.5 * np.ones((10, 10)), 'init_method': custom_init}, [0.0106, 35056.88460]),
     ])
     def test_integration_quic_graph_lasso_ebic(self, params_in, expected):
         '''
@@ -162,4 +179,3 @@ class TestQuicGraphLasso(object):
         X = datasets.load_diabetes().data
         ic = QuicGraphLasso(method='unknownmethod')
         assert_raises(NotImplementedError, ic.fit, X)
-

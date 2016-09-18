@@ -10,6 +10,8 @@ def _init_coefs(X, method='corrcoef'):
     elif method == 'cov':   
         init_cov = np.cov(X, rowvar=False)
         return init_cov, np.max(np.abs(np.triu(init_cov)))
+    elif callable(method):
+        return method(X)
     else:
         raise ValueError(("initialize_method must be 'corrcoef' or 'cov', "
             "passed \'{}\' .".format(method)))
@@ -89,8 +91,10 @@ class InverseCovarianceEstimator(BaseEstimator):
                   'kl', or 'quadratic'
         Used for computing self.score().
 
-    init_method : one of 'corrcoef', 'cov'
+    init_method : one of 'corrcoef', 'cov', or custom function
         Computes initial covariance and scales lambda appropriately.
+        Custom function must return ((n_features, n_features) ndarray, float)
+        where the scalar parameter will be used to scale the penalty lam.
 
     auto_scale : bool
         If True, will compute self.lam_scale_ = max off-diagonal value when 

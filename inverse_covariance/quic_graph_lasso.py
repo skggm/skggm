@@ -187,8 +187,10 @@ class QuicGraphLasso(InverseCovarianceEstimator):
                   'kl', or 'quadratic'
         Used for computing self.score().
 
-    init_method : one of 'corrcoef', 'cov'
+    init_method : one of 'corrcoef', 'cov', or custom function
         Computes initial covariance and scales lambda appropriately.
+        Custom function must return ((n_features, n_features) ndarray, float)
+        where the scalar parameter will be used to scale the penalty lam.
 
     auto_scale : bool
         If True, will compute self.lam_scale_ = max off-diagonal value when 
@@ -390,6 +392,20 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         grids of alpha to be used. If a list is given, it gives the
         grid to be used. See the notes in the class docstring for
         more details.
+
+    cv : int, cross-validation generator or an iterable, optional
+        Determines the cross-validation splitting strategy.
+        Possible inputs for cv are:
+        
+        - None, to use the default 3-fold cross-validation,
+        - integer, to specify the number of folds.
+        - An object to be used as a cross-validation generator.
+        - An iterable yielding train/test splits.
+        
+        For integer/None inputs :class:`KFold` is used.
+        
+        Refer :ref:`User Guide <cross_validation>` for the various
+        cross-validation strategies that can be used here.
     
     n_refinements: strictly positive integer
         The number of times the grid is refined. Not used if explicit
@@ -419,8 +435,10 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                   'kl', or 'quadratic'
         Used for computing self.score().
 
-    init_method : one of 'corrcoef', 'cov'
+    init_method : one of 'corrcoef', 'cov', or custom function
         Computes initial covariance and scales lambda appropriately.
+        Custom function must return ((n_features, n_features) ndarray, float)
+        where the scalar parameter will be used to scale the penalty lam.
 
     auto_scale : bool
         If True, will compute self.lam_scale_ = max off-diagonal value when 
@@ -672,8 +690,10 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
     verbose : integer
         Used in quic routine.
 
-    init_method : one of 'corrcoef', 'cov'
+    init_method : one of 'corrcoef', 'cov', or custom function
         Computes initial covariance and scales lambda appropriately.
+        Custom function must return ((n_features, n_features) ndarray, float)
+        where the scalar parameter will be used to scale the penalty lam.
 
     auto_scale : bool
         If True, will compute self.lam_scale_ = max off-diagonal value when 
