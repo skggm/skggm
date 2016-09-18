@@ -14,33 +14,13 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 title: "skggm"
-email: your-email@domain.com
+#email: your-email@domain.com
 description: > # this means to ignore newlines until "baseurl:"
-  skggm: Gaussian graphical models for scikit-learn.
-  Can put additional blurb here.
+  Gaussian graphical models for scikit-learn
 baseurl: "/skggm" # the subpath of your site, e.g. /blog
 url: "https://jasonlaska.github.io" # the base hostname & protocol for your site
 # twitter_username: jekyllrb
 # github_username:  jekyll
-
-authors:
-  Jason:
-    name: Jason Laska
-    display_name: Jason
-    # gravatar: c66919cb194f96c696c1da0c47354a6a
-    email: jlaska@gmail.com
-    web: http://company.com
-    twitter: chappaquack
-    github: jasonlaska
-  Manjari:
-    name: Manjari Narayan
-    display_name: Manjari
-    # gravatar: 12e480a364a5c19214f99b4dfe9a11d5
-    email: TODO@company.com
-    web: http://company.com
-    twitter: TODO
-    github: mnarayan
-
 
 # Build settings
 markdown: kramdown
