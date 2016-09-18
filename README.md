@@ -52,25 +52,27 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
     As noted earlier, for class methods are provided with _QuicGraphLasso_ to compute EBIC scores and select the best penalty when used in `path` mode. This may be a faster, more flexible approach when experimenting with several model selection methods.
 
+- **ModelAverage** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/model_average.py#L66-L162)
+    
+    _ModelAverage_ is an ensemble meta-estimator that computes several fits with a user-specified `estimator` and averages the support of the resulting precision estimates.  The result is a `proportion_` matrix indicating the sample probability of a non-zero at each index. This is a similar facility to scikit-learn's _[RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html)_) but for the graph lasso.
+
+    In each trial, this class will:
+
+    1. Draw bootstrap samples by randomly subsampling **X**.
+
+    2. Draw a random matrix penalty.
+
+    The random penalty can be chosen in a variety of ways, specified by the `penalization` parameter.  This technique is also known as _stability selection_ or _random lasso_.
+
 - **AdaptiveGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/adaptive_graph_lasso.py#L13-L48)
 
     _AdaptiveGraphLasso_ performs a two step estimation procedure: 
     
-    1. Obtain an initial sparse estimate.  By default QuicGraphLassoCV be used for the initial estimate but you can pass in your own estimator instance via the parameter `estimator`. 
+    1. Obtain an initial sparse estimate. 
 
     2. Derive a new penalization matrix from the original estimate.  We currently provide three methods for this: `binary`, `1/|coeffs|`, and `1/|coeffs|^2`.  The `binary` method only requires the initial estimate's support (and this can be be used with _ModelAverage_ below).
 
     This technique works well to refine the non-zero precision values given a reasonable initial support estimate.
-
-- **ModelAverage** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/model_average.py#L66-L162)
-    
-    _ModelAverage_ is an ensemble meta-estimator that computes several fits with a user-specified `estimator` and averages the support of the resulting precision estimates.  The result is a `proportion_` matrix indicating the sample probability of a non-zero at each index. In each trial, this class will:
-
-    1. Randomly subsample the given examples in **X** (similar to scikit-learn's _[RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html)_).
-
-    2. Choose a random matrix penalty.
-
-    The random penalty can be chosen in a variety of ways, specified by the `penalization` parameter.  This technique is also known as _stability selection_ or _random lasso_.
 
 - **InverseCovarianceEstimator** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/inverse_covariance.py#L80-L123)
     
@@ -84,10 +86,6 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
     Submodule that includes `profiling.AverageError`, `profiling.StatisticalPower` to compare performance between methods.
 
-- **quic**
-
-    Python function to run QUIC algorithm (independent of sklearn estimator).
-
 ## Installation
 
 Clone this repo and run
@@ -97,6 +95,11 @@ Clone this repo and run
 or via PyPI
 
     pip install skggm
+
+of from a cloned repo
+    
+    cd inverse_covariance/pyquic
+    make 
 
 The package requires that `numpy`, `scipy`, and `cython` are installed independently first.
 
