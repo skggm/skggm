@@ -70,7 +70,7 @@ if estimator_type == 'QuicGraphLasso':
     # Compute the sparse inverse covariance via QuicGraphLasso
     estimator = QuicGraphLasso(
         init_method='cov',
-        lam=0.5,
+        lam=0.7,
         mode='default',
         verbose=1)
 
@@ -88,31 +88,47 @@ elif estimator_type == 'QuicGraphLassoEBIC':
         verbose=1)
     estimator.fit(timeseries)
 
-elif estimator_type == 'AdaptiveQuicGraphLasso':
+elif estimator_type == 'AdaptiveQuicGraphLasso1':
+    # Compute the sparse inverse covariance via 
+    # AdaptiveGraphLasso + QuicGraphLasso + method='binary'
+    initial_estimator = QuicGraphLasso(
+        init_method='corrcoef',
+        lam=0.7,
+        mode='default',
+        verbose=1)    
+
+    twostep_estimator = AdaptiveGraphLasso(
+            estimator = initial_estimator,
+            method='binary')
+    twostep_estimator.fit(timeseries)
+    estimator = twostep_estimator.estimator_;
+
+elif estimator_type == 'AdaptiveQuicGraphLasso2':
     # Compute the sparse inverse covariance via 
     # AdaptiveGraphLasso + QuicGraphLassoEBIC + method='binary'
-    model = AdaptiveGraphLasso(
-            estimator=QuicGraphLassoEBIC(
-                init_method='cov',
-            ),
-            method='binary',
-        )
-    model.fit(timeseries)
-    estimator = model.estimator_
+
+    initial_estimator = QuicGraphLassoEBIC(
+           init_method='corrcoef', 
+           verbose=1)
+
+    twostep_estimator = AdaptiveGraphLasso(
+            estimator = initial_estimator,
+            method='binary')
+    twostep_estimator.fit(timeseries)
+    estimator = twostep_estimator.estimator_;
 
 # Display the sparse inverse covariance
 plt.figure(figsize=(7.5, 7.5))
-plt.imshow(
-    np.triu(-estimator.precision_, 1),
-    interpolation="nearest",
-    cmap=plt.cm.RdBu_r)
+plt.imshow(np.triu(-estimator.precision_,1), 
+           #interpolation="nearest", 
+           cmap=plt.cm.PRGn)
 plt.title('Precision (Sparse Inverse Covariance) matrix')
 plt.colorbar()
 
 # And now display the corresponding graph
-plotting.plot_connectome(-estimator.precision_, coords,
+plotting.plot_connectome(estimator.precision_, coords,
                          title='Functional Connectivity using Precision Matrix',
-                         edge_threshold="99.2%",
-                         node_size=20)
+                         edge_threshold="99%",
+                         node_size=25)
 plotting.show()
 raw_input()
