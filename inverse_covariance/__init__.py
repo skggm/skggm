@@ -13,12 +13,8 @@ from .metrics import (
     quadratic_loss,
     ebic,
 )
-from .plot_util import (
-    trace_plot,
-)
 from .model_average import ModelAverage
 from .adaptive_graph_lasso import AdaptiveGraphLasso
-import profiling
 
 __all__ = [
     'InverseCovarianceEstimator',
@@ -30,8 +26,6 @@ __all__ = [
     'kl_loss',
     'quadratic_loss',
     'ebic',
-    'trace_plot',
     'ModelAverage',
     'AdaptiveGraphLasso',
-    'profiling',
 ]

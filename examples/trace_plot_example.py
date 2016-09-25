@@ -3,7 +3,8 @@ import numpy as np
 from sklearn.datasets import make_sparse_spd_matrix
 
 sys.path.append('..')
-from inverse_covariance import QuicGraphLasso, trace_plot 
+from inverse_covariance import QuicGraphLasso
+from inverse_covariance.plot_util import trace_plot 
 
 
 def make_data(n_samples, n_features):
