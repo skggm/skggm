@@ -62,6 +62,12 @@ def _fix_weights(weight_fun, *args):
     return np.dot(mod_mat, weights, mod_mat)
 
 
+def _default_bootstrap(n_samples, num_subsamples):
+    """Returns an array of integers (0, n_samples-1)^num_subsamples.
+    """
+    return np.random.permutation(n_samples)[:num_subsamples]
+
+
 class ModelAverage(BaseEstimator):
     """
     Randomized model averaging meta-estimator.
@@ -135,6 +141,10 @@ class ModelAverage(BaseEstimator):
         Name of the penalty kwarg in the estimator.  This parameter is 
         unimportant if penalization='subsampling'.
 
+    bootstrap : callable fun (default=_default_bootstrap)
+        A function that takes n_samples, num_subsamples as inputs and returns 
+        a list of sample indices in the range (0, n_samples-1).
+        By default, indices are uniformly subsampled.
 
     Attributes
     ----------
@@ -162,7 +172,8 @@ class ModelAverage(BaseEstimator):
     """
     def __init__(self, estimator=None, n_trials=100, subsample=0.3, 
                  normalize=True, lam=0.5, lam_perturb=0.5, penalization='random',
-                 use_cache=True, penalty_name='lam', support_thresh=0.5):
+                 use_cache=True, penalty_name='lam', support_thresh=0.5,
+                 bootstrap=_default_bootstrap):
         self.estimator = estimator 
         self.n_trials = n_trials
         self.subsample = subsample
@@ -173,6 +184,7 @@ class ModelAverage(BaseEstimator):
         self.use_cache = use_cache
         self.penalty_name = penalty_name
         self.support_thresh = support_thresh
+        self.bootstrap = bootstrap
 
         self.proportion_ = None
         self.support_ = None
@@ -236,7 +248,7 @@ class ModelAverage(BaseEstimator):
 
                 # fit estimator
                 num_subsamples = int(self.subsample * n_samples)
-                rp = np.random.permutation(n_samples)[:num_subsamples]
+                rp = self.bootstrap(n_samples, num_subsamples)
                 new_estimator.fit(X[rp, :])
 
                 # check that new_estimator.precision_ is real
