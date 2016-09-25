@@ -69,11 +69,11 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
     This technique works well to refine the non-zero precision values given a reasonable initial support estimate.
 
-- **trace_plot**
+- **inverse_covariance.plot_utils.trace_plot**
 
     Utility to plot `lam_` paths.
 
-- **.profiling**
+- **inverse_covariance.profiling**
 
     Submodule that includes `profiling.AverageError`, `profiling.StatisticalPower` to compare performance between methods.
 
