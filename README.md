@@ -92,7 +92,7 @@ or from a cloned repo
     cd inverse_covariance/pyquic
     make 
 
-The package requires that `numpy`, `scipy`, and `cython` are installed independently first.
+**The package requires that `numpy`, `scipy`, and `cython` are installed independently into your environment first.**
 
 If you would like to fork the pyquic bindings directly, use the Makefile provided in `inverse_covariance/pyquic`.
 
