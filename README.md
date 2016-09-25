@@ -69,7 +69,7 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
     This technique works well to refine the non-zero precision values given a reasonable initial support estimate.
 
-- **inverse_covariance.plot_utils.trace_plot**
+- **inverse_covariance.plot_util.trace_plot**
 
     Utility to plot `lam_` paths.
 
@@ -121,7 +121,7 @@ For slightly higher dimensions of `n_examples=600` and `n_features=120` we obtai
 <img src="images/estimator_suite_scorecard_600x120.png" alt="(n_examples, n_features) = (600, 120)" width="650">
 
 ## Plotting the regularization path
-We've provided a utility function `inverse_covariance.trace_plot` that can be used to display the coefficients as a function of `lam_`.  This can be used with any estimator that returns a path.  The example in `examples/trace_plot_example.py` yields:
+We've provided a utility function `inverse_covariance.plot_util.trace_plot` that can be used to display the coefficients as a function of `lam_`.  This can be used with any estimator that returns a path.  The example in `examples/trace_plot_example.py` yields:
 
 <img src="images/trace_plot.png" alt="Trace plot" width="400">
 
