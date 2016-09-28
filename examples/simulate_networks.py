@@ -1,3 +1,7 @@
+import numpy as np
+import scipy as sp
+from scipy import linalg
+
 def _new_graph(n_features, alpha, adj_type='erdos-renyi', random_sign=False):
     global prng
     prng = np.random.RandomState(1)
