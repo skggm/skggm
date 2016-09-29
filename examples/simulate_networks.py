@@ -2,9 +2,8 @@ import numpy as np
 import scipy as sp
 from scipy import linalg
 
-def _new_graph(n_features, alpha, adj_type='erdos-renyi', random_sign=False):
-    global prng
-    prng = np.random.RandomState(1)
+def _new_graph(n_features, alpha, adj_type='erdos-renyi', random_sign=False,seed=1):
+    prng = np.random.RandomState(seed)
     
     if adj_type=='erdos-renyi':
         adjacency = _random_er_network(n_features=n_features,alpha=alpha,random_state=prng)
@@ -108,3 +107,8 @@ def _make_correlation(adjacency):
     adjacency /= d
     adjacency /= d[:, np.newaxis]
     return adjacency
+
+# Simulate multivariate normal and check empirical covariances
+def _mvn(n_samples, n_features, cov, random_state=np.random.RandomState(2)):
+    X = random_state.multivariate_normal(np.zeros(n_features), cov, size=n_samples)
+    return X
