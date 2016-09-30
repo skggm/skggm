@@ -579,7 +579,8 @@ class AverageError(object):
         self.error_fp_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
         self.error_fn_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
 
-        self.grid_ = np.linspace(1, 4, self.n_grid_points)
+        self.grid_ = np.linspace(5, 200, self.n_grid_points)
+        #self.grid_ = np.logspace(np.log10(2), np.log10(200), self.n_grid_points)
         if self.adj_type=='erdos-renyi':
             self.alphas_ = np.logspace(-2.3,np.log10(.025), n_alpha_grid_points)[::1]
             #self.alphas_ = np.linspace(0.95, 0.99, n_alpha_grid_points)[::-1]
@@ -610,7 +611,7 @@ class AverageError(object):
             for sidx, sample_grid in enumerate(self.grid_):
                 n_samples = int(sample_grid * self.n_features)
                 # Debugging
-                print alpha, n_samples
+                # print alpha, n_samples
                 
                 # model selection (once)
                 X = mvn(n_samples, self.n_features, cov,random_state=mcmc_prng)
