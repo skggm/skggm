@@ -13,6 +13,7 @@ from inverse_covariance import (
     QuicGraphLassoCV,
     QuicGraphLassoEBIC,
     AdaptiveGraphLasso,
+    ModelAverage
 )
 
 def new_graph(n_features, alpha, adj_type='erdos-renyi', random_sign=False,seed=1):
@@ -127,18 +128,6 @@ def mvn(n_samples, n_features, cov, random_state=np.random.RandomState(2)):
     return X
 
 
-# MCMC Statistical Power
-def plot_spower(results, grid, ks):
-    plt.figure()
-    plt.plot(grid, results.T, lw=2)
-    plt.xlabel('n/p (n_samples / n_features)')
-    plt.ylabel('P(exact recovery)')
-    legend_text = []
-    for ks in ks:
-        legend_text.append('sparsity={}'.format(ks))
-    plt.legend(legend_text)
-    plt.show()
-
 
 def exact_support(prec, prec_hat):
     # Q: why do we need something like this?, and why must eps be so big?
@@ -207,6 +196,93 @@ def approx_support(prec, prec_hat, prob=.01):
     return np.less_equal(tnr+fpr,prob), tpr, fpr
 
 
+
+def _support_diff(m, m_hat):
+    '''Count the number of different elements in the support in one triangle,
+    not including the diagonal. 
+    '''
+    n_features, _ = m.shape
+
+    m_no_diag = m.copy()
+    m_no_diag[np.diag_indices(n_features)] = 0
+    m_hat_no_diag = m_hat.copy()
+    m_hat_no_diag[np.diag_indices(n_features)] = 0
+
+    m_nnz = len(np.nonzero(m_no_diag.flat)[0])
+    m_hat_nnz = len(np.nonzero(m_hat_no_diag.flat)[0])
+
+    nnz_intersect = len(np.intersect1d(np.nonzero(m_no_diag.flat)[0],
+                                       np.nonzero(m_hat_no_diag.flat)[0]))
+    return (m_nnz + m_hat_nnz - (2 * nnz_intersect)) / 2.0
+
+
+def _false_support(m, m_hat):
+    '''Count the number of false positive and false negatives supports in 
+    m_hat in one triangle, not including the diagonal.
+    '''
+    n_features, _ = m.shape
+
+    m_no_diag = m.copy()
+    m_no_diag[np.diag_indices(n_features)] = 0
+    m_hat_no_diag = m_hat.copy()
+    m_hat_no_diag[np.diag_indices(n_features)] = 0
+
+    m_nnz = len(np.nonzero(m_no_diag.flat)[0])
+    m_hat_nnz = len(np.nonzero(m_hat_no_diag.flat)[0])
+
+    nnz_intersect = len(np.intersect1d(np.nonzero(m_no_diag.flat)[0],
+                                       np.nonzero(m_hat_no_diag.flat)[0]))
+
+    false_positives = (m_hat_nnz - nnz_intersect) / 2.0
+    false_negatives = (m_nnz - nnz_intersect) / 2.0
+    return false_positives, false_negatives
+
+
+# MCMC Statistical Power
+def plot_spower(results, grid, ks):
+    plt.figure()
+    plt.plot(grid, results.T, lw=2)
+    plt.xlabel('n/p (n_samples / n_features)')
+    plt.ylabel('P(exact recovery)')
+    legend_text = []
+    for ks in ks:
+        legend_text.append('sparsity={}'.format(ks))
+    plt.legend(legend_text)
+    plt.show()
+
+
+def plot_avg_error(results, grid, ks):
+    plt.figure()
+    plt.plot(grid, results.T, lw=2)
+    plt.xlabel('n/p (n_samples / n_features)')
+    plt.ylabel('Average error')
+    legend_text = []
+    for ks in ks:
+        legend_text.append('sparsity={}'.format(ks))
+    plt.legend(legend_text)
+    plt.show()
+
+def ae_trial(trial_estimator, n_samples, n_features, cov, adj, random_state, X = None):
+    
+    if X is None:
+        X = mvn(n_samples, n_features, cov,random_state=random_state)
+        new_estimator = clone(trial_estimator)
+        new_estimator.fit(X)
+        new_precision = new_estimator.precision_        
+    else: 
+        new_precision = trial_estimator.precision_
+
+    error_fro = np.linalg.norm(np.triu(adj,1) - np.triu(new_precision,1), ord='fro')
+    error_supp = _support_diff(adj, new_precision)
+    error_fp, error_fn = _false_support(adj, new_precision)
+    #error_inf = np.linalg.norm(np.triu(adj,1) - np.triu(new_precision,1), ord=inf) 
+    frob_support = np.equal(np.triu(adj,1),0)
+    frob_support[np.nonzero(np.tril(np.ones(np.shape(adj)),0))] = False
+    error_supp_fro = np.linalg.norm(np.dot(frob_support,np.triu(adj,1)) - np.dot(frob_support,np.triu(new_precision,1)), ord='fro')
+
+    return error_fro, error_supp, error_fp, error_fn, error_supp_fro
+
+
 def sp_trial(trial_estimator, n_samples, n_features, cov, adj, random_state):
     X = mvn(n_samples, n_features, cov,random_state=random_state)
     new_estimator = clone(trial_estimator)
@@ -253,7 +329,10 @@ class StatisticalPower(object):
 
     n_grid_points : int (default=10)
         Number of grid points for sampling n_samples / n_features between (0,1)
-
+        
+    adj_type: string (default='erdos-renyi')
+        Name of the type of structure used to create adjacency matrix
+        
     verbose : bool (default=False)
         Print out progress information.
 
@@ -397,4 +476,203 @@ class StatisticalPower(object):
             print 'Not fitted.'
             return
 
-        _plot_spower(self.results_, self.grid_, self.ks_)
+        plot_spower(self.results_, self.grid_, self.ks_)
+
+class AverageError(object):
+    """Compute the average error of a model selector for
+    different values of alpha over grid of n_samples / n_features.
+
+    Use this to compare model selection methods.
+
+    For each choice of alpha, we select a fixed test graph.
+    For each choice of n_samples / n_features, we learn the model selection
+    penalty just once and apply this learned value to each subsequent random
+    trial (new instances with the fixed covariance).
+
+    Parameters
+    -----------        
+    model_selection_estimator : An inverse covariance estimator instance 
+        This estimator must be able to select a penalization parameter. 
+        Use .penalty_ to obtain selected penalty.
+
+    n_features : int (default=50)
+        Fixed number of features to test.
+
+    n_trials : int (default=100)
+        Number of examples to draw to measure P(recovery).
+
+    penalty_ : string (default='lam_')
+        Name of the selected best penalty in estimator
+        e.g., 'lam_' for QuicGraphLassoCV, QuicGraphLassoEBIC,
+              'alpha_' for GraphLassoCV
+
+    n_grid_points : int (default=10)
+        Number of grid points for sampling n_samples / n_features between (0,1)
+
+    adj_type: string (default='erdos-renyi')
+        Name of the type of structure used to create adjacency matrix
+    
+    verbose : bool (default=False)
+        Print out progress information.
+
+    n_jobs: int, optional
+        number of jobs to run in parallel (default 1).
+
+    Methods
+    ----------
+    show() : Plot the results.
+
+    Attributes
+    ----------
+    grid_ : array of size (n_grid_points, )
+        Array of n_samples / n_features ratios.
+
+    alphas_ : array of size (n_alpha_grid_points, )
+        Array of alphas used to generate test graphs 
+        (see .statistical_power._new_graph)
+
+    ks_ : array of size (n_alpha_grid_points, )
+        The sparsity of each test graph.
+
+    error_fro_ : matrix of size (n_alpha_grid_points, n_grid_points)
+        The average Frobenius error for each alpha and 
+        n_samples / n_features grid point.
+
+    error_supp_ : matrix of size (n_alpha_grid_points, n_grid_points)
+        The average support difference for each alpha and 
+        n_samples / n_features grid point.
+
+    error_fp_ : matrix of size (n_alpha_grid_points, n_grid_points)
+        The average false positive difference for each alpha and 
+        n_samples / n_features grid point.
+
+    error_fn_ : matrix of size (n_alpha_grid_points, n_grid_points)
+        The average false negative difference for each alpha and 
+        n_samples / n_features grid point.
+    """
+    def __init__(self, model_selection_estimator=None, n_features=50, 
+                n_trials=100, n_grid_points=10, adj_type='erdos-renyi', verbose=False, penalty_='lam_',
+                n_jobs=1):
+        self.model_selection_estimator = model_selection_estimator  
+        self.n_features = n_features
+        self.n_grid_points = n_grid_points
+        self.adj_type = adj_type
+        self.n_trials = n_trials
+        self.verbose = verbose
+        self.penalty_ = penalty_ # class name for model selected penalty
+        self.n_jobs = n_jobs
+    
+        self.is_fitted = False
+        self.error_fro_ = None
+        self.error_supp_ = None
+        self.error_fp_ = None
+        self.error_fn_ = None
+        self.alphas_ = None
+        self.ks_ = None
+        self.grid_ = None
+ 
+    def fit(self, X=None, y=None):
+        n_alpha_grid_points = 3
+
+        self.error_fro_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
+        self.error_supp_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
+        self.error_fp_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
+        self.error_fn_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
+
+        self.grid_ = np.linspace(1, 4, self.n_grid_points)
+        if self.adj_type=='erdos-renyi':
+            self.alphas_ = np.logspace(-2.3,np.log10(.025), n_alpha_grid_points)[::1]
+            #self.alphas_ = np.linspace(0.95, 0.99, n_alpha_grid_points)[::-1]
+        else:
+            self.alphas_ = np.logspace(np.log(.1),np.log10(.3), n_alpha_grid_points)[::1]
+        self.ks_ = []
+
+        for aidx, alpha in enumerate(self.alphas_):
+            if self.verbose:
+                print 'at alpha {} ({}/{})'.format(
+                    alpha,
+                    aidx,
+                    n_alpha_grid_points,
+                )
+
+            # draw a new fixed graph for alpha
+            cov, prec, adj = new_graph(self.n_features, alpha, adj_type=self.adj_type,random_sign=False,seed=1)    
+            n_nonzero_prec = np.count_nonzero(np.triu(adj,1).flat)
+            self.ks_.append(n_nonzero_prec)
+            mcmc_prng = np.random.RandomState(2)    
+            # cov, prec = _new_graph(self.n_features, alpha)
+            # n_nonzero_prec = np.count_nonzero(prec.flat)
+            # self.ks_.append(n_nonzero_prec)
+            
+            if self.verbose:
+                print '   Graph has {} nonzero entries'.format(n_nonzero_prec)
+
+            for sidx, sample_grid in enumerate(self.grid_):
+                n_samples = int(sample_grid * self.n_features)
+                # Debugging
+                print alpha, n_samples
+                
+                # model selection (once)
+                X = mvn(n_samples, self.n_features, cov,random_state=mcmc_prng)
+                ms_estimator = clone(self.model_selection_estimator)
+                ms_estimator.fit(X)
+                lam = getattr(ms_estimator, self.penalty_)
+                
+                if self.verbose:
+                    display_lam = lam
+                    if isinstance(lam, np.ndarray):
+                        display_lam = np.linalg.norm(lam)
+                    print '   ({}/{}), n_samples = {}, selected lambda = {}'.format(
+                            sidx,
+                            self.n_grid_points,
+                            n_samples,
+                            display_lam)
+
+                # setup default trial estimator
+                trial_estimator = QuicGraphLasso(lam=lam,
+                                                 mode='default',
+                                                 init_method='corrcoef')
+
+                # estimate statistical power
+                errors = Parallel(
+                    n_jobs=self.n_jobs,
+                    verbose=False,
+                    backend='threading',
+                    #max_nbytes=None,
+                    #batch_size=1,
+                )(
+                    delayed(ae_trial)(
+                        trial_estimator, n_samples, self.n_features, cov, adj, random_state=mcmc_prng
+                    )
+                    for nn in range(self.n_trials))
+
+                error_fro, error_supp, error_fp, error_fn, _ = zip(*errors)
+                self.error_fro_[aidx, sidx] = np.mean(error_fro)
+                self.error_supp_[aidx, sidx] = np.mean(error_supp)
+                self.error_fp_[aidx, sidx] = np.mean(error_fp)
+                self.error_fn_[aidx, sidx] = np.mean(error_fn)
+
+            if self.verbose:
+                print 'Results at this row:'
+                print '   fro = {}'.format(self.error_fro_[aidx, :])
+                print '   supp = {}'.format(self.error_supp_[aidx, :])
+                print '   fp = {}'.format(self.error_fp_[aidx, :])
+                print '   fn = {}'.format(self.error_fn_[aidx, :])
+
+        self.is_fitted = True
+        return self
+
+    def show(self):
+        if not self.is_fitted:
+            print 'Not fitted.'
+            return
+
+        errors_to_plot = [
+            ('Frobenius', self.error_fro_),
+            ('Support', self.error_supp_),
+            ('False Positive', self.error_fp_),
+            ('False Negative', self.error_fn_),
+        ]
+        for name, result in errors_to_plot:
+            plot_avg_error(result, self.grid_, self.ks_)
+            plt.title(name)        
