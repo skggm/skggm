@@ -572,7 +572,7 @@ class AverageError(object):
         self.grid_ = None
  
     def fit(self, X=None, y=None):
-        n_alpha_grid_points = 3
+        n_alpha_grid_points = 4
 
         self.error_fro_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
         self.error_supp_ = np.zeros((n_alpha_grid_points, self.n_grid_points))
@@ -585,7 +585,7 @@ class AverageError(object):
             self.alphas_ = np.logspace(-2.3,np.log10(.025), n_alpha_grid_points)[::1]
             #self.alphas_ = np.linspace(0.95, 0.99, n_alpha_grid_points)[::-1]
         else:
-            self.alphas_ = np.logspace(np.log(.1),np.log10(.3), n_alpha_grid_points)[::1]
+            self.alphas_ = np.logspace(np.log(.15),np.log10(.4), n_alpha_grid_points)[::1]
         self.ks_ = []
 
         for aidx, alpha in enumerate(self.alphas_):
