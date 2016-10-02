@@ -1,5 +1,14 @@
 # skggm : Gaussian graphical models in scikit-learn
 
+In the last decade, an important problem in machine learning and statistics has been to learn networks that encode conditional indepedence relationships. For many important probability distributions, such as multivariate Gaussians, this amounts to estimation of inverse covariance matrices. Inverse covariance estimation is now used widely in infer gene regulatory networks in cellular biology and neural interactions in the neuroscience. 
+
+However, many statistical advances and best practices in fitting such models to data are not yet widely adopted and not available in common python packages for machine learning. Furthermore, inverse covariance estimation is an active area of research where researchers continue to improve algorithms and estimators.
+skggm seeks to provide these new developments to a wider audience, and also enable researchers to effectively benchmark their methods in regimes relevant to their applications of interest.
+
+While skggm is currently a package for "Gaussian graphical models in scikit-learn", we hope to eventually develop it into a package for "Generalized graphical models in scikit-learn".
+
+## Inverse Covariance Estimation
+
 Given **n** independently drawn, **p**-dimensional Gaussian random samples <img src="images/S.png" alt="X" width="80">, the maximum likelihood estimate of the inverse covariance matrix <img src="images/Theta.png" alt="\lambda" width="12"> can be computed via the _graphical lasso_, i.e., the program
 
 <img src="images/graphlasso_program.png" alt="\ell_1 penalized inverse covariance estimation" width="500">
