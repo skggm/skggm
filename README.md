@@ -1,11 +1,10 @@
 # skggm : Gaussian graphical models in scikit-learn
-
-In the last decade, an important problem in machine learning and statistics has been to learn networks that encode conditional indepedence relationships. For many important probability distributions, such as multivariate Gaussians, this amounts to estimation of inverse covariance matrices. Inverse covariance estimation is now used widely in infer gene regulatory networks in cellular biology and neural interactions in the neuroscience. 
+In the last decade, learning networks that encode conditional indepedence relationships has become an  important problem in machine learning and statistics. For many important probability distributions, such as multivariate Gaussians, this amounts to estimation of inverse covariance matrices. Inverse covariance estimation is now used widely in infer gene regulatory networks in cellular biology and neural interactions in the neuroscience. 
 
 However, many statistical advances and best practices in fitting such models to data are not yet widely adopted and not available in common python packages for machine learning. Furthermore, inverse covariance estimation is an active area of research where researchers continue to improve algorithms and estimators.
-skggm seeks to provide these new developments to a wider audience, and also enable researchers to effectively benchmark their methods in regimes relevant to their applications of interest.
+With `skggm` we seek to provide these new developments to a wider audience, and also enable researchers to effectively benchmark their methods in regimes relevant to their applications of interest.
 
-While skggm is currently a package for "Gaussian graphical models in scikit-learn", we hope to eventually develop it into a package for "Generalized graphical models in scikit-learn".
+While `skggm` is currently geared toward "Gaussian graphical models", we hope to eventually evolve it to support "Generalized graphical models".
 
 ## Inverse Covariance Estimation
 
@@ -29,18 +28,19 @@ In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible 
     
     # outputs: model.covariance_, model.precision_, model.lam_
 
-and then head over to `examples/estimator_suite.py` for other example usage and read ou walk through at [https://jasonlaska.github.io/skggm/walkthrough](https://jasonlaska.github.io/skggm/how_to).
+and then head over to `examples/estimator_suite.py` for other example usage.
+<!-- and read our walk through at [https://jasonlaska.github.io/skggm/walkthrough](https://jasonlaska.github.io/skggm/walk_through). -->
 
 ---
 
-This is an ongoing effort. We'd love your feedback on which algorithms we should provide bindings for next and how you're using the package. We also welcome contributions. 
+This is an ongoing effort. We'd love your feedback on which algorithms and techniques we should include and how you're using the package. We also welcome contributions. 
 
 [@jasonlaska](https://github.com/jasonlaska) and [@mnarayn](https://github.com/mnarayan)
 
 ---
 
 ## Included in `inverse_covariance` 
-- **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L138-L239)
+- **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L138-L239)
 
     _QuicGraphLasso_ is an implementation of [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) wrapped as a scikit-learn compatible estimator \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\] . The estimator can be run in `default` mode for a fixed penalty or in `path` mode to explore a sequence of penalties efficiently.  The penalty `lam` can be a scalar or matrix.
 
@@ -48,15 +48,15 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
     The interface largely mirrors the built-in _[GraphLasso](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLasso.html)_ although some param names have been changed (e.g., `alpha` to `lam`). Some notable advantages of this implementation over _GraphLasso_ are support for a matrix penalization term and speed.
 
-- **QuicGraphLassoCV** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L372-L468)
+- **QuicGraphLassoCV** [[doc]](https://github.com/jasonlaska/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L372-L468)
     
     _QuicGraphLassoCV_ is an optimized cross-validation model selection implementation similar to scikit-learn's _[GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html)_. As with _QuicGraphLasso_, this implementation also supports matrix penalization.
 
-- **QuicGraphLassoEBIC** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/quic_graph_lasso.py#L644-L717)
+- **QuicGraphLassoEBIC** [[doc]](https://github.com/jasonlaska/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L644-L717)
 
     _QuicGraphLassoEBIC_ is provided as a convenience class to use the _Extended Bayesian Information Criteria_ (EBIC) for model selection \[[Foygel et al.](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\].  
 
-- **ModelAverage** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/model_average.py#L66-L162)
+- **ModelAverage** [[doc]](https://github.com/jasonlaska/skggm/blob/master/inverse_covariance/model_average.py#L72-L172)
     
     _ModelAverage_ is an ensemble meta-estimator that computes several fits with a user-specified `estimator` and averages the support of the resulting precision estimates.  The result is a `proportion_` matrix indicating the sample probability of a non-zero at each index. This is a similar facility to scikit-learn's _[RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html)_) but for the graph lasso.
 
@@ -68,7 +68,7 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
     The random penalty can be chosen in a variety of ways, specified by the `penalization` parameter.  This technique is also known as _stability selection_ or _random lasso_.
 
-- **AdaptiveGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/develop/inverse_covariance/adaptive_graph_lasso.py#L13-L48)
+- **AdaptiveGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/master/inverse_covariance/adaptive_graph_lasso.py#L13-L48)
 
     _AdaptiveGraphLasso_ performs a two step estimation procedure: 
     
@@ -84,7 +84,7 @@ This is an ongoing effort. We'd love your feedback on which algorithms we should
 
 - **inverse_covariance.profiling**
 
-    Submodule that includes `profiling.AverageError`, `profiling.StatisticalPower` to compare performance between methods.
+    Submodule that includes `profiling.AverageError`, `profiling.StatisticalPower` to compare performance between methods.  This is a work in progress, more to come soon!
 
 ## Installation
 
@@ -145,7 +145,7 @@ For example, below is the comparison of the average support error between `QuicG
 ## Brain network functional connectivity
 In `examples/plot_functional_brain_networks.py` and the corresponding Jupyter notebook `example/ABIDE_Example`, we plot the functional connectivity of brain-wide networks learned from the observation data (similar example to [this example](http://nilearn.github.io/auto_examples/03_connectivity/plot_inverse_covariance_connectome.html#sphx-glr-auto-examples-03-connectivity-plot-inverse-covariance-connectome-py)).
 
-Specifically, we extract the time-series from the ABIDE dataset, with nodes defined using regions of interest from the [Power-264 atlas (Power, 2011)](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3222858/). The image on the left shows the upper triangle of the resulting precision matrix and the image on the right shows a top-of-brain connectome depicting the functional connectivity between different locations on XXX.  
+Specifically, we extract the time-series from the ABIDE dataset, with nodes defined using regions of interest from the [Power-264 atlas (Power, 2011)](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3222858/). The image on the left shows the upper triangle of the resulting precision matrix and the image on the right shows a top-of-brain connectome.  
 
 <img src="images/functional_connectivity_precision.png" alt="" width="300">
 <img src="images/functional_connectivity_brain.png" alt="" width="400">
