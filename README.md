@@ -2,9 +2,9 @@
 In the last decade, learning networks that encode conditional indepedence relationships has become an  important problem in machine learning and statistics. For many important probability distributions, such as multivariate Gaussians, this amounts to estimation of inverse covariance matrices. Inverse covariance estimation is now used widely in infer gene regulatory networks in cellular biology and neural interactions in the neuroscience. 
 
 However, many statistical advances and best practices in fitting such models to data are not yet widely adopted and not available in common python packages for machine learning. Furthermore, inverse covariance estimation is an active area of research where researchers continue to improve algorithms and estimators.
-skggm seeks to provide these new developments to a wider audience, and also enable researchers to effectively benchmark their methods in regimes relevant to their applications of interest.
+With `skggm` we seek to provide these new developments to a wider audience, and also enable researchers to effectively benchmark their methods in regimes relevant to their applications of interest.
 
-While skggm is currently a package for "Gaussian graphical models in scikit-learn", we hope to eventually evolve it into a package for "Generalized graphical models in scikit-learn".
+While `skggm` is currently geared toward "Gaussian graphical models", we hope to eventually evolve it to support "Generalized graphical models".
 
 ## Inverse Covariance Estimation
 
