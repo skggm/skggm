@@ -7,7 +7,86 @@ permalink: /walkthrough
 <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
 
-Given $$n$$ independently drawn, $$p$$-dimensional Gaussian random samples $$S \in \mathbb{R}^{n \times p}$$, the maximum likelihood estimate of the inverse covariance matrix $$\Theta$$ can be computed via the _graphical lasso_, i.e., the program
+## Introduction
+
+Graphical models combine graph theory and probability theory to create networks that model complex probabilistic relationships. They are widely used to infer biological networks as in [cellular biology](http://science.sciencemag.org/content/303/5659/799) and [neuroscience](https://www.simonsfoundation.org/features/foundation-news/how-do-different-brain-regions-interact-to-enhance-function/),   [psychometrics](http://www.annualreviews.org/doi/abs/10.1146/annurev-clinpsy-050212-185608) or [finance](http://www.jstor.org/stable/1924119). 
+
+[ Insert Observations to Network Example ]
+
+<!-- <img style="margin: 0 auto;display: block;" src="assets/time-series.png" width="300" />
+<div style="margin: 0 auto;display: block; width:625px;">
+<center><i><small>
+</small></i></center>
+</div>
+<br> -->
+
+A naive network model for the above example observations could be to say that if two variables are correlated, then the two nodes are connected by an edge but not otherwise. Thus the absence of an edge between two nodes indicates the absence of a correlation between them. Unfortunately, as shown in Figure, such pairwise correlations could be spuriously induced by shared _common causes_. 
+
+
+<img style="margin: 0 auto;display: block;" src="assets/skggm_graphics_spurious_correlation.png" width="200" />
+<div style="margin: 0 auto;display: block; width:625px;">
+<center><i><small>
+Figure. A burning fire causes both smoke and heat. Smoke and heat are always observed together and thus genuinely though "indirectly" correlated. But this does not mean smoke and heat have any direct influence over each other.
+</small></i></center>
+</div>
+<br>
+
+Thus, in applications that seek to interpret edges as some form of direct influence, more sophisticated graphical models that eliminate spurious or misleading relationships are desirable. This motivates the usage of Markov networks and a specific instantiation of them, Gaussian graphical models. 
+
+
+
+$$
+\newcommand{\Xdata}{\mathbf{X}}
+\newcommand{\Sig}{\mathbf{\Sigma}}
+\newcommand{\Thet}{\mathbf{\Theta}}
+$$
+
+## Conditional Independence and Markov Networks
+
+Formally a graph $$\mathcal{G}=(V,E)$$ consists a set of vertices $$V = \{1,\ldots,p\}$$ and edges between them $$E\subset V \times V$$.  
+
+The vertices or nodes are associated with a $$p$$-dimensional random variable $$\Xdata = (X_{1},\ldots, X_{p})$$ that has some probability distribution $$\Xdata \sim \mathbb{P}_{\Xdata}$$
+
+There are many [probabilistic graphical models]() that relate the structure in the graph $$\mathcal{G}$$ to the probability distribution over the variables $$\mathbb{P}_{\Xdata}$$. We discuss an important class of graphical models, _Markov networks_, that relate absence of edges in the graph to conditional independence between random variables $$X_{1},\ldots, X_{p}$$.
+
+$$
+\begin{align}
+\label{eqn:pairwise} 	 & X_{j} \perp X_{k} | \ X_{V \setminus \{j,k\}}  &\textbf{(P)}  \\
+\label{eqn:local} 		 & X_{j} \perp X_{V \setminus \{j,\text{ne}(j)\}} | \ X_{ne(j)} &\textbf{(L)} \\
+\label{eqn:global} 		 & X_{A} \perp X_{B} | \ X_{C} & \textbf{(G)}
+\end{align}
+$$
+
+
+
+An extensive reference on a variety of directed and undirected Markov networks is ["Graphical Models" by Lauritzen]()
+
+## Relationship to Inverse Covariance Estimation
+
+In general, if two variables are statistically independent they are also uncorrelated. But the converse is not true in general. However, normal or Gaussian distributions are fully described by their mean and covariance. As a result, a zero correlation also implies statistical independence.  An analogous equivalence holds between conditional independence and the inverse covariance for Gaussian distributions. This follows from the [Hammersley-Clifford theorem](), and the [equivalence]() between the _pairwise_ and _global Markov properties_. 
+
+
+
+Given $$n$$ _i.i.d_ random samples $$(x_{1},x_{2},\ldots,x_{n})^{\top} = \Xdata$$ from a multivariate Gaussian distribution
+
+$$\begin{align} 
+x_{j} \overset{i.i.d}{\sim} \mathcal{N}_p(0, \Sig), \quad j=1,\ldots,n  \label{eqn:mvn}\tag{}
+\end{align}$$
+
+where each sample $$x_{j}$$ is $$p$$-dimensional with $$x_{j} \in \mathbb{R}^{p}$$, $$\Sig$$ is the population covariance matrix $$\Sig = \mathbf{E}(\Xdata^{\top}\Xdata)$$.
+
+
+
+
+[ Insert Toy Network and Matrix Here]
+
+
+Thus, the inverse covariance matrix is an important quantity of interest as it gives us an efficient way of obtaining the structure of the Markov network. The lasso regularized maximum likelihood estimator, otherwise known as the _graphical lasso_ (\ref{eqn:graphlasso}) explained below, is a popular statistical method for estimating such inverse covariances from high dimensional data. In this initial release of [skggm](https://github.com/jasonlaska/skggm) we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the _graphical lasso_ and a collection of modern best practices for working with the _graphical lasso_ and its variants.  
+
+
+
+
+<!-- Given $$n$$ independently drawn, $$p$$-dimensional Gaussian random samples $$S \in \mathbb{R}^{n \times p}$$, the maximum likelihood estimate of the inverse covariance matrix $$\Theta$$ can be computed via the _graphical lasso_, i.e., the program
 
 $$
 \begin{align}
@@ -22,12 +101,54 @@ $$\|\Theta\|_{1, \Lambda} = \sum_{i,j=1}^{p} \lambda_{ij}|\Theta_{ij}|$$
 
 is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. This is a generalization of the scalar $$\lambda$$ formulation found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
-The suport of the sparse precision matrix can be interpreted as the adjency matrix of an undirected graph (with non-zero elements as edges) for correlated components in a system (from which we obtain samples). **Thus, inverse covariance estimation finds numerous applications in X, Y, and Z.**
+The support set of \of the sparse precision matrix can be interpreted as the adjency matrix of an undirected graph (with non-zero elements as edges) for correlated components in a system (from which we obtain samples). **Thus, inverse covariance estimation finds numerous applications in X, Y, and Z.**
 
-In [skggm](https://github.com/jasonlaska/skggm) we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program (\ref{eqn:graphlasso}) and a collection of modern best practices for working with the graphical lasso.   
+-->
 
-## Methods and tradeoffs 
-The core estimator provided in [skggm](https://github.com/jasonlaska/skggm) is `QuicGraphLasso` which is a scikit-learn compatible interface to an implementation of the [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) algorithm for (\ref{eqn:graphlasso}).  
+
+
+
+## Methods 
+
+
+
+**TDA: Summmary/Overview of what we plan to discuss. Statistical procedures, and skggm implementation. Separate family of models, model selection, adaptivity, model averaging in a workflow or something**
+
+
+###  Maximum Likelihood Estimators
+
+$$
+\begin{align}
+\hat{\Thet} = \underset{\Theta \succ 0}{\mathrm{arg\,max}}~\mathcal{L}(\Thet,\hat{\Sig}) 
+&= \underset{\Theta \succ 0}{\mathrm{arg\,max}}\hphantom{~-}\mathrm{log\,det}~\Thet - \mathrm{tr}(\hat{\Sig}\Thet) \nonumber \\
+&= \underset{\Theta \succ 0}{\mathrm{arg\,min}}~-\mathrm{log\,det}~\Thet + \mathrm{tr}(\hat{\Sig}\Thet)
+\label{eqn:mle}\tag{1}
+\end{align}
+$$
+
+
+
+When the number of samples $$n$$ available are fewer than or comparable to the number of variables $$n \le p$$, then estimating upto $$\frac{p(p-1)}{2}$$ coefficients in the inverse covariance becomes difficult. To address the degeneracy of the likelihood in high dimensions, many including [Yuan and Lin](http://pages.stat.wisc.edu/~myuan/papers/graph.final.pdf), [Bannerjee et. al](http://www.jmlr.org/papers/volume9/banerjee08a/banerjee08a.pdf) and [Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf) proposed regularizing maximum likelihood estimators with the help of sparsity enforcing penalties such as the _lasso_.
+
+$$
+\begin{align}
+\hat{\Thet}(\Lambda) = \underset{\Theta \succ 0}{\mathrm{arg\,min}}~ -\mathrm{log\,det}~\Thet + \mathrm{tr}(\hat{\Sig}\Thet) + \|\Thet\|_{1, \Lambda}
+\label{eqn:graphlasso}\tag{2}
+\end{align}
+$$
+
+where $$\Lambda \in \mathbb{R}^{p\times p}$$ is a symmetric non-negative weight matrix and
+
+$$\|\Thet\|_{1, \Lambda} = \sum_{i,j=1}^{p} \lambda_{ij}|\Theta_{ij}|$$
+
+<!-- is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. This is a generalization of the scalar $$\lambda$$ formulation found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html). -->
+
+This estimator reduces to the standard _graphical lasso_ formulation of \[[Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] when all off diagonals of the matrix $$\Lambda$$ take scalar values  $$\lambda_{jk} = \lambda_{kj} =  \lambda$$ for all $$ j \ne k$$, and has been implemented in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html)
+
+
+### Implementation
+
+The core estimator provided in [skggm](https://github.com/jasonlaska/skggm) is `QuicGraphLasso` which is a scikit-learn compatible interface to [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf), a proximal Newton-type algorithm that solves the *graphical lasso* (\ref{eqn:graphlasso}) objective.  
 
 {% highlight python %}
 from inverse_covariance import QuicGraphLasso
@@ -50,20 +171,22 @@ After the model is fit, the estimator object will contain the covariance estimat
 
 The choice of the penalty $$\Lambda$$ can have a large impact on the kind of result obtained.  If a good $$\Lambda$$ is known _a priori_, e.g., when reproducing existing results from the literature, then look no further than this estimator (with `auto_scale='False'`).  
 
-For a new data, we provide several methods for selecting an appropriate $$\Lambda$$. Selection methods roughly fall into two categories of performance: a) biased away from sparsity, resulting in estimates with extra edges; or b) biased toward sparsity, resulting in estimates with missing edges.
+For a new data, we provide several methods for selecting an appropriate $$\Lambda$$. Selection methods roughly fall into two categories of performance: a) [_overselection_ (less sparse)](https://projecteuclid.org/euclid.aos/1152540754), resulting in estimates with false positive edges; or b) [_underselection_ (more sparse)](https://www.stat.ubc.ca/~jhchen/paper/Bio08.pdf), resulting in estimates with false negative edges.
+
 
 # Model selection via cross-validation (less sparse)
 One common way to find $$\Lambda$$ is via cross-validation.  Specifically, for a given grid of penalties, we fit the model on $$K$$ subsets of the data (folds) and measure the estimator performance.  We aggregate the score across the folds to determine a score for each $$\Lambda$$.
 
 In this technique, estimator performance is measured against the sample covariance, i.e., 
 $$
-\Sigma_{\mathrm{S}} = \frac{1}{n - 1} \sum_{i=1}^{n} (s_{i} - \bar{s}) (s_{i} - \bar{s})^{T}
+\hat{\Sig} = \frac{1}{n - 1} \sum_{i=1}^{n} (x_{i} - \bar{x}) (x_{i} - \bar{x})^{\top}
 $$
-for samples $$s_{i} \in S$$ and mean of the observations $$\bar{s}$$. We provide several metrics $$d(\Sigma_{\mathrm{S}}, \Theta^{*})$$ that can be used in with cross-validation via the `score_metric` parameter:
+for samples $$x_{j}$$ and mean of the observations $$\bar{x}$$. We provide several [metrics](http://pages.stat.wisc.edu/~myuan/papers/graph.final.pdf) of the form $$d(\hat{\Sig}, \hat{\Thet})$$ that measure how well the inverse covariance estimate best fits the data. These metrics can be combined with cross-validation via the `score_metric` parameter. Since CV measures out-of-sample error, we estimate inverse covariance $$\hat{\Thet}$$ on the training set and  measure its fit against the sample covariance $$\hat{\Sig}$$ on the test set. The skggm package offers the following options for the CV-loss,
+$$d(\hat{\Sig}^{ts},\hat{\Thet}^{tr})$$:
 
 $$
 \begin{align}
-- \mathrm{tr}(\Sigma_{\mathrm{S}} \cdot \Theta^{*}) + \mathrm{log\,det}~\Theta^{*} - p \cdot \mathrm{log}2\pi
+- \mathrm{tr}(\hat{\Sig}^{ts} \cdot \hat{\Thet}^{tr}) + \mathrm{log\,det}~\hat{\Thet}^{tr}- p \cdot \mathrm{log}2\pi
 \label{eqn:log_likelihood}\tag{log-likelihood}
 \end{align}
 $$
@@ -71,7 +194,7 @@ $$
 $$
 \begin{align}
 \frac{1}{2}\left( 
-\mathrm{tr}(\Sigma_{\mathrm{S}} \cdot \Theta^{*})  - \mathrm{log\,det}(\Sigma_{\mathrm{S}} \cdot \Theta^{*}) - p
+\mathrm{tr}(\hat{\Sig}^{ts} \cdot \hat{\Thet}^{tr})  - \mathrm{log\,det}(\hat{\Sig}^{ts} \cdot \hat{\Thet}^{tr}) - p
 \right)
 \label{eqn:kl_loss}\tag{KL-loss}
 \end{align}
@@ -80,7 +203,7 @@ $$
 $$
 \begin{align}
 \sum_{ij}\left(
-\Sigma_{\mathrm{S}} - \Sigma^{*}
+\hat{\Sig}^{ts} - \hat{\Sig}^{tr}_{smle}
 \right)^{2}
 \label{eqn:frobenius}\tag{Frobenius}
 \end{align}
@@ -88,12 +211,14 @@ $$
 
 $$
 \begin{align}
-\mathrm{tr}~\left(\Sigma_{\mathrm{S}} \cdot \Theta^{*} - I_p\right)^{2}
+\mathrm{tr}~\left(\hat{\Sig}^{ts} \cdot \hat{\Thet}^{tr}  - I_p\right)^{2}
 \label{eqn:quadratic}\tag{quadratic}
 \end{align}
 $$
 
-Cross validation can be performed with _QuicGraphLasso_ and [GridSearchCV](http://scikit-learn.org/stable/modules/generated/sklearn.grid_search.GridSearchCV.html), however, we provide an optimized convenience class `QuicGraphLassoCV` that takes advantage of _path mode_ to adaptively estimate the search grid.  This implementation is closely modeled after scikit-learn's [GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html), but with support for matrix penalties.
+Cross validation can be performed with _QuicGraphLasso_ and [GridSearchCV](http://scikit-learn.org/stable/modules/generated/sklearn.grid_search.GridSearchCV.html), however, we provide an optimized convenience class `QuicGraphLassoCV` that takes advantage of _path mode_ to adaptively estimate the search grid.  This implementation is closely modeled after scikit-learn's [GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html), but with support for matrix penalties.*
+
+*[Don't we also do CV repeatedly on multiple training-test splits?](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3994246/)
 
 {% highlight python %}
 from inverse_covariance import QuicGraphLassoCV
@@ -131,12 +256,12 @@ An alternative to cross-validation is the _Extended Bayesian Information Criteri
 
 $$
 \begin{align}
-EBIC_{\gamma} := -2 \cdot l(\Sigma_{\mathrm{S}}, \Theta^{*}) + |\Theta^{*}| \cdot \mathrm{log}(n) + 4 \cdot |\Theta^{*}| \cdot \mathrm{log}(p) \cdot \gamma,
-\label{eqn:ebic}\tag{2}
+EBIC_{\gamma}(\lambda) := - n \cdot \mathcal{L(\hat{\Thet}(\lambda);\hat{\Sig})} + |\hat{E}(\hat{\Thet})| \cdot \mathrm{log}(n) + 4 \cdot |\hat{E}(\hat{\Thet})|\cdot \mathrm{log}(p) \cdot \gamma,
+\label{eqn:ebic}\tag{3}
 \end{align}
 $$
 
-where $$l(\Sigma_{\mathrm{S}}, \Theta^{*})$$ denotes the log-likelihood between the estimate and the sample covariance and $$\mid\Theta^{*}\mid$$ denotes sparsity of the inverse covariance estimate.  The parameter $$\gamma$$ can be used to penalize graphs for higher dimension problems. When $$\gamma = 0$$, (\ref{eqn:ebic}) reduces to the conventional Bayesian information crieteria (BIC).
+where $$\mathcal{L}(\hat{\Thet}, \hat{\Sig})$$ denotes the log-likelihood (\ref{eqn:mle}) between the estimate and the sample covariance, and $$\mid\hat{E}(\hat{\Thet}(\lambda))\mid$$ denotes number of estimated edges or non-zeros in $$\hat{\Thet}(\lambda)$$.  The parameter $$\gamma$$ can be used to choose sparser graphs for higher dimension problems $$p>>n$$. When $$\gamma = 0$$, the EBIC criterion (\ref{eqn:ebic}) reduces to the conventional Schwarz or Bayesian information crieteria (BIC).
 
 `QuicGraphLassoEBIC` is provided as a convenience class to use _EBIC_ for model selection.  This class computes a path of estimates and selects the model that minimizes the _EBIC_ criteria.  We omit showing the interface here as it is similar to the classes described above with the addition of the `gamma`.
 
@@ -150,7 +275,8 @@ Figure 2. Inverse covariance estimates (more sparse).  From left to right:  the 
 An example is shown in Figure 2. The `QuicGraphLassoEBIC` estimates are much sparser than `QuicGraphLassoCV` estimates, and often contain a subset of the true precision support.  In this small dimensional example, BIC (gamma = 0) performed best as EBIC with gamma = 0.1 selected only the diagonal coefficients. As the dimension of the samples `n_features` grows, BIC will produce a less-sparse result and thus an increasing gamma parameter serves to obtain sparser solutions.
 
 # Randomized model averaging
-For some problems, the support of the sparse precision matrix is of primary interest.  In these cases, the support can be estimated robustly via the _random lasso_ or _stability selection_ [[Wang et al.](https://arxiv.org/abs/1104.3398), [Meinhausen et al.](https://arxiv.org/pdf/0809.2932v2.pdf)]. The skggm `ModelAverage` class implements a meta-estimator to do this. This is a similar facility to scikit-learn's [_RandomizedLasso_](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html), but for the graph lasso.
+
+For some problems, the support of the sparse precision matrix is of primary interest.  In these cases, the true support can be estimated with greater confidence by employing a form of ensemble model averaging known as _stability selection_ \[[Meinhausen et al.](https://arxiv.org/pdf/0809.2932v2.pdf)\] combined with randomizing the model selection via the _random lasso_ \[[Meinhausen et al.](https://arxiv.org/pdf/0809.2932v2.pdf), [Wang et al.](https://arxiv.org/abs/1104.3398)\]. The skggm `ModelAverage` class implements a meta-estimator to do this. This is a similar facility to scikit-learn's [_RandomizedLasso_](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html), but for the graph lasso.
 
 This technique estimates the precision over an ensemble of estimators with random penalties and bootstrapped samples.  Specifically, in each trial we
 
@@ -233,57 +359,16 @@ An example is shown in Figure 4. The adaptive estimator will not only refine the
 It is clear that the estimated values of the true support are much more accurate for each method combination.  For example, even though the support error for BIC is 10 as opposed to 0 in the non-adaptive case, the Frobenius error is 0.38 while it was 0.68 in the non-adaptive case.
 
 
-## Example: Study Forrest data set
 
-**TODO**
 
 
 ## Discussion
 
 This is an ongoing effort. We'd love your feedback on which algorithms we should provide bindings for next and how you're using the package. We also welcome contributions. 
 
-[@jasonlaska](https://github.com/jasonlaska) and [@mnarayn](https://github.com/mnarayan)
+[@jasonlaska](https://github.com/jasonlaska) and [@mnarayan](https://github.com/mnarayan)
 
 
-<!--
-# Study Forest
-
-Show off how to use some of our features using the studyforrest data
-
-Initial: Fit a GGM to one subject. Get ensemble model. Do the same for all 19 subjects. Discuss what things look like.  Edges are biased and cannot be interpreted. 
-
-Make it adaptive: 
-Create a group wide weight matrix.  Eg. if edges have a low stability proportion across all subjects, make the penalty weight high, otherwise reduce the penalty to something low or near zero.  
-
-Now do an adaptive fit on each of the subjects. 
-
-Do some discussion of the results and what we see. 
-
-This kind of shows off how to leverage the naive, adaptive and ensemble components. We can end with discussing that toolbox will be expanded to account for non-independence of data, more sophisticated regularizers that do sparsity/group-sparsity, etc... This makes it nice to revisit the dataset with improvements. 
-
-Earlier notes on this data 
-
-Goal: Explore how brain networks differ by 
-
-emotional arousal (high versus low arousal)
-emotional valence (positive or negative valence). 
-
-- Forrest gump movie has 10 second segments annotated by emotion
-- 2 hour fMRI data throughout for ~ 20 subjects
-
-Really rich dataset of subjects listening to forrest gump movie. 
-http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4416536/
-http://studyforrest.org/
-
-- Exceedingly well organized data and totally open; making the analysis fully automated will be easy 
-- Preprocessed data available, or I wouldn't have time to do this
-- Opportunity to have cool pictures/visualization/novel results
-
-I think we will need to have the sparse + group-sparse version of QUIC available to make this analysis really work. Sample sizes are small and subjects are all healthy so we can borrow strength across subjects. 
-
-Recent paper used the dataset to think about brain networks involved in interoception, so we both have some basis for interpreting our results
-http://www.sciencedirect.com/science/article/pii/S1053811915008174
--->
 
 <!--
 # Example of raw escaping
