@@ -359,6 +359,15 @@ An example is shown in Figure 4. The adaptive estimator will not only refine the
 It is clear that the estimated values of the true support are much more accurate for each method combination.  For example, even though the support error for BIC is 10 as opposed to 0 in the non-adaptive case, the Frobenius error is 0.38 while it was 0.68 in the non-adaptive case.
 
 
+## Summary 
+
+<img style="margin: 0 auto;display: block;" src="assets/skggm_graphics.png" width="400" />
+<div style="margin: 0 auto;display: block; width:600px;">
+<center><i><small>
+A summary of flexibility of skggm for estimating Gaussian graphical models via variants of the graphical lasso
+</small></i></center>
+</div>
+<br>
 
 
 
