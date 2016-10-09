@@ -48,24 +48,39 @@ Formally a graph $$\mathcal{G}=(V,E)$$ consists a set of vertices $$V = \{1,\ldo
 
 The vertices or nodes are associated with a $$p$$-dimensional random variable $$\Xdata = (X_{1},\ldots, X_{p})$$ that has some probability distribution $$\Xdata \sim \mathbb{P}_{\Xdata}$$
 
-There are many [probabilistic graphical models]() that relate the structure in the graph $$\mathcal{G}$$ to the probability distribution over the variables $$\mathbb{P}_{\Xdata}$$. We discuss an important class of graphical models, _Markov networks_, that relate absence of edges in the graph to conditional independence between random variables $$X_{1},\ldots, X_{p}$$.
+There are many [probabilistic graphical models](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) that relate the structure in the graph $$\mathcal{G}$$ to the probability distribution over the variables $$\mathbb{P}_{\Xdata}$$. We discuss an important class of graphical models, _Markov networks_, that relate absence of edges in the graph to conditional independence between random variables $$X_{1},\ldots, X_{p}$$.
+
+<img style="margin: 0 auto;display: block;" src="assets/skggm_markov.png" width="500" />
+<div style="margin: 0 auto;display: block; width:625px;">
+<center><i><small>
+Example of Pairwise, Local and Global Markov Properties with respect to 5-node graph. 
+</small></i></center>
+</div>
+<br>
+
+The pairwise markov property is the weakest Markov property while the global Markov property is the strongest. In general, if a distribution satisfies the global property it implies all the others. $$(G) \Rightarrow (L) \Rightarrow (P)$$. For some special distributions that have positive densities such as the multivariate Gaussian, the [compositional property](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) 
+of conditional independence holds. As a result, $$(P) \Rightarrow (G)$$ and all three Markov properties are equivalent.
 
 $$
 \begin{align}
-\label{eqn:pairwise} 	 & X_{j} \perp X_{k} | \ X_{V \setminus \{j,k\}}  &\textbf{(P)}  \\
-\label{eqn:local} 		 & X_{j} \perp X_{V \setminus \{j,\text{ne}(j)\}} | \ X_{ne(j)} &\textbf{(L)} \\
-\label{eqn:global} 		 & X_{A} \perp X_{B} | \ X_{C} & \textbf{(G)}
+\label{eqn:pairwise} 	\text{Absence of an edge}\ (j,k) \not\in E \Rightarrow
+& X_{j} \perp X_{k} | \ X_{V \setminus \{j,k\}}, \quad \text{for all} \ j \in V, k \in V, j \ne k  &\textbf{(P)}  \\
+%
+\label{eqn:local} 		\text{Given $j \in V$ and its neighbors $ne(j)$} \quad 
+& X_{j} \perp X_{V \setminus \{j,\text{ne}(j)\}} | \ X_{ne(j)} \quad \text{for all $j \in V$. Here $ne(j) = \{k \in V: (j,k) \in E\}$ } &\textbf{(L)}  \\
+%
+\label{eqn:global} 		\text{If all paths between $A$ and $B$ are separated by $C$}\  \Rightarrow\ 
+& X_{A} \perp X_{B} | \ X_{C} \quad \text{for all disjoint subsets $A,B,C \subset V$, where $C$ separates $A$ and $B$} &\textbf{(G)}
 \end{align}
 $$
 
 
+When probability distributions that satisfy the global Markov property, it becomes computationally and statistically tractable to efficiently infer conditional independence relationships. For an extensive reference on Markov properties of directed and undirected Markov networks, please see ["Graphical Models" by Lauritzen](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193). 
 
-An extensive reference on a variety of directed and undirected Markov networks is ["Graphical Models" by Lauritzen](). 
 
 ## Relationship to Inverse Covariance Estimation
 
-In general, if two variables are statistically independent they are also uncorrelated. But the converse is not true in general. However, normal or Gaussian distributions are fully described by their mean and covariance. As a result, a zero correlation also implies statistical independence.  An analogous equivalence holds between conditional independence and the inverse covariance for Gaussian distributions. This follows from the [Hammersley-Clifford theorem](), and the [equivalence]() between the _pairwise_ and _global Markov properties_. 
-
+In general, if two variables are statistically independent they are also uncorrelated. But the converse is not true in general. However, normal or Gaussian distributions are fully described by their mean and covariance. As a result, a zero correlation between two variables also implies statistical independence.  An analogous equivalence holds between conditional independence and the inverse covariance for Gaussian distributions. This follows from the [Hammersley-Clifford theorem](), and the [equivalence]() between the _pairwise_ and _global Markov properties_. 
 
 
 Given $$n$$ _i.i.d_ random samples $$(x_{1},x_{2},\ldots,x_{n})^{\top} = \Xdata$$ from a multivariate Gaussian distribution
@@ -75,7 +90,6 @@ x_{i} \overset{i.i.d}{\sim} \mathcal{N}_p(0, \Sig), \quad i=1,\ldots,n  \label{e
 \end{align}$$
 
 where each sample $$x_{i}$$ is $$p$$-dimensional with $$x_{i} \in \mathbb{R}^{p}$$, $$\Sig$$ is the population covariance matrix $$\Sig = \mathbf{E}(\Xdata^{\top}\Xdata)$$.
-
 
 
 
