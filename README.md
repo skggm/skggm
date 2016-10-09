@@ -10,11 +10,11 @@ While `skggm` is currently geared toward _Gaussian graphical models_, we hope to
 
 Given **n** independently drawn, **p**-dimensional Gaussian random samples <img src="images/S.png" alt="X" width="80">, the maximum likelihood estimate of the inverse covariance matrix <img src="images/Theta.png" alt="\lambda" width="12"> can be computed via the _graphical lasso_, i.e., the program
 
-<img src="images/graphlasso_program.png" alt="\ell_1 penalized inverse covariance estimation" width="500">
+<p align="center"><img src="images/graphlasso_program.png" alt="\ell_1 penalized inverse covariance estimation" width="500"></p>
 
 where <img src="images/Lambda.png" alt="\Lambda" width="80"> is a symmetric non-negative weight matrix and
 
-<img src="images/weighted_ell_1.png" alt="\ell_1 penalized inverse covariance estimation" width="200"> 
+<p align="center"><img src="images/weighted_ell_1.png" alt="\ell_1 penalized inverse covariance estimation" width="200"></p> 
 
 is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. By default skggm's tools do not penalize the diagonal elements but arbitrary penalization is supported. The formulation found here is a generalization of the scalar <img src="images/scalar_lambda.png" alt="\lambda" width="12"> version found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
