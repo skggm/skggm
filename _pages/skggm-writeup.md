@@ -395,7 +395,7 @@ It is clear that the estimated values of the true support are much more accurate
 
 ## Summary 
 
-<img style="margin: 0 auto;display: block;" src="assets/skggm_graphics.png" width="600" />
+<img style="margin: 0 auto;display: block;" src="assets/sklearn_skggm_compare.png" width="600" />
 <div style="margin: 0 auto;display: block; width:700px;">
 <center><i><small>
 A summary of flexibility of skggm for estimating Gaussian graphical models via variants of the graphical lasso
