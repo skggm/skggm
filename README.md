@@ -21,11 +21,9 @@ is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org
 In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program above and a collection of modern best practices for working with the graphical lasso.  
 
 A current breakdown of how this package differs from scikit's built-in `GraphLasso` is depicted by this chart:
-
 <img src="images/sklearn_skggm_compare.png" alt="sklearn/skggm feature comparison" width="600"> 
 
 To get started, test out 
-
     
     from inverse_covariance import QuicGraphLassoCV
     
@@ -34,7 +32,7 @@ To get started, test out
     
     # outputs: model.covariance_, model.precision_, model.lam_
 
-and then head over to `examples/estimator_suite.py` for other example usage.
+and then head over to `examples/estimator_suite.py`. Additional examples can be found at [https://github.com/neuroquant/jf2016-skggm](https://github.com/neuroquant/jf2016-skggm) and fiddled with live via binder at [http://mybinder.org/repo/neuroquant/jf2016-skggm](http://mybinder.org/repo/neuroquant/jf2016-skggm).
 <!-- and read our walk through at [https://jasonlaska.github.io/skggm/walkthrough](https://jasonlaska.github.io/skggm/walk_through). -->
 
 ---
