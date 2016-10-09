@@ -9,7 +9,8 @@ permalink: /walkthrough
 
 ## Introduction
 
-Graphical models combine graph theory and probability theory to create networks that model complex probabilistic relationships. They are widely used to infer biological networks as in [cellular biology](http://science.sciencemag.org/content/303/5659/799) and [neuroscience](https://www.simonsfoundation.org/features/foundation-news/how-do-different-brain-regions-interact-to-enhance-function/),   [psychometrics](http://www.annualreviews.org/doi/abs/10.1146/annurev-clinpsy-050212-185608) or [finance](http://www.jstor.org/stable/1924119). 
+Graphical models combine graph theory and probability theory to create networks that model complex probabilistic relationships. Inferring such networks is an statistical problem in [systems biology](http://science.sciencemag.org/content/303/5659/799) and [neuroscience](https://www.simonsfoundation.org/features/foundation-news/how-do-different-brain-regions-interact-to-enhance-function/),   [psychometrics](http://www.annualreviews.org/doi/abs/10.1146/annurev-clinpsy-050212-185608) or [finance](http://www.jstor.org/stable/1924119). 
+
 
 [ Insert Observations to Network Example ]
 
@@ -20,7 +21,7 @@ Graphical models combine graph theory and probability theory to create networks 
 </div>
 <br> -->
 
-A naive network model for the above example observations could be to say that if two variables are correlated, then the two nodes are connected by an edge but not otherwise. Thus the absence of an edge between two nodes indicates the absence of a correlation between them. Unfortunately, as shown in Figure, such pairwise correlations could be spuriously induced by shared _common causes_. 
+A simple model to infer network between $$p$$ variables is a correlational network. In this case, if two variables are correlated, then the corresponding nodes are connected by an edge but not otherwise. Thus the absence of an edge between two nodes indicates the absence of a correlation between them. Unfortunately, as shown in Figure, such pairwise correlations could be spuriously induced by shared _common causes_. 
 
 
 <img style="margin: 0 auto;display: block;" src="assets/skggm_graphics_spurious_correlation.png" width="200" />
@@ -70,10 +71,10 @@ In general, if two variables are statistically independent they are also uncorre
 Given $$n$$ _i.i.d_ random samples $$(x_{1},x_{2},\ldots,x_{n})^{\top} = \Xdata$$ from a multivariate Gaussian distribution
 
 $$\begin{align} 
-x_{j} \overset{i.i.d}{\sim} \mathcal{N}_p(0, \Sig), \quad j=1,\ldots,n  \label{eqn:mvn}\tag{}
+x_{i} \overset{i.i.d}{\sim} \mathcal{N}_p(0, \Sig), \quad i=1,\ldots,n  \label{eqn:mvn}\tag{}
 \end{align}$$
 
-where each sample $$x_{j}$$ is $$p$$-dimensional with $$x_{j} \in \mathbb{R}^{p}$$, $$\Sig$$ is the population covariance matrix $$\Sig = \mathbf{E}(\Xdata^{\top}\Xdata)$$.
+where each sample $$x_{i}$$ is $$p$$-dimensional with $$x_{i} \in \mathbb{R}^{p}$$, $$\Sig$$ is the population covariance matrix $$\Sig = \mathbf{E}(\Xdata^{\top}\Xdata)$$.
 
 
 
@@ -137,9 +138,9 @@ $$
 \end{align}
 $$
 
-where $$\Lambda \in \mathbb{R}^{p\times p}$$ is a symmetric non-negative weight matrix and
+where $$\Lambda \in \mathbb{R}^{p\times p}$$ is a symmetric matrix with non-negative entries and
 
-$$\|\Thet\|_{1, \Lambda} = \sum_{i,j=1}^{p} \lambda_{ij}|\Theta_{ij}|$$
+$$\|\Thet\|_{1, \Lambda} = \sum_{j,k=1}^{p} \lambda_{jk}\mid\theta_{jk}\mid$$. Typically, the diagonals are not penalized by setting $$\lambda_{jj} = 0,\ j=1,\ldots,p$$ to ensure that $$\hat{\Thet}$$ remains positive definite. 
 
 <!-- is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. This is a generalization of the scalar $$\lambda$$ formulation found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html). -->
 
@@ -323,15 +324,23 @@ Figure 3. Random model averaging support estimates.  From left to right:  the or
 An example is shown in Figure 3. The dense `model.proportions_` matrix contains the sample probability of each element containing a nonzero.  Thresholding this matrix by the default value of 0.5 resulted in a correct estimate of the support.  This technique generally provides a more robust support estimate than the previously explained methods.  One drawback of this approach is the significant time-cost of running the estimator over many trials.  These trials can be run in parallel and an implementation may be prioritized for a future release.
 
 # Refining coefficients via adaptive methods
-Given an initial sparse estimate, we can derive a new "adaptive" penalty and refit the graph lasso [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf), [Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)]. In our current implementation, refitting is always done with `QuicGraphLassoCV`.  We provide three ways of computing new weights before refitting:
 
-- `binary`: Generates a matrix that has zeros where where the estimator was non-zero and ones elsewhere.  This is sometimes called the _relaxed lasso_ or _gelato_ [[Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)].
+Given an initial sparse estimate, we can derive a new ["adaptive"](http://pages.cs.wisc.edu/~shao/stat992/zou2006.pdf) penalty and refit the _graphical lasso_ using data dependent weights [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf), [Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)]. Thus, the adaptive variant of the _graphical lasso_ (\ref{eqn:glasso}) amounts to 
 
-- `inverse`: For an element $$\theta_{i,j}$$ of $$\Theta$$, computes $$\frac{1}{\theta_{i,j}}$$ for non-zero coefficients and $$\mathrm{max}\left\{\frac{1}{\theta_{i,j}}\right\}$$ for the zero valued coefficients.  This is what is used in the _glasso_ R package.
+$$\begin{align}
+\Lambda_{jk} = \lambda \cdot W_{jk}, \quad  \text{ where } W_{jk} = W_{kj} > 0 \  \text{for all} \  (j,k) \label{eqn:adaptive-weights}\tag{5}
+\end{align}$$
 
-- `inverse_squared`: Computes $$\frac{1}{\theta_{i,j}^{2}}$$ for non-zero coefficients and $$\mathrm{max}\left\{\frac{1}{\theta_{i,j}^{2}}\right\}$$ for the zero valued coefficients.
 
-Since the `ModelAverage` meta-estimator produces a good support estimate, this can be used in conjunction with the `binary` option to estimate coefficient values. 
+In our current implementation, refitting is always done with `QuicGraphLassoCV`. We provide three ways of computing new weights in (\ref{eqn:adaptive-weights}) before refitting, given the coefficients $$\hat{\theta}_{jk}$$ of the inverse covariance estimate $$\hat{\Thet}$$:
+
+- `binary`: Here the weight $$W_{jk} = 0 $$ is zero where the estimated entry $$\hat{\theta}_{jk} \ne 0 $$ is non-zero, otherwise the weight is $$W_{jk} = 1 $$.  This is sometimes called the refitted MLE or _gelato_ [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf)], and similar to [_relaxed lasso_](http://stat.ethz.ch/~nicolai/relaxo.pdf).
+
+- `inverse`: Here the weight $$W_{jk}$$ is set to $$\frac{1}{\mid\hat{\theta}_{jk}\mid}$$ for non-zero coefficients and $$\mathrm{max}\left\{\frac{1}{\hat{\theta}_{jk}}\right\}$$ for the zero valued coefficients.  This is the default method in the [adaptive lasso](http://pages.cs.wisc.edu/~shao/stat992/zou2006.pdf) and in the _glasso_ R package.
+
+- `inverse_squared`: Computes $$\frac{1}{\hat{\theta}_{jk}^{2}}$$ for non-zero coefficients and $$\mathrm{max}\left\{\frac{1}{\hat{\theta}_{jk}^{2}}\right\}$$ for the zero valued coefficients.
+
+Since the `ModelAverage` meta-estimator produces a good support estimate, this can be combined with the `binary` option for the weights to combine adaptivity and model averaging. 
 
 {% highlight python %}
 from inverse_covariance import AdaptiveGraphLasso
@@ -361,8 +370,8 @@ It is clear that the estimated values of the true support are much more accurate
 
 ## Summary 
 
-<img style="margin: 0 auto;display: block;" src="assets/skggm_graphics.png" width="400" />
-<div style="margin: 0 auto;display: block; width:600px;">
+<img style="margin: 0 auto;display: block;" src="assets/skggm_graphics.png" width="600" />
+<div style="margin: 0 auto;display: block; width:700px;">
 <center><i><small>
 A summary of flexibility of skggm for estimating Gaussian graphical models via variants of the graphical lasso
 </small></i></center>
