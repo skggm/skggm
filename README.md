@@ -98,7 +98,7 @@ or from a cloned repo
 
 If you would like to fork the pyquic bindings directly, use the Makefile provided in `inverse_covariance/pyquic`.
 
-This package requires the `lapack` libraries to by installed on your system. A configuration example with these dependencies and Anaconda 2 compatibility can be found [here](https://github.com/neuroquant/jf2016-skggm/blob/master/Dockerfile#L8-L10).
+This package requires the `lapack` libraries to by installed on your system. A configuration example with these dependencies for Ubuntu and Anaconda 2 can be found [here](https://github.com/neuroquant/jf2016-skggm/blob/master/Dockerfile#L8-L13).
 
 ## Tests
 To run the tests, execute the following lines.  
