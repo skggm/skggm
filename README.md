@@ -32,7 +32,7 @@ To get started, test out
     
     # outputs: model.covariance_, model.precision_, model.lam_
 
-and then head over to `examples/estimator_suite.py`. Additional examples can be found at [https://github.com/neuroquant/jf2016-skggm](https://github.com/neuroquant/jf2016-skggm) and fiddled with live via binder at [http://mybinder.org/repo/neuroquant/jf2016-skggm](http://mybinder.org/repo/neuroquant/jf2016-skggm).
+and then head over to `examples/estimator_suite.py`. Additional examples can be found [here](https://github.com/neuroquant/jf2016-skggm) and fiddled with live via binder at [here](http://mybinder.org/repo/neuroquant/jf2016-skggm).
 <!-- and read our walk through at [https://jasonlaska.github.io/skggm/walkthrough](https://jasonlaska.github.io/skggm/walk_through). -->
 
 ---
