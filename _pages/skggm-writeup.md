@@ -60,7 +60,7 @@ $$
 
 
 
-An extensive reference on a variety of directed and undirected Markov networks is ["Graphical Models" by Lauritzen]()
+An extensive reference on a variety of directed and undirected Markov networks is ["Graphical Models" by Lauritzen](). 
 
 ## Relationship to Inverse Covariance Estimation
 
@@ -84,8 +84,8 @@ where each sample $$x_{i}$$ is $$p$$-dimensional with $$x_{i} \in \mathbb{R}^{p}
 
 Thus, the inverse covariance matrix is an important quantity of interest as it gives us an efficient way of obtaining the structure of the Markov network. The lasso regularized maximum likelihood estimator, otherwise known as the _graphical lasso_ (\ref{eqn:graphlasso}) explained below, is a popular statistical method for estimating such inverse covariances from high dimensional data. In this initial release of [skggm](https://github.com/jasonlaska/skggm) we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the _graphical lasso_ and a collection of modern best practices for working with the _graphical lasso_ and its variants.  
 
-
-
+The concept of Markov networks has been extended to many other measures of association beyond the standard covariance. These include covariances between variables in Fourier domain (cross-spectral density) encountered in [time-series analyses]() and [information theoretic measures](). Moreover, for some non-Gaussian distributions, zeros in a [generalized inverse covariance]() can provide conditional independence relationships analogous to standard inverse covariance explained above. Given the general importance of the inverse covariance, we expect methods for estimating it to be useful for many other classes of graphical models beyond standard Gaussian graphical models.
+Thus, while skggm currently supports standard inverse covariances for multivariate normal distributions, we hope this implementation will serve as a foundational building block for generalized classes of graphical models. 
 
 <!-- Given $$n$$ independently drawn, $$p$$-dimensional Gaussian random samples $$S \in \mathbb{R}^{n \times p}$$, the maximum likelihood estimate of the inverse covariance matrix $$\Theta$$ can be computed via the _graphical lasso_, i.e., the program
 
@@ -124,7 +124,6 @@ for samples $$\{x_{j}\}$$ and sample mean $$\bar{x}$$.
 To ensure all features are on the same scale, sometimes the sample covariance is replaced by the sample correlation $$\mathbf{R}(\hat{\Sig})$$ using the variance-correlation decomposition 
 $$\mathbf{R}(\hat{\Sig}) = \hat{\mathbf{D}}\ \hat{\Sig}\ \hat{\mathbf{D}}$$, 
 where the diagonal matrix, $$\hat{\mathbf{D}}=\text{diag}(\hat{\sigma}^{-1/2}_{11},\ldots,\hat{\sigma}^{-1/2}_{pp})$$, is a function of the sample variances from $$\hat{\Sig}$$.
- 
 
 
 When the number of samples $$n$$ available are fewer than or comparable to the number of variables $$n \le p$$, the sample covariance becomes ill-conditioned and finally degenerate. Consequently taking its inverse and estimating upto $$\frac{p(p-1)}{2}$$ coefficients in the inverse covariance becomes difficult. To address the degeneracy of the sample covariance and the likelihood (\ref{eqn:mle}) in high dimensions, many including [Yuan and Lin](http://pages.stat.wisc.edu/~myuan/papers/graph.final.pdf), [Bannerjee et. al](http://www.jmlr.org/papers/volume9/banerjee08a/banerjee08a.pdf) and [Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf) proposed regularizing maximum likelihood estimators with the aid of sparsity enforcing penalties such as the _lasso_. Sparsity enforcing penalties assume that many entries in the inverse covariance will be zero. Thus fewer than $$\frac{p(p-1)}{2}$$ parameters need to be estimated, though the location of these non-zero parameters is unknown. The lasso regularized MLE objective is
