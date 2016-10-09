@@ -6,11 +6,14 @@ permalink: /walkthrough
 
 <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
+$$
+\newcommand{\Xdata}{\mathbf{X}}
+\newcommand{\Sig}{\mathbf{\Sigma}}
+\newcommand{\Thet}{\mathbf{\Theta}}
+$$
 
 ## Introduction
-
 Graphical models combine graph theory and probability theory to create networks that model complex probabilistic relationships. Inferring such networks is an statistical problem in [systems biology](http://science.sciencemag.org/content/303/5659/799) and [neuroscience](https://www.simonsfoundation.org/features/foundation-news/how-do-different-brain-regions-interact-to-enhance-function/),   [psychometrics](http://www.annualreviews.org/doi/abs/10.1146/annurev-clinpsy-050212-185608), or [finance](http://www.jstor.org/stable/1924119). 
-
 
 [ Insert Observations to Network Example ]
 
@@ -20,9 +23,7 @@ Graphical models combine graph theory and probability theory to create networks 
 </small></i></center>
 </div>
 <br> -->
-
 A simple model to infer network between $$p$$ variables is a correlational network. In this case, if two variables are correlated, then the corresponding nodes are connected by an edge but not otherwise. Thus the absence of an edge between two nodes indicates the absence of a correlation between them. Unfortunately, as shown in the following figure, such pairwise correlations could be spuriously induced by shared _common causes_. 
-
 
 <img style="margin: 0 auto;display: block;" src="assets/skggm_graphics_spurious_correlation.png" width="200" />
 <div style="margin: 0 auto;display: block; width:625px;">
@@ -31,20 +32,10 @@ A burning fire causes both smoke and heat. Smoke and heat are always observed to
 </small></i></center>
 </div>
 <br>
-
 Thus, in applications that seek to interpret edges as some form of direct influence, more sophisticated graphical models that eliminate spurious or misleading relationships are desirable. This motivates the usage of Markov networks and a specific instantiation of them, Gaussian graphical models. 
 
-$$
-\newcommand{\Xdata}{\mathbf{X}}
-\newcommand{\Sig}{\mathbf{\Sigma}}
-\newcommand{\Thet}{\mathbf{\Theta}}
-$$
-
 ## Conditional Independence and Markov Networks
-
-Formally a graph $$\mathcal{G}=(V,E)$$ consists a set of vertices $$V = \{1,\ldots,p\}$$ and edges between them $$E\subset V \times V$$.  
-
-The vertices or nodes are associated with a $$p$$-dimensional random variable $$\Xdata = (X_{1},\ldots, X_{p})$$ that has some probability distribution $$\Xdata \sim \mathbb{P}_{\Xdata}$$
+Formally a graph $$\mathcal{G}=(V,E)$$ consists a set of vertices $$V = \{1,\ldots,p\}$$ and edges between them $$E\subset V \times V$$.  The vertices or nodes are associated with a $$p$$-dimensional random variable $$\Xdata = (X_{1},\ldots, X_{p})$$ that has some probability distribution $$\Xdata \sim \mathbb{P}_{\Xdata}$$.
 
 There are many [probabilistic graphical models](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) that relate the structure in the graph $$\mathcal{G}$$ to the probability distribution over the variables $$\mathbb{P}_{\Xdata}$$. We discuss an important class of graphical models, _Markov networks_, that relate absence of edges in the graph to conditional independence between random variables $$X_{1},\ldots, X_{p}$$.
 
@@ -55,8 +46,11 @@ Example of Pairwise, Local and Global Markov Properties with respect to 5-node g
 </small></i></center>
 </div>
 <br>
+The pairwise markov property is the weakest Markov property while the global Markov property is the strongest. In general, if a distribution satisfies the global property it implies all the others. 
 
-The pairwise markov property is the weakest Markov property while the global Markov property is the strongest. In general, if a distribution satisfies the global property it implies all the others. $$(G) \Rightarrow (L) \Rightarrow (P)$$. For some special distributions that have positive densities such as the multivariate Gaussian, the [compositional property](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) 
+$$(G) \Rightarrow (L) \Rightarrow (P)$$. 
+
+For some special distributions that have positive densities such as the multivariate Gaussian, the [compositional property](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) 
 of conditional independence holds. As a result, $$(P) \Rightarrow (G)$$ and all three Markov properties are equivalent.
 
 $$
@@ -72,25 +66,21 @@ $$
 \end{align}
 $$
 
-
-When probability distributions that satisfy the global Markov property, it becomes computationally and statistically tractable to efficiently infer conditional independence relationships. For an extensive reference on Markov properties of directed and undirected Markov networks, please see ["Graphical Models" by Lauritzen](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193). 
-
+When probability distributions satisfy the global Markov property, it becomes computationally and statistically tractable to efficiently infer conditional independence relationships. For an extensive reference on Markov properties of directed and undirected Markov networks, please see ["Graphical Models" by Lauritzen](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193). 
 
 ## Relationship to Inverse Covariance Estimation
-
-In general, if two variables are statistically independent they are also uncorrelated. But the converse is not true in general. However, normal or Gaussian distributions are fully described by their mean and covariance. As a result, a zero correlation between two variables also implies statistical independence. An analogous equivalence holds between conditional independence and the inverse covariance for Gaussian distributions. 
-
+In general, if two variables are statistically independent they are also uncorrelated, however, the converse is not necesssarily true. Since Gaussian distributions are fully described by their mean and covariance, then a zero correlation between two variables indeed also implies statistical independence. An analogous equivalence holds between conditional independence and the inverse covariance for Gaussian distributions. 
 
 Given $$n$$ _i.i.d_ random samples $$(x_{1},x_{2},\ldots,x_{n})^{\top} = \Xdata$$ from a multivariate Gaussian distribution
 
 $$\begin{align} 
-x_{i} \overset{i.i.d}{\sim} \mathcal{N}_p(0, \Sig), \quad i=1,\ldots,n  \label{eqn:mvn}\tag{}
-\end{align}$$
+x_{i} \overset{i.i.d}{\sim} \mathcal{N}_p(0, \Sig), \quad i=1,\ldots,n  \label{eqn:mvn}\tag{1}
+\end{align}
+$$
 
-where each sample $$x_{i}$$ is $$p$$-dimensional with $$x_{i} \in \mathbb{R}^{p}$$, $$\Sig$$ is the population covariance matrix $$\Sig = \mathbf{E}(\Xdata^{\top}\Xdata)$$. We denote the inverse covariance by $$\Thet = \Sig^{-1}$
+where each sample $$x_{i}$$ is $$p$$-dimensional with $$x_{i} \in \mathbb{R}^{p}$$, $$\Sig$$ is the population covariance matrix $$\Sig = \mathbf{E}(\Xdata^{\top}\Xdata)$$. We denote the inverse covariance by $$\Thet = \Sig^{-1}$$.
 
 As a consequence of the [Hammersley-Clifford theorem](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) in the case of Gaussian distributions, $$\Thet_{jk} = 0 \iff (j,k) \not \in E$$. 
-
 
 <img style="margin: 0 auto;display: block;" src="assets/skggm_inverse.png" width="500" />
 <div style="margin: 0 auto;display: block; width:625px;">
@@ -99,33 +89,14 @@ Equivalence betwen zeros in the inverse covariance matrix and absence of edges i
 </small></i></center>
 </div>
 <br>
-
 The inverse covariance matrix is an important quantity of interest as it gives us an efficient way of obtaining the structure of the Markov network. The lasso regularized maximum likelihood estimator, otherwise known as the _graphical lasso_ (\ref{eqn:graphlasso}) explained below, is a popular statistical method for estimating such inverse covariances from high dimensional data. In this initial release of [skggm](https://github.com/jasonlaska/skggm) we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the _graphical lasso_ and a collection of modern best practices for working with the _graphical lasso_ and its variants.  
 
 The concept of Markov networks has been extended to many other measures of association beyond the standard covariance. These include covariances between variables in Fourier domain (cross-spectral density) encountered in [time-series analyses](https://www.stat.berkeley.edu/~brill/Papers/graphmodels.pdf) and [information theoretic measures](http://ita.ucsd.edu/workshop/06/papers/71.pdf). Moreover, for some non-Gaussian distributions, zeros in a [generalized inverse covariance](https://arxiv.org/abs/1212.0478) can provide conditional independence relationships analogous to standard inverse covariance explained above. Given the general importance of the inverse covariance, we expect methods for estimating it to be useful for many other classes of graphical models beyond standard Gaussian graphical models.
 Thus, while skggm currently supports standard inverse covariances for multivariate normal distributions, we hope this implementation will serve as a foundational building block for generalized classes of graphical models. 
 
-<!-- Given $$n$$ independently drawn, $$p$$-dimensional Gaussian random samples $$S \in \mathbb{R}^{n \times p}$$, the maximum likelihood estimate of the inverse covariance matrix $$\Theta$$ can be computed via the _graphical lasso_, i.e., the program
-
-$$
-\begin{align}
-(\Sigma^{*})^{-1} = \Theta^{*} = \underset{\Theta \succ 0}{\mathrm{arg\,min}}~ -\mathrm{log\,det}\Theta + \mathrm{tr}(S\Theta) + \|\Theta\|_{1, \Lambda}
-\label{eqn:graphlasso}\tag{1}
-\end{align}
-$$
-
-where $$\Lambda \in \mathbb{R}^{p\times p}$$ is a symmetric non-negative weight matrix and
-
-$$\|\Theta\|_{1, \Lambda} = \sum_{i,j=1}^{p} \lambda_{ij}|\Theta_{ij}|$$
-
-is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. This is a generalization of the scalar $$\lambda$$ formulation found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
-
-The support set of \of the sparse precision matrix can be interpreted as the adjency matrix of an undirected graph (with non-zero elements as edges) for correlated components in a system (from which we obtain samples). **Thus, inverse covariance estimation finds numerous applications in X, Y, and Z.**
-
--->
 
 ###  Maximum Likelihood Estimators
-
+The maximum likelihood estimate of the precison 
 
 $$
 \begin{align}
@@ -136,15 +107,13 @@ $$
 \end{align}
 $$
 
-The sample covariance in (\ref{eqn:mle}) is given by 
-$$\hat{\Sig} = \frac{1}{n - 1} \sum_{i=1}^{n} (x_{i} - \bar{x}) (x_{i} - \bar{x})^{\top}$$
+can be computed via the sample covariance given by $$\hat{\Sig} = \frac{1}{n - 1} \sum_{i=1}^{n} (x_{i} - \bar{x}) (x_{i} - \bar{x})^{\top}$$
 for samples $$\{x_{j}\}$$ and sample mean $$\bar{x}$$. 
 To ensure all features are on the same scale, sometimes the sample covariance is replaced by the sample correlation $$\mathbf{R}(\hat{\Sig})$$ using the variance-correlation decomposition 
 $$\mathbf{R}(\hat{\Sig}) = \hat{\mathbf{D}}\ \hat{\Sig}\ \hat{\mathbf{D}}$$, 
 where the diagonal matrix, $$\hat{\mathbf{D}}=\text{diag}(\hat{\sigma}^{-1/2}_{11},\ldots,\hat{\sigma}^{-1/2}_{pp})$$, is a function of the sample variances from $$\hat{\Sig}$$.
 
-
-When the number of samples $$n$$ available are fewer than or comparable to the number of variables $$n \le p$$, the sample covariance becomes ill-conditioned and finally degenerate. Consequently taking its inverse and estimating upto $$\frac{p(p-1)}{2}$$ coefficients in the inverse covariance becomes difficult. To address the degeneracy of the sample covariance and the likelihood (\ref{eqn:mle}) in high dimensions, many including [Yuan and Lin](http://pages.stat.wisc.edu/~myuan/papers/graph.final.pdf), [Bannerjee et. al](http://www.jmlr.org/papers/volume9/banerjee08a/banerjee08a.pdf) and [Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf) proposed regularizing maximum likelihood estimators with the aid of sparsity enforcing penalties such as the _lasso_. Sparsity enforcing penalties assume that many entries in the inverse covariance will be zero. Thus fewer than $$\frac{p(p-1)}{2}$$ parameters need to be estimated, though the location of these non-zero parameters is unknown. The lasso regularized MLE objective is
+When the number of samples $$n$$ available are fewer than or comparable to the number of variables $$n \le p$$, the sample covariance becomes ill-conditioned and finally degenerate. Consequently taking its inverse and estimating up to $$\frac{p(p-1)}{2}$$ coefficients in the inverse covariance becomes difficult. To address the degeneracy of the sample covariance and likelihood (\ref{eqn:mle}) in high dimensions, many including [Yuan and Lin](http://pages.stat.wisc.edu/~myuan/papers/graph.final.pdf), [Bannerjee et. al](http://www.jmlr.org/papers/volume9/banerjee08a/banerjee08a.pdf), and [Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf) proposed regularizing maximum likelihood estimators with the aid of sparsity enforcing penalties such as the _lasso_. Sparsity enforcing penalties assume that many entries in the inverse covariance will be zero. Thus fewer than $$\frac{p(p-1)}{2}$$ parameters need to be estimated, though the location of these non-zero parameters is unknown. The lasso regularized MLE objective is
 
 $$
 \begin{align}
@@ -154,13 +123,11 @@ $$
 $$
 where $$\Lambda \in \mathbb{R}^{p\times p}$$ is a symmetric matrix with non-negative entries and
 $$\|\Thet\|_{1, \Lambda} = \sum_{j,k=1}^{p} \lambda_{jk}\mid\theta_{jk}\mid$$. Typically, the diagonals are not penalized by setting $$\lambda_{jj} = 0,\ j=1,\ldots,p$$ to ensure that $$\hat{\Thet}$$ remains positive definite. 
-The objective (\ref{eqn:graphlasso}) reduces to the standard _graphical lasso_ formulation of \[[Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] when all off diagonals of the penalty matrix take a constant scalar value  $$\lambda_{jk} = \lambda_{kj} =  \lambda$$ for all $$ j \ne k$$. The standard _graphical lasso_ has been implemented in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html)
+The objective (\ref{eqn:graphlasso}) reduces to the standard _graphical lasso_ formulation of \[[Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] when all off diagonals of the penalty matrix take a constant scalar value  $$\lambda_{jk} = \lambda_{kj} =  \lambda$$ for all $$ j \ne k$$. The standard _graphical lasso_ has been implemented in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
 
 
 ## Methods & Implementation
-
-
 <img style="margin: 0 auto;display: block;" src="assets/skggm_workflow.png" width="800" />
 <div style="margin: 0 auto;display: block; width:825px;">
 <center><i><small>
@@ -168,9 +135,6 @@ Overview of the skggm implementation of the graphical lasso and its adaptive var
 </small></i></center>
 </div>
 <br>
-
-
-
 The core estimator provided in [skggm](https://github.com/jasonlaska/skggm) is `QuicGraphLasso` which is a scikit-learn compatible interface to [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf), a proximal Newton-type algorithm that solves the _graphical lasso_ (\ref{eqn:graphlasso}) objective.  
 
 {% highlight python %}
@@ -197,7 +161,6 @@ The _graphical lasso_ (\ref{eqn:graphlasso}) provides a family of estimates $$\T
 
 
 ### Model selection via cross-validation (less sparse)
-
 A common method to choose $$\Lambda$$ is [cross-validation](https://www.stat.berkeley.edu/~bickel/BL2008-banding.pdf).  Specifically, given a grid of penalties and K folds of the data,  
 
 1. Estimate a family of sparse to dense precision matrices on $$K-1$$ splits of the data. 
