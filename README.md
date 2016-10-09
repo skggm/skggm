@@ -113,36 +113,36 @@ In `examples/estimator_suite.py` we reproduce the [plot_sparse_cov](http://sciki
 
 An example run for `n_examples=100` and `n_features=20` yielded the following results. 
 
-<img src="images/estimator_suite_scorecard_100x20.png" alt="(n_examples, n_features) = (100, 20)" width="650">
+<p align="center"><img src="images/estimator_suite_scorecard_100x20.png" alt="(n_examples, n_features) = (100, 20)" width="650"></p>
 
-<img src="images/estimator_suite_plots_page0_100x20.png" alt="(n_examples, n_features) = (100, 20)" width="600">
+<p align="center"><img src="images/estimator_suite_plots_page0_100x20.png" alt="(n_examples, n_features) = (100, 20)" width="600"></p>
 
-<img src="images/estimator_suite_plots_page1_100x20.png" alt="(n_examples, n_features) = (100, 20)" width="600">
+<p align="center"><img src="images/estimator_suite_plots_page1_100x20.png" alt="(n_examples, n_features) = (100, 20)" width="600"></p>
 
 For slightly higher dimensions of `n_examples=600` and `n_features=120` we obtained:
 
-<img src="images/estimator_suite_scorecard_600x120.png" alt="(n_examples, n_features) = (600, 120)" width="650">
+<p align="center"><img src="images/estimator_suite_scorecard_600x120.png" alt="(n_examples, n_features) = (600, 120)" width="650"></p>
 
 ## Plotting the regularization path
 We've provided a utility function `inverse_covariance.plot_util.trace_plot` that can be used to display the coefficients as a function of `lam_`.  This can be used with any estimator that returns a path.  The example in `examples/trace_plot_example.py` yields:
 
-<img src="images/trace_plot.png" alt="Trace plot" width="400">
+<p align="center"><img src="images/trace_plot.png" alt="Trace plot" width="400"></p>
 
 ## Profiling utilities
 We've provided some utilities in `inverse_covariance.profiling` to compare performance across the estimators. 
 
 For example, below is the comparison of the average support error between `QuicGraphLassoCV` and its randomized model average equivalent (the example found in `examples/compare_model_selection.py`).  The support error of `QuicGraphLassoCV` is dominated by the false-positive rate which grows substantially as the number of samples grows.
 
-<img src="images/model_avg_support.png" alt="" width="300">
-<img src="images/quicgraphlassocv_support.png" alt="" width="300">
+<p align="center"><img src="images/model_avg_support.png" alt="" width="300"></p>
+<p align="center"><img src="images/quicgraphlassocv_support.png" alt="" width="300"></p>
 
 ## Brain network functional connectivity
 In `examples/plot_functional_brain_networks.py` and the corresponding Jupyter notebook `example/ABIDE_Example`, we plot the functional connectivity of brain-wide networks learned from the observation data (similar example to [this example](http://nilearn.github.io/auto_examples/03_connectivity/plot_inverse_covariance_connectome.html#sphx-glr-auto-examples-03-connectivity-plot-inverse-covariance-connectome-py)).
 
 Specifically, we extract the time-series from the ABIDE dataset, with nodes defined using regions of interest from the [Power-264 atlas (Power, 2011)](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3222858/). The image on the left shows the upper triangle of the resulting precision matrix and the image on the right shows a top-of-brain connectome.  
 
-<img src="images/functional_connectivity_precision.png" alt="" width="300">
-<img src="images/functional_connectivity_brain.png" alt="" width="400">
+<p align="center"><img src="images/functional_connectivity_precision.png" alt="" width="300"></p>
+<p align="center"><img src="images/functional_connectivity_brain.png" alt="" width="400"></p>
 
 # References
 
