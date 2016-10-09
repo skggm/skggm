@@ -79,6 +79,9 @@ This is an ongoing effort. We'd love your feedback on which algorithms and techn
 
     Submodule that includes `profiling.AverageError`, `profiling.StatisticalPower` to compare performance between methods.  This is a work in progress, more to come soon!
 
+The following diagram shows how these tools fit together:
+<p align="center"><img src="images/skggm_workflow.png" alt="sklearn/skggm feature comparison" width="600"></p>
+
 ## Installation
 
 Clone this repo and run
