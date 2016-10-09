@@ -21,20 +21,18 @@ Graphical models combine graph theory and probability theory to create networks 
 </div>
 <br> -->
 
-A simple model to infer network between $$p$$ variables is a correlational network. In this case, if two variables are correlated, then the corresponding nodes are connected by an edge but not otherwise. Thus the absence of an edge between two nodes indicates the absence of a correlation between them. Unfortunately, as shown in Figure, such pairwise correlations could be spuriously induced by shared _common causes_. 
+A simple model to infer network between $$p$$ variables is a correlational network. In this case, if two variables are correlated, then the corresponding nodes are connected by an edge but not otherwise. Thus the absence of an edge between two nodes indicates the absence of a correlation between them. Unfortunately, as shown in the following figure, such pairwise correlations could be spuriously induced by shared _common causes_. 
 
 
 <img style="margin: 0 auto;display: block;" src="assets/skggm_graphics_spurious_correlation.png" width="200" />
 <div style="margin: 0 auto;display: block; width:625px;">
 <center><i><small>
-Figure. A burning fire causes both smoke and heat. Smoke and heat are always observed together and thus genuinely though "indirectly" correlated. But this does not mean smoke and heat have any direct influence over each other.
+A burning fire causes both smoke and heat. Smoke and heat are always observed together and thus genuinely though "indirectly" correlated. But this does not mean smoke and heat have any direct influence over each other.
 </small></i></center>
 </div>
 <br>
 
 Thus, in applications that seek to interpret edges as some form of direct influence, more sophisticated graphical models that eliminate spurious or misleading relationships are desirable. This motivates the usage of Markov networks and a specific instantiation of them, Gaussian graphical models. 
-
-
 
 $$
 \newcommand{\Xdata}{\mathbf{X}}
