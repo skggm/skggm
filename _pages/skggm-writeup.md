@@ -118,18 +118,26 @@ The support set of \of the sparse precision matrix can be interpreted as the adj
 
 ###  Maximum Likelihood Estimators
 
+
 $$
 \begin{align}
 \hat{\Thet} = \underset{\Theta \succ 0}{\mathrm{arg\,max}}~\mathcal{L}(\Thet,\hat{\Sig}) 
 &= \underset{\Theta \succ 0}{\mathrm{arg\,max}}\hphantom{~-}\mathrm{log\,det}~\Thet - \mathrm{tr}(\hat{\Sig}\Thet) \nonumber \\
 &= \underset{\Theta \succ 0}{\mathrm{arg\,min}}~-\mathrm{log\,det}~\Thet + \mathrm{tr}(\hat{\Sig}\Thet)
-\label{eqn:mle}\tag{1}
+\label{eqn:mle}\tag{MLE}
 \end{align}
 $$
 
+The sample covariance in (\ref{eqn:mle}) is given by 
+$$\hat{\Sig} = \frac{1}{n - 1} \sum_{i=1}^{n} (x_{i} - \bar{x}) (x_{i} - \bar{x})^{\top}$$
+for samples $$\{x_{j}\}$$ and sample mean $$\bar{x}$$. 
+To ensure all features are on the same scale, sometimes the sample covariance is replaced by the sample correlation $$\mathbf{R}(\hat{\Sig})$$ using the variance-correlation decomposition 
+$$\mathbf{R}(\hat{\Sig}) = \hat{\mathbf{D}}\ \hat{\Sig}\ \hat{\mathbf{D}}$$, 
+where the diagonal matrix, $$\hat{\mathbf{D}}=\text{diag}(\hat{\sigma}^{-1/2}_{11},\ldots,\hat{\sigma}^{-1/2}_{pp})$$, is a function of the sample variances from $$\hat{\Sig}$$.
+ 
 
 
-When the number of samples $$n$$ available are fewer than or comparable to the number of variables $$n \le p$$, then estimating upto $$\frac{p(p-1)}{2}$$ coefficients in the inverse covariance becomes difficult. To address the degeneracy of the likelihood in high dimensions, many including [Yuan and Lin](http://pages.stat.wisc.edu/~myuan/papers/graph.final.pdf), [Bannerjee et. al](http://www.jmlr.org/papers/volume9/banerjee08a/banerjee08a.pdf) and [Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf) proposed regularizing maximum likelihood estimators with the help of sparsity enforcing penalties such as the _lasso_.
+When the number of samples $$n$$ available are fewer than or comparable to the number of variables $$n \le p$$, the sample covariance becomes ill-conditioned and finally degenerate. Consequently taking its inverse and estimating upto $$\frac{p(p-1)}{2}$$ coefficients in the inverse covariance becomes difficult. To address the degeneracy of the sample covariance and the likelihood (\ref{eqn:mle}) in high dimensions, many including [Yuan and Lin](http://pages.stat.wisc.edu/~myuan/papers/graph.final.pdf), [Bannerjee et. al](http://www.jmlr.org/papers/volume9/banerjee08a/banerjee08a.pdf) and [Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf) proposed regularizing maximum likelihood estimators with the aid of sparsity enforcing penalties such as the _lasso_. Sparsity enforcing penalties assume that many entries in the inverse covariance will be zero. Thus fewer than $$\frac{p(p-1)}{2}$$ parameters need to be estimated, though the location of these non-zero parameters is unknown. The lasso regularized MLE objective is
 
 $$
 \begin{align}
@@ -137,19 +145,17 @@ $$
 \label{eqn:graphlasso}\tag{2}
 \end{align}
 $$
-
 where $$\Lambda \in \mathbb{R}^{p\times p}$$ is a symmetric matrix with non-negative entries and
-
 $$\|\Thet\|_{1, \Lambda} = \sum_{j,k=1}^{p} \lambda_{jk}\mid\theta_{jk}\mid$$. Typically, the diagonals are not penalized by setting $$\lambda_{jj} = 0,\ j=1,\ldots,p$$ to ensure that $$\hat{\Thet}$$ remains positive definite. 
+The objective (\ref{eqn:graphlasso}) reduces to the standard _graphical lasso_ formulation of \[[Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] when all off diagonals of the matrix $$\Lambda$$ take scalar values  $$\lambda_{jk} = \lambda_{kj} =  \lambda$$ for all $$ j \ne k$$ and has been implemented in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html)
+
 
 <!-- is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. This is a generalization of the scalar $$\lambda$$ formulation found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html). -->
-
-This estimator reduces to the standard _graphical lasso_ formulation of \[[Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] when all off diagonals of the matrix $$\Lambda$$ take scalar values  $$\lambda_{jk} = \lambda_{kj} =  \lambda$$ for all $$ j \ne k$$, and has been implemented in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html)
 
 
 ### Implementation
 
-The core estimator provided in [skggm](https://github.com/jasonlaska/skggm) is `QuicGraphLasso` which is a scikit-learn compatible interface to [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf), a proximal Newton-type algorithm that solves the *graphical lasso* (\ref{eqn:graphlasso}) objective.  
+The core estimator provided in [skggm](https://github.com/jasonlaska/skggm) is `QuicGraphLasso` which is a scikit-learn compatible interface to [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf), a proximal Newton-type algorithm that solves the _graphical lasso_ (\ref{eqn:graphlasso}) objective.  
 
 {% highlight python %}
 from inverse_covariance import QuicGraphLasso
@@ -176,13 +182,15 @@ For a new data, we provide several methods for selecting an appropriate $$\Lambd
 
 
 # Model selection via cross-validation (less sparse)
-One common way to find $$\Lambda$$ is via cross-validation.  Specifically, for a given grid of penalties, we fit the model on $$K$$ subsets of the data (folds) and measure the estimator performance.  We aggregate the score across the folds to determine a score for each $$\Lambda$$.
 
-In this technique, estimator performance is measured against the sample covariance, i.e., 
-$$
-\hat{\Sig} = \frac{1}{n - 1} \sum_{i=1}^{n} (x_{i} - \bar{x}) (x_{i} - \bar{x})^{\top}
-$$
-for samples $$x_{j}$$ and mean of the observations $$\bar{x}$$. We provide several [metrics](http://pages.stat.wisc.edu/~myuan/papers/graph.final.pdf) of the form $$d(\hat{\Sig}, \hat{\Thet})$$ that measure how well the inverse covariance estimate best fits the data. These metrics can be combined with cross-validation via the `score_metric` parameter. Since CV measures out-of-sample error, we estimate inverse covariance $$\hat{\Thet}$$ on the training set and  measure its fit against the sample covariance $$\hat{\Sig}$$ on the test set. The skggm package offers the following options for the CV-loss,
+The _graphical lasso_ provides a family of estimates $$\Thet(\Lambda)$$ indexed by the regularization parameter $$\Lambda$$. A common method to choose $$\Lambda$$ is cross-validation.  Specifically, given a grid of penalties and K folds of the data,  
+
+1. Estimate a family of sparse to dense precision matrices on $$K-1$$ splits of the data. 
+2. Then, we score the performance of these estimates on $$K^{\text{th}}$$ split using some loss function.   
+3. Repeat Steps 1. and 2. over all folds
+4. Aggregate the score across the folds in Step 3. to determine a mean score for each $$\Lambda$$.
+
+We provide several [metrics](http://pages.stat.wisc.edu/~myuan/papers/graph.final.pdf) of the form $$d(\hat{\Sig}, \hat{\Thet})$$ that measure how well the inverse covariance estimate best fits the data. These metrics can be combined with cross-validation via the `score_metric` parameter. Since CV measures out-of-sample error, we estimate inverse covariance $$\hat{\Thet}$$ on the training set and  measure its fit against the sample covariance $$\hat{\Sig}$$ on the test set. The skggm package offers the following options for the CV-loss,
 $$d(\hat{\Sig}^{ts},\hat{\Thet}^{tr})$$:
 
 $$
