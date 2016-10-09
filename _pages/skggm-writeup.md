@@ -80,7 +80,7 @@ When probability distributions that satisfy the global Markov property, it becom
 
 ## Relationship to Inverse Covariance Estimation
 
-In general, if two variables are statistically independent they are also uncorrelated. But the converse is not true in general. However, normal or Gaussian distributions are fully described by their mean and covariance. As a result, a zero correlation between two variables also implies statistical independence.  An analogous equivalence holds between conditional independence and the inverse covariance for Gaussian distributions. This follows from the [Hammersley-Clifford theorem](), and the [equivalence]() between the _pairwise_ and _global Markov properties_. 
+In general, if two variables are statistically independent they are also uncorrelated. But the converse is not true in general. However, normal or Gaussian distributions are fully described by their mean and covariance. As a result, a zero correlation between two variables also implies statistical independence. An analogous equivalence holds between conditional independence and the inverse covariance for Gaussian distributions. 
 
 
 Given $$n$$ _i.i.d_ random samples $$(x_{1},x_{2},\ldots,x_{n})^{\top} = \Xdata$$ from a multivariate Gaussian distribution
@@ -89,16 +89,22 @@ $$\begin{align}
 x_{i} \overset{i.i.d}{\sim} \mathcal{N}_p(0, \Sig), \quad i=1,\ldots,n  \label{eqn:mvn}\tag{}
 \end{align}$$
 
-where each sample $$x_{i}$$ is $$p$$-dimensional with $$x_{i} \in \mathbb{R}^{p}$$, $$\Sig$$ is the population covariance matrix $$\Sig = \mathbf{E}(\Xdata^{\top}\Xdata)$$.
+where each sample $$x_{i}$$ is $$p$$-dimensional with $$x_{i} \in \mathbb{R}^{p}$$, $$\Sig$$ is the population covariance matrix $$\Sig = \mathbf{E}(\Xdata^{\top}\Xdata)$$. We denote the inverse covariance by $$\Thet = \Sig^{-1}$
+
+As a consequence of the [Hammersley-Clifford theorem](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) in the case of Gaussian distributions, $$\Thet_{jk} = 0 \iff (j,k) \not \in E$$. 
 
 
+<img style="margin: 0 auto;display: block;" src="assets/skggm_inverse.png" width="500" />
+<div style="margin: 0 auto;display: block; width:625px;">
+<center><i><small>
+Equivalence betwen zeros in the inverse covariance matrix and absence of edges in the graph
+</small></i></center>
+</div>
+<br>
 
-[ Insert Toy Network and Matrix Here]
+The inverse covariance matrix is an important quantity of interest as it gives us an efficient way of obtaining the structure of the Markov network. The lasso regularized maximum likelihood estimator, otherwise known as the _graphical lasso_ (\ref{eqn:graphlasso}) explained below, is a popular statistical method for estimating such inverse covariances from high dimensional data. In this initial release of [skggm](https://github.com/jasonlaska/skggm) we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the _graphical lasso_ and a collection of modern best practices for working with the _graphical lasso_ and its variants.  
 
-
-Thus, the inverse covariance matrix is an important quantity of interest as it gives us an efficient way of obtaining the structure of the Markov network. The lasso regularized maximum likelihood estimator, otherwise known as the _graphical lasso_ (\ref{eqn:graphlasso}) explained below, is a popular statistical method for estimating such inverse covariances from high dimensional data. In this initial release of [skggm](https://github.com/jasonlaska/skggm) we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the _graphical lasso_ and a collection of modern best practices for working with the _graphical lasso_ and its variants.  
-
-The concept of Markov networks has been extended to many other measures of association beyond the standard covariance. These include covariances between variables in Fourier domain (cross-spectral density) encountered in [time-series analyses]() and [information theoretic measures](). Moreover, for some non-Gaussian distributions, zeros in a [generalized inverse covariance]() can provide conditional independence relationships analogous to standard inverse covariance explained above. Given the general importance of the inverse covariance, we expect methods for estimating it to be useful for many other classes of graphical models beyond standard Gaussian graphical models.
+The concept of Markov networks has been extended to many other measures of association beyond the standard covariance. These include covariances between variables in Fourier domain (cross-spectral density) encountered in [time-series analyses](https://www.stat.berkeley.edu/~brill/Papers/graphmodels.pdf) and [information theoretic measures](http://ita.ucsd.edu/workshop/06/papers/71.pdf). Moreover, for some non-Gaussian distributions, zeros in a [generalized inverse covariance](https://arxiv.org/abs/1212.0478) can provide conditional independence relationships analogous to standard inverse covariance explained above. Given the general importance of the inverse covariance, we expect methods for estimating it to be useful for many other classes of graphical models beyond standard Gaussian graphical models.
 Thus, while skggm currently supports standard inverse covariances for multivariate normal distributions, we hope this implementation will serve as a foundational building block for generalized classes of graphical models. 
 
 <!-- Given $$n$$ independently drawn, $$p$$-dimensional Gaussian random samples $$S \in \mathbb{R}^{n \times p}$$, the maximum likelihood estimate of the inverse covariance matrix $$\Theta$$ can be computed via the _graphical lasso_, i.e., the program
