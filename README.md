@@ -19,7 +19,7 @@ where <img src="images/Lambda.png" alt="\Lambda" width="80"> is a symmetric non-
 is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. By default skggm's tools do not penalize the diagonal elements but arbitrary penalization is supported. The formulation found here is a generalization of the scalar <img src="images/scalar_lambda.png" alt="\lambda" width="12"> version found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
 In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program above and a collection of modern best practices for working with the graphical lasso. A rough breakdown of how this package differs from scikit's built-in `GraphLasso` is depicted by this chart:
-<div style="text-align:center"><img src="images/sklearn_skggm_compare.png" alt="sklearn/skggm feature comparison" width="600"></div>
+-><img src="images/sklearn_skggm_compare.png" alt="sklearn/skggm feature comparison" width="600"><-
 
 To get started, install the package and head over to `examples/estimator_suite.py`. Additional examples can be found [here](https://github.com/neuroquant/jf2016-skggm) and fiddled with live via binder at [here](http://mybinder.org/repo/neuroquant/jf2016-skggm).
 <!-- and read our walk through at [https://jasonlaska.github.io/skggm/walkthrough](https://jasonlaska.github.io/skggm/walk_through). -->
