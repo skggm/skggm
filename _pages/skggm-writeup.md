@@ -51,7 +51,7 @@ Figure 3. Example of Pairwise, Local, and Global Markov properties with respect 
 </div>
 <br>
 
-We denote [statistical independence](https://en.wikipedia.org/wiki/Independence_(probability_theory)) by $$\perp$$ and [conditioning](https://en.wikipedia.org/wiki/Independence_(probability_theory)#Conditional_independence) by $$\mid$$ denotes . The properties depicted in Figure 3 are as follows.  
+We denote [statistical independence](https://en.wikipedia.org/wiki/Independence_(probability_theory)) by $$\perp$$ and [conditioning](https://en.wikipedia.org/wiki/Independence_(probability_theory)#Conditional_independence) by $$\mid$$. The properties depicted in Figure 3 are as follows.  
 
 1. _Pairwise_: The absence of an edge $$(j,k) \not\in E$$ implies
 
