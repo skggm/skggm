@@ -137,9 +137,6 @@ We've provided a utility function `inverse_covariance.plot_util.trace_plot` that
 
 <p align="center"><img src="images/trace_plot.png" alt="Trace plot" width="400"></p>
 
-<iframe src="https://widgets.figshare.com/articles/4003380/embed?show_title=1" width="568" height="351" frameborder="0"></iframe>
-
-
 # References
 
 ### BIC / EBIC Model Selection
