@@ -18,7 +18,7 @@ Graphical models combine graph theory and probability theory to create networks 
 <img style="margin: 0 auto;display: block;" src="assets/skggm_network.png" width="650" />
 <div style="margin: 0 auto;display: block; width:625px;">
 <center><i><small>
-Figure 1. An illustrative graphic depicting p correlated time-series samples of length n and an estimated network from the data.  The correlations between the samples is assumed to have arisen from an underlying network structure.
+Figure 1. An illustrative graphic depicting observations or activity of size n from p variables (biomolecules, stocks, units of brain function, et cetera).  To discover the mechanisms of gene regulation or brain function we need to understand how these p variables influence each other in the form of a graph.
 </small></i></center>
 </div>
 <br>
