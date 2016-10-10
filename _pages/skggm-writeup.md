@@ -279,8 +279,8 @@ For some problems, the support of the sparse precision matrix is of primary inte
 
 This technique estimates the precision over an ensemble of estimators with random penalties and bootstrapped samples.  Specifically, in each trial we
 
-1. Draw boostrap samples by randomly subsampling $$\Xdata$$
-2. Draw a random matrix penalty
+1. Draw boostrap samples by randomly subsampling $$\Xdata$$.
+2. Draw a random matrix penalty.
 
 A final _proportion matrix_ is then estimated by summing or averaging the precision estimates from each trial.  The precision support can be estimated by thresholding the proportion matrix.
 
