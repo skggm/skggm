@@ -41,7 +41,7 @@ Thus, in applications that seek to interpret edges as some form of direct influe
 
 Formally, a graph $$\mathcal{G}=(V,E)$$ consists a set of vertices $$V = \{1,\ldots,p\}$$ and edges between them $$E\subset V \times V$$.  The vertices or nodes are associated with a $$p$$-dimensional random variable $$\Xdata = (X_{1},\ldots, X_{p})$$ that has some probability distribution $$\Xdata \sim \mathbb{P}_{\Xdata}$$.
 
-There are many [probabilistic graphical models](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) that relate the structure in the graph $$\mathcal{G}$$ to the probability distribution over the variables $$\mathbb{P}_{\Xdata}$$. We discuss an important class of graphical models, _Markov networks_, that relate absence of edges in the graph to conditional independence between random variables $$X_{1},\ldots, X_{p}$$.
+There are many [probabilistic graphical models](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) that relate the structure in the graph $$\mathcal{G}$$ to the probability distribution over the variables $$\mathbb{P}_{\Xdata}$$. We discuss an important class of graphical models, _Markov networks_, that relate absence of edges in the graph to conditional independence between random variables $$X_{1},\ldots, X_{p}$$. A particular graph $$\mathcal{G}$$ and probability distribution $$\mathbb{P}_{\Xdata}$$ forms a Markov network if it satisfies a Markov property.
 
 <img style="margin: 0 auto;display: block;" src="assets/skggm_markov.png" width="500" />
 <div style="margin: 0 auto;display: block; width:625px;">
@@ -86,7 +86,7 @@ We denote [statistical independence](https://en.wikipedia.org/wiki/Independence_
 
 
 The pairwise Markov property is the weakest Markov property while the global Markov property is the strongest. In general, if a distribution satisfies the global property it implies all the others, i.e., $$(\ref{eqn:global}) \Rightarrow (\ref{eqn:local}) \Rightarrow (\ref{eqn:pairwise})$$. For some special distributions that have positive densities such as the multivariate Gaussian, the [compositional property](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) 
-of conditional independence holds. As a result, $$(\ref{eqn:pairwise}) \Rightarrow (\ref{eqn:global})$$ and all three Markov properties are equivalent.
+of conditional independence holds. As a result, $$(\ref{eqn:pairwise}) \Rightarrow (\ref{eqn:global})$$ and all three Markov properties are equivalent. Typically, the term _Markov networks_ refers to networks that satisfy the (\ref{eqn:global}), otherwise they might be called local or pairwise Markov networks depending on the strongest property satisfied.
 
 When probability distributions satisfy the global Markov property, it becomes computationally and statistically tractable to efficiently infer conditional independence relationships. For an extensive reference on Markov properties of directed and undirected Markov networks, please see ["Graphical Models" by Lauritzen](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193). 
 
