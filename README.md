@@ -131,14 +131,6 @@ We've provided a utility function `inverse_covariance.plot_util.trace_plot` that
 
 <p align="center"><img src="images/trace_plot.png" alt="Trace plot" width="400"></p>
 
-## Profiling utilities
-We've provided some utilities in `inverse_covariance.profiling` to compare performance across the estimators. 
-
-For example, below is the comparison of the average support error between `QuicGraphLassoCV` and its randomized model average equivalent (the example found in `examples/compare_model_selection.py`).  The support error of `QuicGraphLassoCV` is dominated by the false-positive rate which grows substantially as the number of samples grows.
-
-<p align="center"><img src="images/model_avg_support.png" alt="" width="300"></p>
-<p align="center"><img src="images/quicgraphlassocv_support.png" alt="" width="300"></p>
-
 ## Brain network functional connectivity
 In `examples/plot_functional_brain_networks.py` and the corresponding Jupyter notebook `example/ABIDE_Example`, we plot the functional connectivity of brain-wide networks learned from the observation data (similar example to [this example](http://nilearn.github.io/auto_examples/03_connectivity/plot_inverse_covariance_connectome.html#sphx-glr-auto-examples-03-connectivity-plot-inverse-covariance-connectome-py)).
 
