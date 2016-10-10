@@ -15,20 +15,19 @@ $$
 ## Introduction
 Graphical models combine graph theory and probability theory to create networks that model complex probabilistic relationships. Inferring such networks is an statistical problem in [systems biology](http://science.sciencemag.org/content/303/5659/799) and [neuroscience](https://www.simonsfoundation.org/features/foundation-news/how-do-different-brain-regions-interact-to-enhance-function/),   [psychometrics](http://www.annualreviews.org/doi/abs/10.1146/annurev-clinpsy-050212-185608), or [finance](http://www.jstor.org/stable/1924119). 
 
-[ Insert Observations to Network Example ]
-
-<!-- <img style="margin: 0 auto;display: block;" src="assets/time-series.png" width="300" />
+<img style="margin: 0 auto;display: block;" src="assets/skggm_network.png" width="650" />
 <div style="margin: 0 auto;display: block; width:625px;">
 <center><i><small>
+Figure 1. An illustrative graphic depicting p correlated time-series samples of length n and an estimated network from the data.  The correlations between the samples is assumed to have arisen from an underlying network structure.
 </small></i></center>
 </div>
-<br> -->
-A simple model to infer network between $$p$$ variables is a correlational network. In this case, if two variables are correlated, then the corresponding nodes are connected by an edge but not otherwise. Thus the absence of an edge between two nodes indicates the absence of a correlation between them. Unfortunately, as shown in the following figure, such pairwise correlations could be spuriously induced by shared _common causes_. 
+<br>
+A simple model to infer network between $$p$$ variables is a correlational network. In this case, if two variables are correlated, then the corresponding nodes are connected by an edge but not otherwise. Thus the absence of an edge between two nodes indicates the absence of a correlation between them. Unfortunately, as shown in Figure 2, such pairwise correlations could be spuriously induced by shared _common causes_. 
 
 <img style="margin: 0 auto;display: block;" src="assets/skggm_graphics_spurious_correlation.png" width="200" />
 <div style="margin: 0 auto;display: block; width:625px;">
 <center><i><small>
-A burning fire causes both smoke and heat. Smoke and heat are always observed together and thus genuinely though "indirectly" correlated. But this does not mean smoke and heat have any direct influence over each other.
+Figure 2. A burning fire causes both smoke and heat. Smoke and heat are always observed together and thus genuinely though "indirectly" correlated. But this does not mean smoke and heat have any direct influence over each other.
 </small></i></center>
 </div>
 <br>
@@ -42,7 +41,7 @@ There are many [probabilistic graphical models](https://www.amazon.com/Graphical
 <img style="margin: 0 auto;display: block;" src="assets/skggm_markov.png" width="500" />
 <div style="margin: 0 auto;display: block; width:625px;">
 <center><i><small>
-Example of Pairwise, Local and Global Markov Properties with respect to 5-node graph. 
+Figure 3. Example of Pairwise, Local, and Global Markov properties with respect to 5-node graph. 
 </small></i></center>
 </div>
 <br>
@@ -85,7 +84,7 @@ As a consequence of the [Hammersley-Clifford theorem](https://www.amazon.com/Gra
 <img style="margin: 0 auto;display: block;" src="assets/skggm_inverse.png" width="500" />
 <div style="margin: 0 auto;display: block; width:625px;">
 <center><i><small>
-Equivalence betwen zeros in the inverse covariance matrix and absence of edges in the graph
+Figure 4. Equivalence between zeros in the inverse covariance matrix and absence of edges in the graph.
 </small></i></center>
 </div>
 <br>
@@ -129,7 +128,7 @@ The objective (\ref{eqn:graphlasso}) reduces to the standard _graphical lasso_ f
 <img style="margin: 0 auto;display: block;" src="assets/skggm_workflow.png" width="800" />
 <div style="margin: 0 auto;display: block; width:625px;">
 <center><i><small>
-Overview of the skggm implementation of the graphical lasso and its adaptive variants with model selection and model averaging.
+Figure 5. Overview of the skggm graphical lasso features and workflow.
 </small></i></center>
 </div>
 <br>
@@ -222,11 +221,11 @@ In addition to covariance and precision estimates, this class returns the best p
 <img style="margin: 0 auto;display: block;" src="assets/graph_lasso_cv.png" width="650" />
 <div style="margin: 0 auto;display: block; width:620px;">
 <center><i><small>
-Figure 1.  Inverse covariance estimates (less sparse).  From left to right:  the original inverse covariance (precision) matrix, the sample covariance, a QuicGraphLassoCV estimate with log-likelihood for scoring (error = 0.6, support error = 4), and a QuicGraphLassoCV estimate with the Frobenius norm for scoring (error = 0.64, support error = 2).
+Figure 6.  Inverse covariance estimates (less sparse).  From left to right:  the original inverse covariance (precision) matrix, the sample covariance, a QuicGraphLassoCV estimate with log-likelihood for scoring (error = 0.6, support error = 4), and a QuicGraphLassoCV estimate with the Frobenius norm for scoring (error = 0.64, support error = 2).
 </small></i></center>
 </div>
 <br>
-An example is shown in Figure 1. The `QuicGraphLassoCV` estimates are much sparser than the empirical precision, but contain a superset of the true precision support. As the dimension of the samples `n_features` grows, we find that this model selection method tends to bias toward more non-zero coefficients. Further, the coefficient values on the true support are not particularly accurate.
+An example is shown in Figure 6. The `QuicGraphLassoCV` estimates are much sparser than the empirical precision, but contain a superset of the true precision support. As the dimension of the samples `n_features` grows, we find that this model selection method tends to bias toward more non-zero coefficients. Further, the coefficient values on the true support are not particularly accurate.
 
 In this trial of this example, the Frobenius scoring function performed better than log-likelihood and KL-divergence, however, this does not reflect how they might compare different data and larger dimensions.  
 
@@ -249,11 +248,11 @@ where $$\mathcal{L}(\hat{\Thet}, \hat{\Sig})$$ denotes the log-likelihood (\ref{
 <img style="margin: 0 auto;display: block;" src="assets/ebic.png" width="500" />
 <div style="margin: 0 auto;display: block; width:620px;">
 <center><i><small>
-Figure 2. Inverse covariance estimates (more sparse).  From left to right:  the original inverse covariance (precision) matrix, a QuicGraphLassoEBIC estimate with gamma = 0 (BIC) (error = 0.68, support error = 0), and a QuicGraphLassoEBIC estimate with gamma = 0.1 (error = 1.36, support error = 6).
+Figure 7. Inverse covariance estimates (more sparse).  From left to right:  the original inverse covariance (precision) matrix, a QuicGraphLassoEBIC estimate with gamma = 0 (BIC) (error = 0.68, support error = 0), and a QuicGraphLassoEBIC estimate with gamma = 0.1 (error = 1.36, support error = 6).
 </small></i></center>
 </div>
 <br>
-An example is shown in Figure 2. The `QuicGraphLassoEBIC` estimates are much sparser than `QuicGraphLassoCV` estimates, and often contain a subset of the true precision support.  In this small dimensional example, BIC (gamma = 0) performed best as EBIC with gamma = 0.1 selected only the diagonal coefficients. As the dimension of the samples `n_features` grows, BIC will produce a less-sparse result and thus an increasing gamma parameter serves to obtain sparser solutions.
+An example is shown in Figure 7. The `QuicGraphLassoEBIC` estimates are much sparser than `QuicGraphLassoCV` estimates, and often contain a subset of the true precision support.  In this small dimensional example, BIC (gamma = 0) performed best as EBIC with gamma = 0.1 selected only the diagonal coefficients. As the dimension of the samples `n_features` grows, BIC will produce a less-sparse result and thus an increasing gamma parameter serves to obtain sparser solutions.
 
 ## Randomized model averaging
 
@@ -297,11 +296,11 @@ This class will contain the matrix of support probabilities `model.proportion_`$
 <img style="margin: 0 auto;display: block;" src="assets/model_average.png" width="500" />
 <div style="margin: 0 auto;display: block; width:620px;">
 <center><i><small>
-Figure 3. Random model averaging support estimates.  From left to right:  the original inverse covariance (precision) matrix, the ModelAverage proportions matrix, and the thresholded proportions matrix (support estimate).  The threshold used in this estimate was 0.5 and the support error is 0.
+Figure 8. Random model averaging support estimates.  From left to right:  the original inverse covariance (precision) matrix, the ModelAverage proportions matrix, and the thresholded proportions matrix (support estimate).  The threshold used in this estimate was 0.5 and the support error is 0.
 </small></i></center>
 </div>
 <br>
-An example is shown in Figure 3. The dense `model.proportions_` matrix contains the sample probability of each element containing a nonzero.  Thresholding this matrix by the default value of 0.5 resulted in a correct estimate of the support.  This technique generally provides a more robust support estimate than the previously explained methods.  One drawback of this approach is the significant time-cost of running the estimator over many trials.  These trials can be run in parallel and an implementation may be prioritized for a future release.
+An example is shown in Figure 8. The dense `model.proportions_` matrix contains the sample probability of each element containing a nonzero.  Thresholding this matrix by the default value of 0.5 resulted in a correct estimate of the support.  This technique generally provides a more robust support estimate than the previously explained methods.  One drawback of this approach is the significant time-cost of running the estimator over many trials.  These trials can be run in parallel and an implementation may be prioritized for a future release.
 
 ## Refining estimates via adaptive methods
 Given an initial sparse estimate, we can derive a new ["adaptive"](http://pages.cs.wisc.edu/~shao/stat992/zou2006.pdf) penalty and refit the _graphical lasso_ using data dependent weights [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf), [Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)]. Thus, the adaptive variant of the _graphical lasso_ (\ref{eqn:graphlasso}) amounts to 
@@ -337,11 +336,11 @@ The resulting model will contain `model.estimator_` which is a final `QuicGraphL
 <img style="margin: 0 auto;display: block;" src="assets/adaptive.png" width="650" />
 <div style="margin: 0 auto;display: block; width:620px;">
 <center><i><small>
-Figure 4. Adaptive inverse covariance estimates.  From left to right:  the original inverse covariance (precision) matrix, adaptive estimate with QuicGraphLassoCV base estimator and 'inverse' method (error = 0.32, support error = 2), adaptive estimate with QuicGraphLassoEBIC (gamma = 0) base estimator and 'inverse' method (error = 0.38, support error = 10), adaptive estimate with ModelAverage base estimator and 'binary' method (error = 0.08, support error = 0).
+Figure 9. Adaptive inverse covariance estimates.  From left to right:  the original inverse covariance (precision) matrix, adaptive estimate with QuicGraphLassoCV base estimator and 'inverse' method (error = 0.32, support error = 2), adaptive estimate with QuicGraphLassoEBIC (gamma = 0) base estimator and 'inverse' method (error = 0.38, support error = 10), adaptive estimate with ModelAverage base estimator and 'binary' method (error = 0.08, support error = 0).
 </small></i></center>
 </div>
 <br>
-An example is shown in Figure 4. The adaptive estimator will not only refine the estimated coefficients but also produce a new support estimate. This can be seen in the example as the adaptive cross-validation estimator produces a smaller support than the adaptive BIC estimator, the opposite of what we found in the non-adaptive examples. 
+An example is shown in Figure 9. The adaptive estimator will not only refine the estimated coefficients but also produce a new support estimate. This can be seen in the example as the adaptive cross-validation estimator produces a smaller support than the adaptive BIC estimator, the opposite of what we found in the non-adaptive examples. 
 
 It is clear that the estimated values of the true support are much more accurate for each method combination.  For example, even though the support error for BIC is 10 as opposed to 0 in the non-adaptive case, the Frobenius error is 0.38 while it was 0.68 in the non-adaptive case.
 
