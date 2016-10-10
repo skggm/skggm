@@ -14,9 +14,9 @@ Given **n** independently drawn, **p**-dimensional Gaussian random samples <img 
 
 where <img src="images/Lambda.png" alt="\Lambda" width="80"> is a symmetric matrix with non-negative entries and 
 
-<img src="images/penalty.png" alt="penalty" width="200">. 
+<p align="center"><img src="images/penalty.png" alt="penalty" width="200"></p>. 
 
-Typically, the diagonals are not penalized by setting <img src="images/lambda_diagonals.png" alt="diagonals" width="160"> to ensure that <img src="images/Theta.png" alt="Theta" width="20"> remains positive definite. The objective reduces to the standard graphical lasso formulation of [Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf) when all off diagonals of the penalty matrix take a constant scalar value <img src="images/scalar_penalty.png" alt="scalar_penalty" width="80">. The standard graphical lasso has been implemented in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
+Typically, the diagonals are not penalized by setting <img src="images/lambda_diagonals.png" alt="diagonals" width="200"> to ensure that <img src="images/Theta.png" alt="Theta" width="10"> remains positive definite. The objective reduces to the standard graphical lasso formulation of [Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf) when all off diagonals of the penalty matrix take a constant scalar value <img src="images/scalar_penalty.png" alt="scalar_penalty" width="200">. The standard graphical lasso has been implemented in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
 In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program above and a collection of modern best practices for working with the graphical lasso. A rough breakdown of how this package differs from scikit's built-in `GraphLasso` is depicted by this chart:
 <p align="center"><img src="images/sklearn_skggm_compare.png" alt="sklearn/skggm feature comparison" width="600"></p>
