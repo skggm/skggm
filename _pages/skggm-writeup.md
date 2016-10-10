@@ -329,7 +329,7 @@ An example is shown in Figure 8. The dense `model.proportions_` matrix contains 
 Given an initial sparse estimate, we can derive a new ["adaptive"](http://pages.cs.wisc.edu/~shao/stat992/zou2006.pdf) penalty and refit the _graphical lasso_ using data dependent weights $$W$$ [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf), [Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)]. Thus, the adaptive variant of the _graphical lasso_ (\ref{eqn:graphlasso}) amounts to 
 
 $$\begin{align}
-\Lambda_{jk} = \lambda \cdot W_{jk}, \quad  \text{ where } W_{jk} = W_{kj} > 0 ~ \  \text{for all} \ ~ (j,k) \ j \ne k \label{eqn:adaptive-weights}\tag{4}
+\Lambda_{jk} = \lambda \cdot W_{jk}, \quad  \text{ where } W_{jk} = W_{kj} > 0 ~ \  \text{for all} \ ~ (j,k),~ \ j \ne k.\label{eqn:adaptive-weights}\tag{4}
 \end{align}$$
 
 In our current implementation, refitting is always done with `QuicGraphLassoCV`. We provide three ways of computing new weights in (\ref{eqn:adaptive-weights}) before refitting, given the coefficients $$\hat{\theta}_{jk}$$ of the inverse covariance estimate $$\hat{\Thet}$$:
