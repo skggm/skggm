@@ -31,7 +31,7 @@ Figure 2. A burning fire causes both smoke and heat. Smoke and heat are always o
 </small></i></center>
 </div>
 <br>
-Thus, in applications that seek to interpret edges as some form of direct influence, more sophisticated graphical models that eliminate spurious or misleading relationships are desirable. This motivates the usage of Markov networks, specifically _Gaussian graphical models_. 
+Thus, in applications that seek to interpret edges as some form of direct influence, more sophisticated graphical models that eliminate spurious or misleading relationships are desirable. This motivates the usage of Markov networks, popularly known as _Gaussian graphical models_ for Gaussian distributed data. 
 
 ## Conditional independence and Markov networks
 Formally a graph $$\mathcal{G}=(V,E)$$ consists a set of vertices $$V = \{1,\ldots,p\}$$ and edges between them $$E\subset V \times V$$.  The vertices or nodes are associated with a $$p$$-dimensional random variable $$\Xdata = (X_{1},\ldots, X_{p})$$ that has some probability distribution $$\Xdata \sim \mathbb{P}_{\Xdata}$$.
