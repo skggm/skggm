@@ -65,7 +65,7 @@ The properties depicted in Figure 3 are as follows.
     \end{align}
     $$
 
-    where $$ne(j) = \{k \in V: (j,k) \in E\}$$.
+    where $$ne(j) = \{k \in V: (j,k) \in E, \ j \ne k \}$$.
 
 3. _Global_: All paths between $$A$$ and $$B$$ are separated by $$C$$ implies
 
