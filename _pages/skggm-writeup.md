@@ -149,7 +149,7 @@ The objective (\ref{eqn:graphlasso}) reduces to the standard _graphical lasso_ f
 
 ## A tour of skggm:  methods & interfaces
 <img style="margin: 0 auto;display: block;" src="assets/skggm_workflow.png" width="1200" />
-<div style="margin: 0 auto;display: block; width:1225px;">
+<div style="margin: 0 auto;display: block; width:620px;">
 <center><i><small>
 Figure 5. Overview of the skggm graphical lasso facilities.
 </small></i></center>
