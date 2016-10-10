@@ -39,7 +39,7 @@ Thus, in applications that seek to interpret edges as some form of direct influe
 
 ## Conditional independence and Markov networks
 
-Formally a graph $$\mathcal{G}=(V,E)$$ consists a set of vertices $$V = \{1,\ldots,p\}$$ and edges between them $$E\subset V \times V$$.  The vertices or nodes are associated with a $$p$$-dimensional random variable $$\Xdata = (X_{1},\ldots, X_{p})$$ that has some probability distribution $$\Xdata \sim \mathbb{P}_{\Xdata}$$.
+Formally, a graph $$\mathcal{G}=(V,E)$$ consists a set of vertices $$V = \{1,\ldots,p\}$$ and edges between them $$E\subset V \times V$$.  The vertices or nodes are associated with a $$p$$-dimensional random variable $$\Xdata = (X_{1},\ldots, X_{p})$$ that has some probability distribution $$\Xdata \sim \mathbb{P}_{\Xdata}$$.
 
 There are many [probabilistic graphical models](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) that relate the structure in the graph $$\mathcal{G}$$ to the probability distribution over the variables $$\mathbb{P}_{\Xdata}$$. We discuss an important class of graphical models, _Markov networks_, that relate absence of edges in the graph to conditional independence between random variables $$X_{1},\ldots, X_{p}$$.
 
@@ -50,7 +50,8 @@ Figure 3. Example of Pairwise, Local, and Global Markov properties with respect 
 </small></i></center>
 </div>
 <br>
-The properties depicted in Figure 3 are as follows.  
+
+We denote [statistical independence](https://en.wikipedia.org/wiki/Independence_(probability_theory)) by $$\perp$$ and $$|$$ denotes [conditioning](https://en.wikipedia.org/wiki/Independence_(probability_theory)#Conditional_independence). The properties depicted in Figure 3 are as follows.  
 
 1. _Pairwise_: The absence of an edge $$(j,k) \not\in E$$ implies
 
