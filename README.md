@@ -8,15 +8,11 @@ While `skggm` is currently geared toward _Gaussian graphical models_, we hope to
 
 ## Inverse Covariance Estimation
 
-Given **n** independently drawn, **p**-dimensional Gaussian random samples <img src="images/S.png" alt="X" width="80">, the maximum likelihood estimate of the inverse covariance matrix <img src="images/Theta.png" alt="\lambda" width="12"> can be computed via the _graphical lasso_, i.e., the program
+Given **n** independently drawn, **p**-dimensional Gaussian random samples <img src="images/X.png" alt="X" width="80"> with sample covariance <img src="images/S.png" alt="S" width="80">, the maximum likelihood estimate of the inverse covariance matrix <img src="images/Theta.png" alt="\lambda" width="12"> can be computed via the _graphical lasso_, i.e., the program
 
 <p align="center"><img src="images/graphlasso_program.png" alt="\ell_1 penalized inverse covariance estimation" width="500"></p>
 
-where <img src="images/Lambda.png" alt="\Lambda" width="80"> is a symmetric non-negative weight matrix and
-
-<p align="center"><img src="images/weighted_ell_1.png" alt="\ell_1 penalized inverse covariance estimation" width="200"></p> 
-
-is a regularization term that promotes sparsity \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\]. The formulation found here is a generalization of the scalar <img src="images/scalar_lambda.png" alt="\lambda" width="12"> version found in \[[Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] and implemented [here](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
+where <img src="images/Lambda.png" alt="\Lambda" width="80"> is a symmetric matrix with non-negative entries and <img src="images/penalty.png" alt="penalty" width="80">. Typically, the diagonals are not penalized by setting <img src="images/lambda_diagonals.png" alt="diagonals" width="80"> to ensure that <img src="images/Theta.png" alt="Theta" width="80"> remains positive definite. The objective reduces to the standard graphical lasso formulation of [Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf) when all off diagonals of the penalty matrix take a constant scalar value <img src="images/scalar_lambda.png" alt="scalar_lambda" width="80">. The standard graphical lasso has been implemented in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
 In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the program above and a collection of modern best practices for working with the graphical lasso. A rough breakdown of how this package differs from scikit's built-in `GraphLasso` is depicted by this chart:
 <p align="center"><img src="images/sklearn_skggm_compare.png" alt="sklearn/skggm feature comparison" width="600"></p>
