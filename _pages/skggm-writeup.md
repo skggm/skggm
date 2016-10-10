@@ -125,11 +125,9 @@ where $$\Lambda \in \mathbb{R}^{p\times p}$$ is a symmetric matrix with non-nega
 $$\|\Thet\|_{1, \Lambda} = \sum_{j,k=1}^{p} \lambda_{jk}\mid\theta_{jk}\mid$$. Typically, the diagonals are not penalized by setting $$\lambda_{jj} = 0,\ j=1,\ldots,p$$ to ensure that $$\hat{\Thet}$$ remains positive definite. 
 The objective (\ref{eqn:graphlasso}) reduces to the standard _graphical lasso_ formulation of \[[Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] when all off diagonals of the penalty matrix take a constant scalar value  $$\lambda_{jk} = \lambda_{kj} =  \lambda$$ for all $$ j \ne k$$. The standard _graphical lasso_ has been implemented in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
-
-
 ## Methods & Implementation
 <img style="margin: 0 auto;display: block;" src="assets/skggm_workflow.png" width="800" />
-<div style="margin: 0 auto;display: block; width:825px;">
+<div style="margin: 0 auto;display: block; width:625px;">
 <center><i><small>
 Overview of the skggm implementation of the graphical lasso and its adaptive variants with model selection and model averaging.
 </small></i></center>
@@ -156,16 +154,14 @@ If the input penalty `lam` is a scalar, it will be converted to a matrix with ze
 
 After the model is fit, the estimator object will contain the covariance estimate `model.covariance_`$$\in \mathbb{R}^{p\times p}$$, the sparse inverse covariance estimate `model.precision_`$$\in \mathbb{R}^{p\times p}$$, and the penalty `model.lam_` used to obtain these estimates.  When `auto_scale=False`, the output pentalty will be identical to the input penalty. If `mode='path'` is used, then the `path` parameter must be provided and both `model.covariance_` and `model.precision_` will be a list of $$p\times p$$ matrices of length `len(path)`. In general, the estimators introduced here will follow this interface unless otherwise noted.  
 
-
 The _graphical lasso_ (\ref{eqn:graphlasso}) provides a family of estimates $$\Thet(\Lambda)$$ indexed by the regularization parameter $$\Lambda$$. The choice of the penalty $$\Lambda$$ can have a large impact on the kind of result obtained.  If a good $$\Lambda$$ is known _a priori_, e.g., when reproducing existing results from the literature, then look no further than this estimator (with `auto_scale='False'`).  Otherwise when $$\Lambda$$ is unknown, we provide several methods for selecting an appropriate $$\Lambda$$. Selection methods roughly fall into two categories of performance: a) [_overselection_ (less sparse)](https://projecteuclid.org/euclid.aos/1152540754), resulting in estimates with false positive edges; or b) [_underselection_ (more sparse)](https://www.stat.ubc.ca/~jhchen/paper/Bio08.pdf), resulting in estimates with false negative edges.
-
 
 ### Model selection via cross-validation (less sparse)
 A common method to choose $$\Lambda$$ is [cross-validation](https://www.stat.berkeley.edu/~bickel/BL2008-banding.pdf).  Specifically, given a grid of penalties and K folds of the data,  
 
-1. Estimate a family of sparse to dense precision matrices on $$K-1$$ splits of the data. 
-2. Then, we score the performance of these estimates on $$K^{\text{th}}$$ split using some loss function.   
-3. Repeat Steps 1. and 2. over all folds
+1. Estimate a family of sparse to dense precision matrices on $$K-1$$ splits of the data.
+2. Score the performance of these estimates on $$K^{\text{th}}$$ split using some loss function.   
+3. Repeat Steps 1. and 2. over all folds.
 4. Aggregate the score across the folds in Step 3. to determine a mean score for each $$\Lambda$$.
 
 We provide several [metrics](http://pages.stat.wisc.edu/~myuan/papers/graph.final.pdf) of the form $$d(\hat{\Sig}, \hat{\Thet})$$ that measure how well the inverse covariance estimate best fits the data. These metrics can be combined with cross-validation via the `score_metric` parameter. Since CV measures out-of-sample error, we estimate inverse covariance $$\hat{\Thet}$$ on the training set and  measure its fit against the sample covariance $$\hat{\Sig}$$ on the test set. The skggm package offers the following options for the CV-loss,
@@ -203,9 +199,7 @@ $$
 \end{align}
 $$
 
-Cross validation can be performed with _QuicGraphLasso_ and [GridSearchCV](http://scikit-learn.org/stable/modules/generated/sklearn.grid_search.GridSearchCV.html), however, we provide an optimized convenience class `QuicGraphLassoCV` that takes advantage of _path mode_ to adaptively estimate the search grid.  This implementation is closely modeled after scikit-learn's [GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html), but with support for matrix penalties.*
-
-*[Don't we also do CV repeatedly on multiple training-test splits?](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3994246/)
+Cross validation can be performed with _QuicGraphLasso_ and [GridSearchCV](http://scikit-learn.org/stable/modules/generated/sklearn.grid_search.GridSearchCV.html), however, we provide an optimized convenience class `QuicGraphLassoCV` that takes advantage of _path mode_ to adaptively estimate the search grid.  This implementation is closely modeled after scikit-learn's [GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html), but with support for matrix penalties.
 
 {% highlight python %}
 from inverse_covariance import QuicGraphLassoCV
@@ -232,7 +226,7 @@ Figure 1.  Inverse covariance estimates (less sparse).  From left to right:  the
 </small></i></center>
 </div>
 <br>
-An example is shown in Figure 1. The `QuicGraphLassoCV` estimates are much sparser than the empirical covariance $$\Sigma_{\mathrm{S}}$$, but contain a superset of the true precision support. As the dimension of the samples `n_features` grows, we find that this model selection method tends to bias toward more non-zero coefficients. Further, the coefficient values on the true support are not particularly accurate.
+An example is shown in Figure 1. The `QuicGraphLassoCV` estimates are much sparser than the empirical precision, but contain a superset of the true precision support. As the dimension of the samples `n_features` grows, we find that this model selection method tends to bias toward more non-zero coefficients. Further, the coefficient values on the true support are not particularly accurate.
 
 In this trial of this example, the Frobenius scoring function performed better than log-likelihood and KL-divergence, however, this does not reflect how they might compare different data and larger dimensions.  
 
@@ -263,22 +257,22 @@ An example is shown in Figure 2. The `QuicGraphLassoEBIC` estimates are much spa
 
 ## Randomized model averaging
 
-For some problems, the support of the sparse precision matrix is of primary interest.  In these cases, the true support can be estimated with greater confidence by employing a form of ensemble model averaging known as _stability selection_ \[[Meinhausen et al.](https://arxiv.org/pdf/0809.2932v2.pdf)\] combined with randomizing the model selection via the _random lasso_ \[[Meinhausen et al.](https://arxiv.org/pdf/0809.2932v2.pdf), [Wang et al.](https://arxiv.org/abs/1104.3398)\]. The skggm `ModelAverage` class implements a meta-estimator to do this. This is a similar facility to scikit-learn's [_RandomizedLasso_](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html), but for the graph lasso.
+For some problems, the support of the sparse precision matrix is of primary interest.  In these cases, the true support can be estimated with greater confidence by employing a form of ensemble model averaging known as _stability selection_ \[[Meinhausen et al.](https://arxiv.org/pdf/0809.2932v2.pdf)\] combined with randomizing the model selection via the _random lasso_ \[[Meinhausen et al.](https://arxiv.org/pdf/0809.2932v2.pdf), [Wang et al.](https://arxiv.org/abs/1104.3398)\]. The skggm `ModelAverage` class implements a meta-estimator to do this. This is a similar facility to scikit-learn's [_RandomizedLasso_](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html) but for the graphical lasso.
 
 This technique estimates the precision over an ensemble of estimators with random penalties and bootstrapped samples.  Specifically, in each trial we
 
-1. draw boostrap samples by randomly subsampling $$S$$
-2. draw a random matrix penalty
+1. Draw boostrap samples by randomly subsampling $$S$$
+2. Draw a random matrix penalty
 
 A final _proportion matrix_ is then estimated by summing or averaging the precision estimates from each trial.  The precision support can be estimated by thresholding the proportion matrix.
 
 The random penalty can be chosen in a variety of ways.  We initially offer the following methods:
 
-- `subsampling` (fixed penalty): This option does not modify the penalty and only draws bootstrapped samples from $$S$$. Use this in conjunction with a scalar penalty.
+- `subsampling` (fixed penalty): This option does not modify the penalty and only draws bootstrapped samples from $$\Xdata$$. Use this in conjunction with a scalar penalty.
 
 - `random`: This option generates a randomly perturbed penalty weight matrix.  Specifically, the off-diagonal entries take the values $$\{\lambda\eta,~ \frac{\lambda}{\eta}\}$$ with probability $$1/2$$. The class uses `lam_perturb` for $$\eta$$. 
 
-- `fully_random`: This option generates a symmetric matrix with Gaussian off-diagonal entries (for a single triangle).  The penalty matrix is scaled appropriately for $$S$$.
+- `fully_random`: This option generates a symmetric matrix with Gaussian off-diagonal entries (for a single triangle).  The penalty matrix is scaled appropriately for $$\Xdata$$.
 
 `ModelAverage` takes the parameter `estimator` as the graph lasso estimator instance to build the ensemble and by default, `QuicGraphLassoCV` is used.  
 
@@ -310,13 +304,11 @@ Figure 3. Random model averaging support estimates.  From left to right:  the or
 An example is shown in Figure 3. The dense `model.proportions_` matrix contains the sample probability of each element containing a nonzero.  Thresholding this matrix by the default value of 0.5 resulted in a correct estimate of the support.  This technique generally provides a more robust support estimate than the previously explained methods.  One drawback of this approach is the significant time-cost of running the estimator over many trials.  These trials can be run in parallel and an implementation may be prioritized for a future release.
 
 ## Refining estimates via adaptive methods
-
-Given an initial sparse estimate, we can derive a new ["adaptive"](http://pages.cs.wisc.edu/~shao/stat992/zou2006.pdf) penalty and refit the _graphical lasso_ using data dependent weights [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf), [Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)]. Thus, the adaptive variant of the _graphical lasso_ (\ref{eqn:glasso}) amounts to 
+Given an initial sparse estimate, we can derive a new ["adaptive"](http://pages.cs.wisc.edu/~shao/stat992/zou2006.pdf) penalty and refit the _graphical lasso_ using data dependent weights [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf), [Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)]. Thus, the adaptive variant of the _graphical lasso_ (\ref{eqn:graphlasso}) amounts to 
 
 $$\begin{align}
-\Lambda_{jk} = \lambda \cdot W_{jk}, \quad  \text{ where } W_{jk} = W_{kj} > 0 \  \text{for all} \  (j,k) \label{eqn:adaptive-weights}\tag{5}
+\Lambda_{jk} = \lambda \cdot W_{jk}, \quad  \text{ where } W_{jk} = W_{kj} > 0 ~ \  \text{for all} \ ~ (j,k) \label{eqn:adaptive-weights}\tag{5}
 \end{align}$$
-
 
 In our current implementation, refitting is always done with `QuicGraphLassoCV`. We provide three ways of computing new weights in (\ref{eqn:adaptive-weights}) before refitting, given the coefficients $$\hat{\theta}_{jk}$$ of the inverse covariance estimate $$\hat{\Thet}$$:
 
@@ -354,31 +346,17 @@ An example is shown in Figure 4. The adaptive estimator will not only refine the
 It is clear that the estimated values of the true support are much more accurate for each method combination.  For example, even though the support error for BIC is 10 as opposed to 0 in the non-adaptive case, the Frobenius error is 0.38 while it was 0.68 in the non-adaptive case.
 
 
-## Summary 
+## Discussion
+The following chart depicting the various features supported in skggm and contrasting this with currently available tools for scikit-learn.  
 
 <img style="margin: 0 auto;display: block;" src="assets/sklearn_skggm_compare.png" width="600" />
-<div style="margin: 0 auto;display: block; width:700px;">
+<div style="margin: 0 auto;display: block; width:620px;">
 <center><i><small>
-A summary of flexibility of skggm for estimating Gaussian graphical models via variants of the graphical lasso
+A summary of skggm's core features for estimating Gaussian graphical models.
 </small></i></center>
 </div>
 <br>
 
-
-
-## Discussion
-
-This is an ongoing effort. We'd love your feedback on which algorithms we should provide bindings for next and how you're using the package. We also welcome contributions. 
+This is just the first release of an ongoing effort. We'd love your feedback on which algorithms we should provide bindings for next and how you're using the package. We also welcome contributions. 
 
 [@jasonlaska](https://github.com/jasonlaska) and [@mnarayan](https://github.com/mnarayan)
-
-
-
-<!--
-# Example of raw escaping
-
-{% raw %}
-  $$a^2 + b^2 = c^2$$ 
-  note that all equations between these tags will not need escaping! 
-{% endraw %}
--->
