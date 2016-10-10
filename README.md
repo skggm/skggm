@@ -4,7 +4,7 @@ In the last decade, learning networks that encode conditional indepedence relati
 However, many statistical advances and best practices in fitting such models to data are not yet widely adopted and not available in common python packages for machine learning. Furthermore, inverse covariance estimation is an active area of research where researchers continue to improve algorithms and estimators.
 With `skggm` we seek to provide these new developments to a wider audience, and also enable researchers to effectively benchmark their methods in regimes relevant to their applications of interest.
 
-While `skggm` is currently geared toward _Gaussian graphical models_, we hope to eventually evolve it to support _Generalized graphical models_.
+While `skggm` is currently geared toward _Gaussian graphical models_, we hope to eventually evolve it to support _Generalized graphical models_.  Read more [here](https://jasonlaska.github.io/skggm/tour).
 
 ## Inverse Covariance Estimation
 
