@@ -37,6 +37,11 @@ This is an ongoing effort. We'd love your feedback on which algorithms and techn
 ---
 
 ## Included in `inverse_covariance` 
+An overview of the skggm graphical lasso facilities is depicted by the following diagram:
+<p align="center"><img src="images/skggm_workflow.png" alt="sklearn/skggm feature comparison" width="600"></p>
+
+Information on basic usage can be found at [https://jasonlaska.github.io/skggm/tour](https://jasonlaska.github.io/skggm/tour).  The package includes the following classes and submodules.
+
 - **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L138-L239)
 
     _QuicGraphLasso_ is an implementation of [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) wrapped as a scikit-learn compatible estimator \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\] . The estimator can be run in `default` mode for a fixed penalty or in `path` mode to explore a sequence of penalties efficiently.  The penalty `lam` can be a scalar or matrix.
@@ -82,9 +87,6 @@ This is an ongoing effort. We'd love your feedback on which algorithms and techn
 - **inverse_covariance.profiling**
 
     Submodule that includes `profiling.AverageError`, `profiling.StatisticalPower` to compare performance between methods.  This is a work in progress, more to come soon!
-
-The following diagram shows how these tools fit together:
-<p align="center"><img src="images/skggm_workflow.png" alt="sklearn/skggm feature comparison" width="600"></p>
 
 ## Installation
 
