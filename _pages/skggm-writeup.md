@@ -177,8 +177,8 @@ The _graphical lasso_ (\ref{eqn:graphlasso}) provides a family of estimates $$\T
 ### Model selection via cross-validation (less sparse)
 A common method to choose $$\Lambda$$ is [cross-validation](https://www.stat.berkeley.edu/~bickel/BL2008-banding.pdf).  Specifically, given a grid of penalties and K folds of the data,  
 
-1. Estimate a family of sparse to dense precision matrices on $$K-1$$ splits of the data.
-2. Score the performance of these estimates on $$K^{\text{th}}$$ split using some loss function.   
+1. Estimate a family of sparse to dense precision matrices on $$K-1$$ folds of the data.
+2. Score the performance of these estimates on $$K^{\text{th}}$$ fold using some loss function.   
 3. Repeat Steps 1. and 2. over all folds.
 4. Aggregate the score across the folds in Step 3. to determine a mean score for each $$\Lambda$$.
 
