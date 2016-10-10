@@ -143,13 +143,13 @@ $$
 \label{eqn:graphlasso}\tag{2}
 \end{align}
 $$
-where $$\Lambda \in \mathbb{R}^{p\times p}$$ is a symmetric matrix with non-negative entries and
-$$\|\Thet\|_{1, \Lambda} = \sum_{j,k=1}^{p} \lambda_{jk}\mid\theta_{jk}\mid$$. Typically, the diagonals are not penalized by setting $$\lambda_{jj} = 0,\ j=1,\ldots,p$$ to ensure that $$\hat{\Thet}$$ remains positive definite. 
+where $$\Lambda$$ is a $$p \times p$$ symmetric matrix with non-negative entries and
+$$\|\Thet\|_{1, \Lambda} = \sum_{j,k=1}^{p} \lambda_{jk}\mid\theta_{jk}\mid$$. Typically, we avoid penalizing the diagonals by setting $$\lambda_{jj} = 0,\ j=1,\ldots,p$$ to ensure that $$\hat{\Thet}$$ remains positive definite. 
 The objective (\ref{eqn:graphlasso}) reduces to the standard _graphical lasso_ formulation of [Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf) when all off diagonals of the penalty matrix take a constant scalar value  $$\lambda_{jk} = \lambda_{kj} =  \lambda$$ for all $$ j \ne k$$. The standard _graphical lasso_ has been implemented in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
 ## A tour of skggm:  methods & interfaces
-<img style="margin: 0 auto;display: block;" src="assets/skggm_workflow.png" width="800" />
-<div style="margin: 0 auto;display: block; width:625px;">
+<img style="margin: 0 auto;display: block;" src="assets/skggm_workflow.png" width="1200" />
+<div style="margin: 0 auto;display: block; width:1225px;">
 <center><i><small>
 Figure 5. Overview of the skggm graphical lasso facilities.
 </small></i></center>
