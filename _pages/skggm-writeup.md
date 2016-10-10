@@ -12,7 +12,7 @@ $$
 \newcommand{\Thet}{\mathbf{\Theta}}
 $$
 
-## Introduction
+
 Graphical models combine graph theory and probability theory to create networks that model complex probabilistic relationships. Inferring such networks is a statistical problem in [systems biology](http://science.sciencemag.org/content/303/5659/799), [neuroscience](https://www.simonsfoundation.org/features/foundation-news/how-do-different-brain-regions-interact-to-enhance-function/),   [psychometrics](http://www.annualreviews.org/doi/abs/10.1146/annurev-clinpsy-050212-185608), or [finance](http://www.jstor.org/stable/1924119). 
 
 <img style="margin: 0 auto;display: block;" src="assets/skggm_network.png" width="650" />
@@ -32,6 +32,10 @@ Figure 2. A burning fire causes both smoke and heat. Smoke and heat are always o
 </div>
 <br>
 Thus, in applications that seek to interpret edges as some form of direct influence, more sophisticated graphical models that eliminate spurious or misleading relationships are desirable. This motivates the usage of Markov networks, popularly known as _Gaussian graphical models_ for Gaussian distributed data. In the next few sections, we'll briefly introduce the notion of Markov networks for general probability distributions before considering the case of multivariate Gaussians.
+
+
+* TOC
+{:toc}
 
 ## Conditional independence and Markov networks
 
@@ -363,7 +367,7 @@ It is clear that the estimated values of the true support are much more accurate
 
 
 ## Discussion
-In this post, we've briefly overviewed the relationship between Markov networks and inverse covariance, discussed the graphical lasso algorithm, and toured through some of the core features of the first release of [skggm](https://github.com/jasonlaska/skggm).
+In this post, we've briefly overviewed the relationship between Markov networks and inverse covariance, discussed the graphical lasso algorithm, and toured through some of the core features of the first release of [skggm](https://github.com/jasonlaska/skggm). We have additional [jupyter notebooks](github.com/neuroquant/jf2016-skggm) and accompanying [slides](http://neurostats.org/jf2016-skggm) that work through inverse covariance estimation for more difficult network structures.
 
 The following chart depicting the various features supported in skggm and contrasting this with currently available tools for scikit-learn.  
 
