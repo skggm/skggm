@@ -147,7 +147,7 @@ The objective (\ref{eqn:graphlasso}) reduces to the standard _graphical lasso_ f
 <img style="margin: 0 auto;display: block;" src="assets/skggm_workflow.png" width="800" />
 <div style="margin: 0 auto;display: block; width:625px;">
 <center><i><small>
-Figure 5. Overview of the skggm graphical lasso features and workflow.
+Figure 5. Overview of the skggm graphical lasso facilities.
 </small></i></center>
 </div>
 <br>
