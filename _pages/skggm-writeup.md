@@ -47,7 +47,7 @@ Figure 3. Example of Pairwise, Local, and Global Markov properties with respect 
 <br>
 The properties depicted in Figure 3 are as follows.  
 
-1. _Pairwise_: The absence of an edge $$(j,k) \not\in E$$, i.e.,
+1. _Pairwise_: The absence of an edge $$(j,k) \not\in E$$ implies
 
     $$
     \begin{align}
@@ -67,7 +67,7 @@ The properties depicted in Figure 3 are as follows.
 
     where $$ne(j) = \{k \in V: (j,k) \in E\}$$.
 
-3. _Global_: All paths between $$A$$ and $$B$$ are separated by $$C$$, i.e.,
+3. _Global_: All paths between $$A$$ and $$B$$ are separated by $$C$$ implies
 
     $$
     \begin{align}
