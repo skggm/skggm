@@ -141,7 +141,7 @@ $$
 $$
 where $$\Lambda \in \mathbb{R}^{p\times p}$$ is a symmetric matrix with non-negative entries and
 $$\|\Thet\|_{1, \Lambda} = \sum_{j,k=1}^{p} \lambda_{jk}\mid\theta_{jk}\mid$$. Typically, the diagonals are not penalized by setting $$\lambda_{jj} = 0,\ j=1,\ldots,p$$ to ensure that $$\hat{\Thet}$$ remains positive definite. 
-The objective (\ref{eqn:graphlasso}) reduces to the standard _graphical lasso_ formulation of \[[Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf)\] when all off diagonals of the penalty matrix take a constant scalar value  $$\lambda_{jk} = \lambda_{kj} =  \lambda$$ for all $$ j \ne k$$. The standard _graphical lasso_ has been implemented in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
+The objective (\ref{eqn:graphlasso}) reduces to the standard _graphical lasso_ formulation of [Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf) when all off diagonals of the penalty matrix take a constant scalar value  $$\lambda_{jk} = \lambda_{kj} =  \lambda$$ for all $$ j \ne k$$. The standard _graphical lasso_ has been implemented in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
 ## Methods & Implementation
 <img style="margin: 0 auto;display: block;" src="assets/skggm_workflow.png" width="800" />
@@ -279,7 +279,7 @@ For some problems, the support of the sparse precision matrix is of primary inte
 
 This technique estimates the precision over an ensemble of estimators with random penalties and bootstrapped samples.  Specifically, in each trial we
 
-1. Draw boostrap samples by randomly subsampling $$S$$
+1. Draw boostrap samples by randomly subsampling $$\Xdata$$
 2. Draw a random matrix penalty
 
 A final _proportion matrix_ is then estimated by summing or averaging the precision estimates from each trial.  The precision support can be estimated by thresholding the proportion matrix.
