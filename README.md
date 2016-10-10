@@ -131,14 +131,6 @@ We've provided a utility function `inverse_covariance.plot_util.trace_plot` that
 
 <p align="center"><img src="images/trace_plot.png" alt="Trace plot" width="400"></p>
 
-## Brain network functional connectivity
-In `examples/plot_functional_brain_networks.py` and the corresponding Jupyter notebook `example/ABIDE_Example`, we plot the functional connectivity of brain-wide networks learned from the observation data (similar example to [this example](http://nilearn.github.io/auto_examples/03_connectivity/plot_inverse_covariance_connectome.html#sphx-glr-auto-examples-03-connectivity-plot-inverse-covariance-connectome-py)).
-
-Specifically, we extract the time-series from the ABIDE dataset, with nodes defined using regions of interest from the [Power-264 atlas (Power, 2011)](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3222858/). The image on the left shows the upper triangle of the resulting precision matrix and the image on the right shows a top-of-brain connectome.  
-
-<p align="center"><img src="images/functional_connectivity_precision.png" alt="" width="300"></p>
-<p align="center"><img src="images/functional_connectivity_brain.png" alt="" width="400"></p>
-
 # References
 
 ### BIC / EBIC Model Selection
