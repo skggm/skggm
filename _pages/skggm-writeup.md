@@ -79,9 +79,7 @@ The properties depicted in Figure 3 are as follows.
     for all disjoint subsets $$A,B,C \subset V$$, where $$C$$ separates $$A$$ and $$B$$.
 
 
-The pairwise Markov property is the weakest Markov property while the global Markov property is the strongest. In general, if a distribution satisfies the global property it implies all the others, i.e., $$(\ref{eqn:global}) \Rightarrow (\ref{eqn:local}) \Rightarrow (\ref{eqn:pairwise})$$. 
-
-For some special distributions that have positive densities such as the multivariate Gaussian, the [compositional property](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) 
+The pairwise Markov property is the weakest Markov property while the global Markov property is the strongest. In general, if a distribution satisfies the global property it implies all the others, i.e., $$(\ref{eqn:global}) \Rightarrow (\ref{eqn:local}) \Rightarrow (\ref{eqn:pairwise})$$. For some special distributions that have positive densities such as the multivariate Gaussian, the [compositional property](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) 
 of conditional independence holds. As a result, $$(\ref{eqn:pairwise}) \Rightarrow (\ref{eqn:global})$$ and all three Markov properties are equivalent.
 
 When probability distributions satisfy the global Markov property, it becomes computationally and statistically tractable to efficiently infer conditional independence relationships. For an extensive reference on Markov properties of directed and undirected Markov networks, please see ["Graphical Models" by Lauritzen](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193). 
