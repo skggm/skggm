@@ -25,14 +25,14 @@ In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible 
 To get started, install the package (via pip, see below) and:
  
 - read the tour of skggm at [https://jasonlaska.github.io/skggm/tour](https://jasonlaska.github.io/skggm/tour)
-- read [@mnarayn](https://github.com/mnarayan)'s [talk](https://dx.doi.org/10.6084/m9.figshare.4003380) and check out the companion examples [here](https://github.com/neuroquant/jf2016-skggm) (live via binder at [here](http://mybinder.org/repo/neuroquant/jf2016-skggm)). Presented at HHMI, Janelia Farms, October 2016. 
+- read [@mnarayan](https://github.com/mnarayan)'s [talk](https://dx.doi.org/10.6084/m9.figshare.4003380) and check out the companion examples [here](https://github.com/neuroquant/jf2016-skggm) (live via binder at [here](http://mybinder.org/repo/neuroquant/jf2016-skggm)). Presented at HHMI, Janelia Farms, October 2016. 
 - basic usage examples can be found in [examples/estimator_suite.py](https://github.com/jasonlaska/skggm/blob/master/examples/estimator_suite.py)
 
 ---
 
 This is an ongoing effort. We'd love your feedback on which algorithms and techniques we should include and how you're using the package. We also welcome contributions. 
 
-[@jasonlaska](https://github.com/jasonlaska) and [@mnarayn](https://github.com/mnarayan)
+[@jasonlaska](https://github.com/jasonlaska) and [@mnarayan](https://github.com/mnarayan)
 
 ---
 
