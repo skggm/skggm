@@ -25,8 +25,8 @@ In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible 
 To get started, install the package (via pip, see below) and:
  
 - read the tour of skggm at [https://jasonlaska.github.io/skggm/tour](https://jasonlaska.github.io/skggm/tour)
-- check out the examples in `examples/estimator_suite.py`
-- check out the example [here](https://github.com/neuroquant/jf2016-skggm) (live via binder at [here](http://mybinder.org/repo/neuroquant/jf2016-skggm))
+- read @mnarayn's [talk](https://dx.doi.org/10.6084/m9.figshare.4003380) and check out the companion examples [here](https://github.com/neuroquant/jf2016-skggm) (live via binder at [here](http://mybinder.org/repo/neuroquant/jf2016-skggm)), Presented at HHMI, Janelia Farms, October 2016. 
+- basic usage examples can be found in `examples/estimator_suite.py`
 
 ---
 
