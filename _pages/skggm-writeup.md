@@ -13,7 +13,7 @@ $$
 $$
 
 ## Introduction
-Graphical models combine graph theory and probability theory to create networks that model complex probabilistic relationships. Inferring such networks is an statistical problem in [systems biology](http://science.sciencemag.org/content/303/5659/799) and [neuroscience](https://www.simonsfoundation.org/features/foundation-news/how-do-different-brain-regions-interact-to-enhance-function/),   [psychometrics](http://www.annualreviews.org/doi/abs/10.1146/annurev-clinpsy-050212-185608), or [finance](http://www.jstor.org/stable/1924119). 
+Graphical models combine graph theory and probability theory to create networks that model complex probabilistic relationships. Inferring such networks is a statistical problem in [systems biology](http://science.sciencemag.org/content/303/5659/799) and [neuroscience](https://www.simonsfoundation.org/features/foundation-news/how-do-different-brain-regions-interact-to-enhance-function/),   [psychometrics](http://www.annualreviews.org/doi/abs/10.1146/annurev-clinpsy-050212-185608), or [finance](http://www.jstor.org/stable/1924119). 
 
 <img style="margin: 0 auto;display: block;" src="assets/skggm_network.png" width="650" />
 <div style="margin: 0 auto;display: block; width:625px;">
