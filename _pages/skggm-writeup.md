@@ -31,7 +31,7 @@ Figure 2. A burning fire causes both smoke and heat. Smoke and heat are always o
 </small></i></center>
 </div>
 <br>
-Thus, in applications that seek to interpret edges as some form of direct influence, more sophisticated graphical models that eliminate spurious or misleading relationships are desirable. This motivates the usage of Markov networks, popularly known as _Gaussian graphical models_ for Gaussian distributed data. In the next few sections, we'll briefly introduce the notion of Markov networks for general probability distributions before considering the case of multivariate Gaussians.
+Thus, in applications that seek to interpret edges as some form of direct influence, more sophisticated graphical models that eliminate spurious or misleading relationships are desirable. This motivates the usage of Markov networks, popularly known as _Gaussian graphical models_ for Gaussian distributed data. First, we briefly introduce the notion of Markov networks for general probability distributions before considering the case of multivariate Gaussians. Then, we consider a particularly efficient way to estimate Gaussian graphical models via the inverse covariance. Last, but not least, we lay out how skggm implements a variety of important maximum likelihood estimators for the inverse covariance.  
 
 
 * TOC
