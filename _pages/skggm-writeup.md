@@ -52,7 +52,7 @@ The properties depicted in Figure 3 are as follows.
     $$
     \begin{align}
     \label{eqn:pairwise}
-    X_{j} \perp X_{k} | \ X_{V \setminus \{j,k\}}, \quad \forall \ j \in V, ~k \in V, ~j \ne k\tag{$\textbf{P}$}
+    X_{j} \perp X_{k} | \ X_{V \setminus \{j,k\}}, \quad \forall \ j \in V, ~k \in V, ~j \ne k.\tag{$\textbf{P}$}
     \end{align}
     $$
 
