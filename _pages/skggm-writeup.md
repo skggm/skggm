@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Gaussian graphical models with skggm
-permalink: /walkthrough
+permalink: /tour
 ---
 
 <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
