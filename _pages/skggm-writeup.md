@@ -165,7 +165,7 @@ model = QuicGraphLasso(
     mode=str,               # 'default': single estimate
                             # 'path': use sequence of scaled penalties 
     path=list,              # Sequence of penalty scales mode='path'
-    init_method=str,        # Inital covariance estimate: 'corrcoef' or 'cov'
+    init_method=str,        # Initial covariance estimate: 'corrcoef' or 'cov'
     auto_scale=bool,        # If True, scales penalty by 
                             # max off-diagonal entry of the sample covariance
 )
@@ -174,7 +174,7 @@ model.fit(X)                # X is data matrix (n_samples, n_features)
 
 If the input penalty `lam` is a scalar, it will be converted to a matrix with zeros along the diagonal and `lam` for all other entries. A matrix `lam` is used as-is, although it will be scaled if `auto_scale=True`.
 
-After the model is fit, the estimator object will contain the covariance estimate `model.covariance_`$$\in \mathbb{R}^{p\times p}$$, the sparse inverse covariance estimate `model.precision_`$$\in \mathbb{R}^{p\times p}$$, and the penalty `model.lam_` used to obtain these estimates.  When `auto_scale=False`, the output pentalty will be identical to the input penalty. If `mode='path'` is used, then the `path` parameter must be provided and both `model.covariance_` and `model.precision_` will be a list of $$p\times p$$ matrices of length `len(path)`. In general, the estimators introduced here will follow this interface unless otherwise noted.  
+After the model is fit, the estimator object will contain the covariance estimate `model.covariance_` $$\in \mathbb{R}^{p\times p}$$, the sparse inverse covariance estimate `model.precision_` $$\in \mathbb{R}^{p\times p}$$, and the penalty `model.lam_` used to obtain these estimates.  When `auto_scale=False`, the output pentalty will be identical to the input penalty. If `mode='path'` is used, then the `path` parameter must be provided and both `model.covariance_` and `model.precision_` will be a list of $$p\times p$$ matrices of length `len(path)`. In general, the estimators introduced here will follow this interface unless otherwise noted.  
 
 The _graphical lasso_ (\ref{eqn:graphlasso}) provides a family of estimates $$\Thet(\Lambda)$$ indexed by the regularization parameter $$\Lambda$$. The choice of the penalty $$\Lambda$$ can have a large impact on the kind of result obtained.  If a good $$\Lambda$$ is known _a priori_, e.g., when reproducing existing results from the literature, then look no further than this estimator (with `auto_scale='False'`).  Otherwise when $$\Lambda$$ is unknown, we provide several methods for selecting an appropriate $$\Lambda$$. Selection methods roughly fall into two categories of performance: a) [_overselection_ (less sparse)](https://projecteuclid.org/euclid.aos/1152540754), resulting in estimates with false positive edges; or b) [_underselection_ (more sparse)](https://www.stat.ubc.ca/~jhchen/paper/Bio08.pdf), resulting in estimates with false negative edges.
 
@@ -182,11 +182,12 @@ The _graphical lasso_ (\ref{eqn:graphlasso}) provides a family of estimates $$\T
 A common method to choose $$\Lambda$$ is [cross-validation](https://www.stat.berkeley.edu/~bickel/BL2008-banding.pdf).  Specifically, given a grid of penalties and K folds of the data,  
 
 1. Estimate a family of sparse to dense precision matrices on $$K-1$$ folds of the data.
-2. Score the performance of these estimates on $$K^{\text{th}}$$ fold using some loss function.   
-3. Repeat Steps 1. and 2. over all folds.
-4. Aggregate the score across the folds in Step 3. to determine a mean score for each $$\Lambda$$.
+2. Score the performance of these estimates on the $$K^{\text{th}}$$ fold using some loss function.   
+3. Repeat Steps 1 and 2 over all folds.
+4. Aggregate the score across the folds in Step 3 to determine a mean score for each $$\Lambda$$.
+5. Pick the value of $$\Lambda$$ that minimizes the mean score.
 
-We provide several [metrics](http://pages.stat.wisc.edu/~myuan/papers/graph.final.pdf) of the form $$d(\hat{\Sig}, \hat{\Thet})$$ that measure how well the inverse covariance estimate best fits the data. These metrics can be combined with cross-validation via the `score_metric` parameter. Since CV measures out-of-sample error, we estimate inverse covariance $$\hat{\Thet}$$ on the training set and  measure its fit against the sample covariance $$\hat{\Sig}$$ on the test set. The skggm package offers the following options for the CV-loss,
+We provide several [metrics](http://pages.stat.wisc.edu/~myuan/papers/graph.final.pdf) of the form $$d(\hat{\Sig}, \hat{\Thet})$$ that measure how well the inverse covariance estimate fits the data. These metrics can be combined with cross-validation via the `score_metric` parameter. Since CV measures out-of-sample error, we estimate inverse covariance $$\hat{\Thet}$$ on the training set and  measure its fit against the sample covariance $$\hat{\Sig}$$ on the test set. The skggm package offers the following options for the CV-loss,
 $$d(\hat{\Sig}^{ts},\hat{\Thet}^{tr})$$:
 
 $$
