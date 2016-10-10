@@ -47,39 +47,42 @@ Figure 3. Example of Pairwise, Local, and Global Markov properties with respect 
 <br>
 The properties depicted in Figure 3 are as follows.  
 
-Absence of an edge
+1. _Pairwise_: The absence of an edge $$(j,k) \not\in E$$, i.e.,
 
-$$
-\begin{align}
-\label{eqn:pairwise}
-(j,k) \not\in E \Rightarrow
-& X_{j} \perp X_{k} | \ X_{V \setminus \{j,k\}}, \quad \forall \ j \in V, ~k \in V, ~j \ne k  &\textbf{(P)}
-\end{align}
-$$
+    $$
+    \begin{align}
+    \label{eqn:pairwise}
+    X_{j} \perp X_{k} | \ X_{V \setminus \{j,k\}}, \quad \forall \ j \in V, ~k \in V, ~j \ne k\tag{$\textbf{P}$}
+    \end{align}
+    $$
 
-Given $$j \in V$$ and its neighbors $$ne(j)$$
+2. _Local_: Given $$j \in V$$ and its neighbors $$ne(j)$$,
 
-$$
-\begin{align}
-\label{eqn:local} 
-& X_{j} \perp X_{V \setminus \{j,\text{ne}(j)\}} | \ X_{ne(j)}, \quad \forall j \in V  &\textbf{(L)}
-\end{align}
-$$
+    $$
+    \begin{align}
+    \label{eqn:local} 
+    X_{j} \perp X_{V \setminus \{j,\text{ne}(j)\}} | \ X_{ne(j)}, \quad \forall j \in V\tag{$\textbf{L}$}
+    \end{align}
+    $$
 
-where $$ne(j) = \{k \in V: (j,k) \in E\}$$.
+    where $$ne(j) = \{k \in V: (j,k) \in E\}$$.
 
-$$
-\begin{align}
-\label{eqn:global}      \text{If all paths between $A$ and $B$ are separated by $C$}\  \Rightarrow\ 
-& X_{A} \perp X_{B} | \ X_{C} \quad \text{for all disjoint subsets $A,B,C \subset V$, where $C$ separates $A$ and $B$} &\textbf{(G)}
-\end{align}
-$$
+3. _Global_: All paths between $$A$$ and $$B$$ are separated by $$C$$, i.e.,
+
+    $$
+    \begin{align}
+    \label{eqn:global}
+    X_{A} \perp X_{B} | \ X_{C}\tag{$\textbf{G}$}
+    \end{align}
+    $$
+
+    for all disjoint subsets $$A,B,C \subset V$$, where $$C$$ separates $$A$$ and $$B$$.
 
 
-The pairwise markov property is the weakest Markov property while the global Markov property is the strongest. In general, if a distribution satisfies the global property it implies all the others, i.e., $$(G) \Rightarrow (L) \Rightarrow (P)$$. 
+The pairwise Markov property is the weakest Markov property while the global Markov property is the strongest. In general, if a distribution satisfies the global property it implies all the others, i.e., $$(\ref{eqn:global}) \Rightarrow (\ref{eqn:local}) \Rightarrow (\ref{eqn:pairwise})$$. 
 
 For some special distributions that have positive densities such as the multivariate Gaussian, the [compositional property](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) 
-of conditional independence holds. As a result, $$(P) \Rightarrow (G)$$ and all three Markov properties are equivalent.
+of conditional independence holds. As a result, $$(\ref{eqn:pairwise}) \Rightarrow (\ref{eqn:global})$$ and all three Markov properties are equivalent.
 
 When probability distributions satisfy the global Markov property, it becomes computationally and statistically tractable to efficiently infer conditional independence relationships. For an extensive reference on Markov properties of directed and undirected Markov networks, please see ["Graphical Models" by Lauritzen](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193). 
 
