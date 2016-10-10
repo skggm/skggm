@@ -252,7 +252,7 @@ Figure 7. Inverse covariance estimates (more sparse).  From left to right:  the 
 </small></i></center>
 </div>
 <br>
-An example is shown in Figure 7. The `QuicGraphLassoEBIC` estimates are much sparser than `QuicGraphLassoCV` estimates, and often contain a subset of the true precision support.  In this small dimensional example, BIC (gamma = 0) performed best as EBIC with gamma = 0.1 selected only the diagonal coefficients. As the dimension of the samples `n_features` grows, BIC will produce a less-sparse result and thus an increasing gamma parameter serves to obtain sparser solutions.
+An example is shown in Figure 7. The `QuicGraphLassoEBIC` estimates are much sparser than `QuicGraphLassoCV` estimates, and often contain a subset of the true precision support.  In this small dimensional example, BIC (gamma = 0) performed best as EBIC with gamma = 0.1 selected only the diagonal coefficients. As the dimension of the samples `n_features` grows, BIC will select a less-sparse result and thus an increasing gamma parameter serves to obtain sparser solutions.
 
 ## Randomized model averaging
 
@@ -306,7 +306,7 @@ An example is shown in Figure 8. The dense `model.proportions_` matrix contains 
 Given an initial sparse estimate, we can derive a new ["adaptive"](http://pages.cs.wisc.edu/~shao/stat992/zou2006.pdf) penalty and refit the _graphical lasso_ using data dependent weights [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf), [Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)]. Thus, the adaptive variant of the _graphical lasso_ (\ref{eqn:graphlasso}) amounts to 
 
 $$\begin{align}
-\Lambda_{jk} = \lambda \cdot W_{jk}, \quad  \text{ where } W_{jk} = W_{kj} > 0 ~ \  \text{for all} \ ~ (j,k) \label{eqn:adaptive-weights}\tag{5}
+\Lambda_{jk} = \lambda \cdot W_{jk}, \quad  \text{ where } W_{jk} = W_{kj} > 0 ~ \  \text{for all} \ ~ (j,k) \label{eqn:adaptive-weights}\tag{4}
 \end{align}$$
 
 In our current implementation, refitting is always done with `QuicGraphLassoCV`. We provide three ways of computing new weights in (\ref{eqn:adaptive-weights}) before refitting, given the coefficients $$\hat{\theta}_{jk}$$ of the inverse covariance estimate $$\hat{\Thet}$$:
