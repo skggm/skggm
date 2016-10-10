@@ -18,11 +18,11 @@ Graphical models combine graph theory and probability theory to create networks 
 <img style="margin: 0 auto;display: block;" src="assets/skggm_network.png" width="650" />
 <div style="margin: 0 auto;display: block; width:625px;">
 <center><i><small>
-Figure 1. An illustrative graphic depicting the activity of p biomolecules (genes, proteins), stocks or units of brain function.  To discover the mechanisms of gene regulation or brain function we need to understand how these p variables influence each other in the form of a graph. Thus, given n measurements from each of these p variables the goal is to infer an underlying network that encodes these relationships. 
+Figure 1. An illustrative graphic depicting the activity of p biomolecules (genes, proteins), stocks or units of brain function.  To discover the mechanisms of gene regulation or brain function we need to understand how these p variables influence each other in the form of a graph. Thus, given n measurements from each of these p variables, the goal is to infer an underlying network that encodes these relationships. 
 </small></i></center>
 </div>
 <br>
-A simple model to infer network between $$p$$ variables is a correlational network. In this case, if two variables are correlated, then the corresponding nodes are connected by an edge but not otherwise. Thus the absence of an edge between two nodes indicates the absence of a correlation between them. Unfortunately, as shown in Figure 2, such pairwise correlations could be spuriously induced by shared _common causes_. 
+A simple model to infer a network between $$p$$ variables is a correlational network. In this case, if two variables are correlated, then the corresponding nodes are connected by an edge, but not otherwise. Thus the absence of an edge between two nodes indicates the absence of a correlation between them. Unfortunately, as shown in Figure 2, such pairwise correlations could be spuriously induced by shared _common causes_. 
 
 <img style="margin: 0 auto;display: block;" src="assets/skggm_graphics_spurious_correlation.png" width="200" />
 <div style="margin: 0 auto;display: block; width:625px;">
@@ -31,7 +31,7 @@ Figure 2. A burning fire causes both smoke and heat. Smoke and heat are always o
 </small></i></center>
 </div>
 <br>
-Thus, in applications that seek to interpret edges as some form of direct influence, more sophisticated graphical models that eliminate spurious or misleading relationships are desirable. This motivates the usage of Markov networks, popularly known as _Gaussian graphical models_ for Gaussian distributed data. First, we briefly introduce the notion of Markov networks for general probability distributions before considering the case of multivariate Gaussians. Then, we consider a particularly efficient way to estimate Gaussian graphical models via the inverse covariance. Last, but not least, we lay out how skggm implements a variety of important maximum likelihood estimators for the inverse covariance.  
+Thus, in applications that seek to interpret edges as some form of direct influence, more sophisticated graphical models that eliminate spurious or misleading relationships are desirable. This motivates the usage of Markov networks, popularly known as _Gaussian graphical models_ for Gaussian distributed data. First, we briefly introduce the notion of Markov networks for general probability distributions before considering the case of multivariate Gaussians. Then, we consider a particularly efficient way to estimate Gaussian graphical models via the inverse covariance. Last, but not least, we lay out how [skggm](http:github.com/jasonlaska/skggm) implements a variety of important maximum likelihood estimators for the inverse covariance.  
 
 
 * TOC
