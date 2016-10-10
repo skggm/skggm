@@ -41,7 +41,7 @@ Thus, in applications that seek to interpret edges as some form of direct influe
 
 Formally, a graph $$\mathcal{G}=(V,E)$$ consists a set of vertices $$V = \{1,\ldots,p\}$$ and edges between them $$E\subset V \times V$$.  The vertices or nodes are associated with a $$p$$-dimensional random variable $$\Xdata = (X_{1},\ldots, X_{p})$$ that has some probability distribution $$\Xdata \sim \mathbb{P}_{\Xdata}$$.
 
-There are many [probabilistic graphical models](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) that relate the structure in the graph $$\mathcal{G}$$ to the probability distribution over the variables $$\mathbb{P}_{\Xdata}$$. We discuss an important class of graphical models, _Markov networks_, that relate absence of edges in the graph to conditional independence between random variables $$X_{1},\ldots, X_{p}$$. A particular graph $$\mathcal{G}$$ and probability distribution $$\mathbb{P}_{\Xdata}$$ forms a Markov network if it satisfies a Markov property.
+There are many [probabilistic graphical models](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) that relate the structure in the graph $$\mathcal{G}$$ to the probability distribution over the variables $$\mathbb{P}_{\Xdata}$$. We discuss an important class of graphical models, _Markov networks_, that relate absence of edges in the graph to conditional independence between random variables $$X_{1},\ldots, X_{p}$$. A particular graph $$\mathcal{G}$$ and probability distribution $$\mathbb{P}_{\Xdata}$$ forms a Markov network if it satisfies one of the Markov properties:
 
 <img style="margin: 0 auto;display: block;" src="assets/skggm_markov.png" width="500" />
 <div style="margin: 0 auto;display: block; width:625px;">
@@ -85,13 +85,13 @@ We denote [statistical independence](https://en.wikipedia.org/wiki/Independence_
     for all disjoint subsets $$A,B,C \subset V$$, where $$C$$ separates $$A$$ and $$B$$.
 
 
-The pairwise Markov property is the weakest Markov property while the global Markov property is the strongest. In general, if a distribution satisfies the global property it implies all the others, i.e., $$(\ref{eqn:global}) \Rightarrow (\ref{eqn:local}) \Rightarrow (\ref{eqn:pairwise})$$. For some special distributions that have positive densities such as the multivariate Gaussian, the [compositional property](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) 
-of conditional independence holds. As a result, $$(\ref{eqn:pairwise}) \Rightarrow (\ref{eqn:global})$$ and all three Markov properties are equivalent. Typically, the term _Markov networks_ refers to networks that satisfy the (\ref{eqn:global}), otherwise they might be called local or pairwise Markov networks depending on the strongest property satisfied.
+The pairwise Markov property is the weakest Markov property while the global Markov property is the strongest. If a distribution satisfies the global property it implies all the others, i.e., $$(\ref{eqn:global}) \Rightarrow (\ref{eqn:local}) \Rightarrow (\ref{eqn:pairwise})$$. For some special distributions that have positive densities such as the multivariate Gaussian, the [compositional property](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) 
+of conditional independence holds. As a result, $$(\ref{eqn:pairwise}) \Rightarrow (\ref{eqn:global})$$ and all three Markov properties are equivalent. Typically, the term _Markov networks_ refers to networks that satisfy (\ref{eqn:global}), otherwise they might be called local or pairwise Markov networks depending on the strongest property satisfied.
 
 When probability distributions satisfy the global Markov property, it becomes computationally and statistically tractable to efficiently infer conditional independence relationships. For an extensive reference on Markov properties of directed and undirected Markov networks, please see ["Graphical Models" by Lauritzen](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193). 
 
 ## Markov networks and inverse covariance
-In general, if two variables are statistically independent they are also uncorrelated, however, the converse is not necesssarily true. Since Gaussian distributions are fully described by their mean and covariance, then a zero correlation between two variables indeed also implies statistical independence. An analogous equivalence holds between conditional independence and the inverse covariance for Gaussian distributions. 
+If two variables are statistically independent they are also uncorrelated, however, the converse is not necesssarily true. Since Gaussian distributions are fully described by their mean and covariance, a zero correlation between two variables also implies statistical independence. An analogous equivalence holds between conditional independence and the inverse covariance for Gaussian distributions. 
 
 Given $$n$$ _i.i.d_ random samples $$(x_{1},x_{2},\ldots,x_{n})^{\top} = \Xdata$$ from a multivariate Gaussian distribution
 
@@ -100,9 +100,9 @@ x_{i} \overset{i.i.d}{\sim} \mathcal{N}_p(0, \Sig), \quad i=1,\ldots,n  \label{e
 \end{align}
 $$
 
-where each sample $$x_{i}$$ is $$p$$-dimensional with $$x_{i} \in \mathbb{R}^{p}$$, $$\Sig$$ is the population covariance matrix $$\Sig = \mathbf{E}(\Xdata^{\top}\Xdata)$$. We denote the inverse covariance by $$\Thet = \Sig^{-1}$$.
+where each sample $$x_{i} \in \mathbb{R}^{p}$$ is $$p$$-dimensional, and $$\Sig$$ is the population covariance matrix $$\Sig = \mathbf{E}(\Xdata^{\top}\Xdata)$$. We denote the inverse covariance by $$\Thet = \Sig^{-1}$$.
 
-As a consequence of the [Hammersley-Clifford theorem](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) in the case of Gaussian distributions, $$\Thet_{jk} = 0 \iff (j,k) \not \in E$$. 
+As a consequence of the [Hammersley-Clifford theorem](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) in the case of Gaussian distributions, a zero in the inverse covariance is equivalent to the absence of an edge in the graph $$\Thet_{jk} = 0 \iff (j,k) \not \in E$$. Note that partial correlations are proportional to entries of the inverse covariance. Thus, this property also holds for the partial correlation matrices. 
 
 <img style="margin: 0 auto;display: block;" src="assets/skggm_inverse.png" width="500" />
 <div style="margin: 0 auto;display: block; width:625px;">
