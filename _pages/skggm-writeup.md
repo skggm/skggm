@@ -102,12 +102,12 @@ $$
 
 where each sample $$x_{i} \in \mathbb{R}^{p}$$ is $$p$$-dimensional, and $$\Sig$$ is the population covariance matrix $$\Sig = \mathbf{E}(\Xdata^{\top}\Xdata)$$. We denote the inverse covariance by $$\Thet = \Sig^{-1}$$.
 
-As a consequence of the [Hammersley-Clifford theorem](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) in the case of Gaussian distributions, $$\Thet_{jk} = 0 \iff (j,k) \not \in E$$. Thus, as shown in Figure 4, a zero in the inverse covariance is equivalent to the absence of an edge in the graph. (Note: Partial correlations are proportional to entries of the inverse covariance. Thus, this property also holds for the partial correlation matrices.)
+As a consequence of the [Hammersley-Clifford theorem](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) in the case of Gaussian distributions, $$\Thet_{jk} = 0 \iff (j,k) \not \in E \iff X_{j} \perp X_{k} \mid \ X_{V \setminus \{j,k\}}$$. Thus, as shown in Figure 4, a zero in the inverse covariance is equivalent to conditional independence and the absence of an edge in the graph. (Note: Partial correlations are proportional to entries of the inverse covariance. Thus, this property also holds for the partial correlation matrices.)
 
 <img style="margin: 0 auto;display: block;" src="assets/skggm_inverse.png" width="500" />
 <div style="margin: 0 auto;display: block; width:625px;">
 <center><i><small>
-Figure 4. Equivalence between zeros in the inverse covariance matrix and absence of edges in the graph.
+Figure 4. Equivalence between zeros in the inverse covariance matrix and absence of edges in the graph indicating conditional independence.
 </small></i></center>
 </div>
 <br>
