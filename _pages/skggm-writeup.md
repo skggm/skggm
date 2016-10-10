@@ -383,4 +383,6 @@ A summary of skggm's core features for estimating Gaussian graphical models.
 
 Development of skggm is an ongoing effort. We'd love your feedback on which algorithms and techniques we should include and how you're using the package. We also welcome contributions. 
 
+_Acknowledgements: The authors would like to thank Jason Crawford for reading drafts of this post and providing feedback. Some introductory material and figures have been adapted from @mnarayan's dissertation._
+
 [@jasonlaska](https://github.com/jasonlaska) and [@mnarayan](https://github.com/mnarayan), October 10, 2016.
