@@ -157,7 +157,7 @@ The core estimator provided in [skggm](https://github.com/jasonlaska/skggm) is `
 from inverse_covariance import QuicGraphLasso
 
 model = QuicGraphLasso(
-    lam=int or np.ndarray,  # Graph lasso penalty (scalar or matrix) 
+    lam=int or np.ndarray,  # Graphical lasso penalty (scalar or matrix) 
     mode=str,               # 'default': single estimate
                             # 'path': use sequence of scaled penalties 
     path=list,              # Sequence of penalty scales mode='path'
@@ -292,13 +292,13 @@ The random penalty can be chosen in a variety of ways.  We initially offer the f
 
 - `fully_random`: This option generates a symmetric matrix with Gaussian off-diagonal entries (for a single triangle).  The penalty matrix is scaled appropriately for $$\Xdata$$.
 
-`ModelAverage` takes the parameter `estimator` as the graph lasso estimator instance to build the ensemble and by default, `QuicGraphLassoCV` is used.  
+`ModelAverage` takes the parameter `estimator` as the graphical lasso estimator instance to build the ensemble and by default, `QuicGraphLassoCV` is used.  
 
 {% highlight python %}
 from inverse_covariance import ModelAverage
 
 model = ModelAverage(
-    estimator=estimator,    # Graph lasso estimator instance 
+    estimator=estimator,    # Graphical lasso estimator instance 
                             # e.g., QuicGraphLassoCV(), QuicGraphLassoEBIC()
     n_trials=int,           # Number of trials to average over
     penalization=str,       # One of 'subsampling', 'random' (default), 
