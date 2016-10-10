@@ -369,7 +369,7 @@ It is clear that the estimated values of the true support are much more accurate
 
 
 ## Discussion
-In this post, we've briefly overviewed the relationship between Markov networks and inverse covariance, discussed estimation via the _graphical lasso_, and toured through some of the core features of the first release of [skggm](https://github.com/jasonlaska/skggm). We have additional [jupyter notebooks](github.com/neuroquant/jf2016-skggm) and accompanying [slides](http://neurostats.org/jf2016-skggm) that work through inverse covariance estimation for more difficult network structures.
+In this post, we've briefly overviewed the relationship between Markov networks and inverse covariance, discussed estimation via the _graphical lasso_, and toured through some of the core features of the first release of [skggm](https://github.com/jasonlaska/skggm). We have additional [jupyter notebooks](https://github.com/neuroquant/jf2016-skggm) and accompanying [slides](http://neurostats.org/jf2016-skggm) that work through inverse covariance estimation for more difficult network structures.
 
 The following chart depicts the various features supported in skggm and contrasts this with currently available tools for scikit-learn.  
 
