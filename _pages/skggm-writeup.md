@@ -235,7 +235,7 @@ model = QuicGraphLassoCV(
     cv=int,                 # Number of folds or sklearn CV object
     score_metric=str,       # One of 'log_likelihood' (default), 'frobenius', 
                             #        'kl', or 'quadratic'
-    init_method=str,        # Inital covariance estimate: 'corrcoef' or 'cov'
+    init_method=str,        # Initial covariance estimate: 'corrcoef' or 'cov'
 )
 model.fit(X)                # X is data matrix (n_samples, n_features) 
 {% endhighlight %}
@@ -249,9 +249,9 @@ Figure 6.  Inverse covariance estimates (less sparse).  From left to right:  the
 </small></i></center>
 </div>
 <br>
-An example is shown in Figure 6. The `QuicGraphLassoCV` estimates are much sparser than the empirical precision, but contain a superset of the true precision support. As the dimension of the samples `n_features` grows, we find that this model selection method tends to bias toward more non-zero coefficients. Further, the coefficient values on the true support are not particularly accurate.
+An example is shown in Figure 6. The `QuicGraphLassoCV` estimates are much sparser than the empirical precision, but are a superset of the true precision support. As the dimension of the samples `n_features` grows, we find that this model selection method tends to bias toward more non-zero coefficients. Further, the coefficient values on the true support are not particularly accurate.
 
-In this trial of this example, the Frobenius scoring function performed better than log-likelihood and KL-divergence, however, this does not reflect how they might compare different data and larger dimensions.  
+In this trial of this example, the Frobenius scoring function performed better than log-likelihood and KL-divergence, however, this does not reflect how they might compare with different underlying networks and/or in larger dimensions.  
 
 Code for the example above and those that follow can be found in [skggm](https://github.com/jasonlaska/skggm) in [examples/estimator_suite.py](https://github.com/jasonlaska/skggm/blob/master/examples/estimator_suite.py).
 
@@ -276,7 +276,7 @@ Figure 7. Inverse covariance estimates (more sparse).  From left to right:  the 
 </small></i></center>
 </div>
 <br>
-An example is shown in Figure 7. The `QuicGraphLassoEBIC` estimates are much sparser than `QuicGraphLassoCV` estimates, and often contain a subset of the true precision support.  In this small dimensional example, BIC (gamma = 0) performed best as EBIC with gamma = 0.1 selected only the diagonal coefficients. As the dimension of the samples `n_features` grows, BIC will select a less-sparse result and thus an increasing gamma parameter serves to obtain sparser solutions.
+An example is shown in Figure 7. The `QuicGraphLassoEBIC` estimates are much sparser than `QuicGraphLassoCV` estimates, and often contain a subset of the true precision support.  In this small dimensional example, BIC (gamma = 0) performed best, as EBIC with gamma = 0.1 selected only the diagonal coefficients. As the dimension of the samples `n_features` grows, BIC will select a less-sparse result and thus an increasing gamma parameter serves to obtain sparser solutions.
 
 ### Randomized model averaging
 For some problems, the support of the sparse precision matrix is of primary interest.  In these cases, the true support can be estimated with greater confidence by employing a form of ensemble model averaging known as _stability selection_ \[[Meinhausen et al.](https://arxiv.org/pdf/0809.2932v2.pdf)\] combined with randomizing the model selection via the _random lasso_ \[[Meinhausen et al.](https://arxiv.org/pdf/0809.2932v2.pdf), [Wang et al.](https://arxiv.org/abs/1104.3398)\]. The skggm `ModelAverage` class implements a meta-estimator to do this. This is a similar facility to scikit-learn's [_RandomizedLasso_](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html) but for the graphical lasso.
@@ -314,7 +314,7 @@ model = ModelAverage(
 model.fit(X)                # X is data matrix (n_samples, n_features)             
 {% endhighlight %}
 
-This class will contain the matrix of support probabilities `model.proportion_`$$\in \mathbb{R}^{p\times p}$$, an estimate of the support `model.support_`$$\in \mathbb{R}^{p\times p}$$, the penalties used in each trial `model.lams_`, and the indices for selecting the subset of data in each trial `model.subsets_`.  
+This class will contain the matrix of support probabilities `model.proportion_` $$\in \mathbb{R}^{p\times p}$$, an estimate of the support `model.support_` $$\in \mathbb{R}^{p\times p}$$, the penalties used in each trial `model.lams_`, and the indices for selecting the subset of data in each trial `model.subsets_`.  
 
 <img style="margin: 0 auto;display: block;" src="assets/model_average.png" width="500" />
 <div style="margin: 0 auto;display: block; width:620px;">
@@ -326,10 +326,10 @@ Figure 8. Random model averaging support estimates.  From left to right:  the or
 An example is shown in Figure 8. The dense `model.proportions_` matrix contains the sample probability of each element containing a nonzero.  Thresholding this matrix by the default value of 0.5 resulted in a correct estimate of the support.  This technique generally provides a more robust support estimate than the previously explained methods.  One drawback of this approach is the significant time-cost of running the estimator over many trials, however these trials are easily parallelized.
 
 ### Refining estimates via adaptive methods
-Given an initial sparse estimate, we can derive a new ["adaptive"](http://pages.cs.wisc.edu/~shao/stat992/zou2006.pdf) penalty and refit the _graphical lasso_ using data dependent weights [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf), [Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)]. Thus, the adaptive variant of the _graphical lasso_ (\ref{eqn:graphlasso}) amounts to 
+Given an initial sparse estimate, we can derive a new ["adaptive"](http://pages.cs.wisc.edu/~shao/stat992/zou2006.pdf) penalty and refit the _graphical lasso_ using data dependent weights $$W$$ [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf), [Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)]. Thus, the adaptive variant of the _graphical lasso_ (\ref{eqn:graphlasso}) amounts to 
 
 $$\begin{align}
-\Lambda_{jk} = \lambda \cdot W_{jk}, \quad  \text{ where } W_{jk} = W_{kj} > 0 ~ \  \text{for all} \ ~ (j,k) \label{eqn:adaptive-weights}\tag{4}
+\Lambda_{jk} = \lambda \cdot W_{jk}, \quad  \text{ where } W_{jk} = W_{kj} > 0 ~ \  \text{for all} \ ~ (j,k) \ j \ne k \label{eqn:adaptive-weights}\tag{4}
 \end{align}$$
 
 In our current implementation, refitting is always done with `QuicGraphLassoCV`. We provide three ways of computing new weights in (\ref{eqn:adaptive-weights}) before refitting, given the coefficients $$\hat{\theta}_{jk}$$ of the inverse covariance estimate $$\hat{\Thet}$$:
@@ -369,9 +369,9 @@ It is clear that the estimated values of the true support are much more accurate
 
 
 ## Discussion
-In this post, we've briefly overviewed the relationship between Markov networks and inverse covariance, discussed the graphical lasso algorithm, and toured through some of the core features of the first release of [skggm](https://github.com/jasonlaska/skggm). We have additional [jupyter notebooks](github.com/neuroquant/jf2016-skggm) and accompanying [slides](http://neurostats.org/jf2016-skggm) that work through inverse covariance estimation for more difficult network structures.
+In this post, we've briefly overviewed the relationship between Markov networks and inverse covariance, discussed estimation via the _graphical lasso_, and toured through some of the core features of the first release of [skggm](https://github.com/jasonlaska/skggm). We have additional [jupyter notebooks](github.com/neuroquant/jf2016-skggm) and accompanying [slides](http://neurostats.org/jf2016-skggm) that work through inverse covariance estimation for more difficult network structures.
 
-The following chart depicting the various features supported in skggm and contrasting this with currently available tools for scikit-learn.  
+The following chart depicts the various features supported in skggm and contrasting this with currently available tools for scikit-learn.  
 
 <img style="margin: 0 auto;display: block;" src="assets/sklearn_skggm_compare.png" width="600" />
 <div style="margin: 0 auto;display: block; width:620px;">
