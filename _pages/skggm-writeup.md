@@ -330,11 +330,11 @@ $$\begin{align}
 
 In our current implementation, refitting is always done with `QuicGraphLassoCV`. We provide three ways of computing new weights in (\ref{eqn:adaptive-weights}) before refitting, given the coefficients $$\hat{\theta}_{jk}$$ of the inverse covariance estimate $$\hat{\Thet}$$:
 
-- `binary`: Here the weight $$W_{jk} = 0 $$ is zero where the estimated entry $$\hat{\theta}_{jk} \ne 0 $$ is non-zero, otherwise the weight is $$W_{jk} = 1 $$.  This is sometimes called the refitted MLE or _gelato_ [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf)], and similar to [_relaxed lasso_](http://stat.ethz.ch/~nicolai/relaxo.pdf).
+- `binary`: The weight $$W_{jk} = 0 $$ is zero where the estimated entry $$\hat{\theta}_{jk} \ne 0 $$ is non-zero, otherwise the weight is $$W_{jk} = 1 $$.  This is sometimes called the refitted MLE or _gelato_ [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf)], and similar to [_relaxed lasso_](http://stat.ethz.ch/~nicolai/relaxo.pdf).
 
-- `inverse`: Here the weight $$W_{jk}$$ is set to $$\frac{1}{\mid\hat{\theta}_{jk}\mid}$$ for non-zero coefficients and $$\mathrm{max}\left\{\frac{1}{\hat{\theta}_{jk}}\right\}$$ for the zero valued coefficients.  This is the default method in the [adaptive lasso](http://pages.cs.wisc.edu/~shao/stat992/zou2006.pdf) and in the _glasso_ R package.
+- `inverse`: The weight $$W_{jk}$$ is set to $$\frac{1}{\mid\hat{\theta}_{jk}\mid}$$ for non-zero coefficients and $$\mathrm{max}\left\{\frac{1}{\hat{\theta}_{jk}}\right\}$$ for the zero valued coefficients.  This is the default method in the [adaptive lasso](http://pages.cs.wisc.edu/~shao/stat992/zou2006.pdf) and in the _glasso_ R package.
 
-- `inverse_squared`: Computes $$\frac{1}{\hat{\theta}_{jk}^{2}}$$ for non-zero coefficients and $$\mathrm{max}\left\{\frac{1}{\hat{\theta}_{jk}^{2}}\right\}$$ for the zero valued coefficients.
+- `inverse_squared`: The weight $$W_{jk}$$ is set to $$\frac{1}{\hat{\theta}_{jk}^{2}}$$ for non-zero coefficients and $$\mathrm{max}\left\{\frac{1}{\hat{\theta}_{jk}^{2}}\right\}$$ for the zero valued coefficients.
 
 Since the `ModelAverage` meta-estimator produces a good support estimate, this can be combined with the `binary` option for the weights to combine adaptivity and model averaging. 
 
