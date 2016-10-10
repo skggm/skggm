@@ -10,7 +10,7 @@ While `skggm` is currently geared toward _Gaussian graphical models_, we hope to
 
 Given **n** independently drawn, **p**-dimensional Gaussian random samples <img src="images/X.png" alt="X" width="80"> with sample covariance <img src="images/sigma_hat.png" alt="S" width="13">, the maximum likelihood estimate of the inverse covariance matrix <img src="images/Theta.png" alt="\lambda" width="12"> can be computed via the _graphical lasso_, i.e., the program
 
-<p align="center"><img src="images/graphlasso_program.png" alt="\ell_1 penalized inverse covariance estimation" width="500"></p>
+<p align="center"><img src="images/graphlasso_program.png" alt="\ell_1 penalized inverse covariance estimation" width="480"></p>
 
 where <img src="images/Lambda.png" alt="\Lambda" width="80"> is a symmetric matrix with non-negative entries and 
 
@@ -26,7 +26,7 @@ To get started, install the package (via pip, see below) and:
  
 - read the tour of skggm at [https://jasonlaska.github.io/skggm/tour](https://jasonlaska.github.io/skggm/tour)
 - read [@mnarayn](https://github.com/mnarayan)'s [talk](https://dx.doi.org/10.6084/m9.figshare.4003380) and check out the companion examples [here](https://github.com/neuroquant/jf2016-skggm) (live via binder at [here](http://mybinder.org/repo/neuroquant/jf2016-skggm)). Presented at HHMI, Janelia Farms, October 2016. 
-- basic usage examples can be found in `examples/estimator_suite.py`
+- basic usage examples can be found in [examples/estimator_suite.py](https://github.com/jasonlaska/skggm/blob/master/examples/estimator_suite.py)
 
 ---
 
