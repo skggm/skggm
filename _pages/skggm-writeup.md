@@ -33,7 +33,7 @@ Figure 2. A burning fire causes both smoke and heat. Smoke and heat are always o
 <br>
 Thus, in applications that seek to interpret edges as some form of direct influence, more sophisticated graphical models that eliminate spurious or misleading relationships are desirable. This motivates the usage of Markov networks, specifically _Gaussian graphical models_. 
 
-## Conditional Independence and Markov Networks
+## Conditional independence and Markov networks
 Formally a graph $$\mathcal{G}=(V,E)$$ consists a set of vertices $$V = \{1,\ldots,p\}$$ and edges between them $$E\subset V \times V$$.  The vertices or nodes are associated with a $$p$$-dimensional random variable $$\Xdata = (X_{1},\ldots, X_{p})$$ that has some probability distribution $$\Xdata \sim \mathbb{P}_{\Xdata}$$.
 
 There are many [probabilistic graphical models](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193) that relate the structure in the graph $$\mathcal{G}$$ to the probability distribution over the variables $$\mathbb{P}_{\Xdata}$$. We discuss an important class of graphical models, _Markov networks_, that relate absence of edges in the graph to conditional independence between random variables $$X_{1},\ldots, X_{p}$$.
@@ -86,7 +86,7 @@ of conditional independence holds. As a result, $$(\ref{eqn:pairwise}) \Rightarr
 
 When probability distributions satisfy the global Markov property, it becomes computationally and statistically tractable to efficiently infer conditional independence relationships. For an extensive reference on Markov properties of directed and undirected Markov networks, please see ["Graphical Models" by Lauritzen](https://www.amazon.com/Graphical-Models-Oxford-Statistical-Science/dp/0198522193). 
 
-## Relationship to Inverse Covariance Estimation
+## Markov networks and inverse covariance
 In general, if two variables are statistically independent they are also uncorrelated, however, the converse is not necesssarily true. Since Gaussian distributions are fully described by their mean and covariance, then a zero correlation between two variables indeed also implies statistical independence. An analogous equivalence holds between conditional independence and the inverse covariance for Gaussian distributions. 
 
 Given $$n$$ _i.i.d_ random samples $$(x_{1},x_{2},\ldots,x_{n})^{\top} = \Xdata$$ from a multivariate Gaussian distribution
@@ -113,7 +113,7 @@ The concept of Markov networks has been extended to many other measures of assoc
 Thus, while skggm currently supports standard inverse covariances for multivariate normal distributions, we hope this implementation will serve as a foundational building block for generalized classes of graphical models. 
 
 
-###  Maximum Likelihood Estimators
+##  Maximum likelihood estimators
 The maximum likelihood estimate of the precison 
 
 $$
@@ -143,7 +143,7 @@ where $$\Lambda \in \mathbb{R}^{p\times p}$$ is a symmetric matrix with non-nega
 $$\|\Thet\|_{1, \Lambda} = \sum_{j,k=1}^{p} \lambda_{jk}\mid\theta_{jk}\mid$$. Typically, the diagonals are not penalized by setting $$\lambda_{jj} = 0,\ j=1,\ldots,p$$ to ensure that $$\hat{\Thet}$$ remains positive definite. 
 The objective (\ref{eqn:graphlasso}) reduces to the standard _graphical lasso_ formulation of [Friedman et. al](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf) when all off diagonals of the penalty matrix take a constant scalar value  $$\lambda_{jk} = \lambda_{kj} =  \lambda$$ for all $$ j \ne k$$. The standard _graphical lasso_ has been implemented in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
-## Methods & Implementation
+## A tour of skggm:  methods & interfaces
 <img style="margin: 0 auto;display: block;" src="assets/skggm_workflow.png" width="800" />
 <div style="margin: 0 auto;display: block; width:625px;">
 <center><i><small>
@@ -273,8 +273,7 @@ Figure 7. Inverse covariance estimates (more sparse).  From left to right:  the 
 <br>
 An example is shown in Figure 7. The `QuicGraphLassoEBIC` estimates are much sparser than `QuicGraphLassoCV` estimates, and often contain a subset of the true precision support.  In this small dimensional example, BIC (gamma = 0) performed best as EBIC with gamma = 0.1 selected only the diagonal coefficients. As the dimension of the samples `n_features` grows, BIC will select a less-sparse result and thus an increasing gamma parameter serves to obtain sparser solutions.
 
-## Randomized model averaging
-
+### Randomized model averaging
 For some problems, the support of the sparse precision matrix is of primary interest.  In these cases, the true support can be estimated with greater confidence by employing a form of ensemble model averaging known as _stability selection_ \[[Meinhausen et al.](https://arxiv.org/pdf/0809.2932v2.pdf)\] combined with randomizing the model selection via the _random lasso_ \[[Meinhausen et al.](https://arxiv.org/pdf/0809.2932v2.pdf), [Wang et al.](https://arxiv.org/abs/1104.3398)\]. The skggm `ModelAverage` class implements a meta-estimator to do this. This is a similar facility to scikit-learn's [_RandomizedLasso_](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html) but for the graphical lasso.
 
 This technique estimates the precision over an ensemble of estimators with random penalties and bootstrapped samples.  Specifically, in each trial we
@@ -319,9 +318,9 @@ Figure 8. Random model averaging support estimates.  From left to right:  the or
 </small></i></center>
 </div>
 <br>
-An example is shown in Figure 8. The dense `model.proportions_` matrix contains the sample probability of each element containing a nonzero.  Thresholding this matrix by the default value of 0.5 resulted in a correct estimate of the support.  This technique generally provides a more robust support estimate than the previously explained methods.  One drawback of this approach is the significant time-cost of running the estimator over many trials.  These trials can be run in parallel and an implementation may be prioritized for a future release.
+An example is shown in Figure 8. The dense `model.proportions_` matrix contains the sample probability of each element containing a nonzero.  Thresholding this matrix by the default value of 0.5 resulted in a correct estimate of the support.  This technique generally provides a more robust support estimate than the previously explained methods.  One drawback of this approach is the significant time-cost of running the estimator over many trials, however these trials are easily parallelized.
 
-## Refining estimates via adaptive methods
+### Refining estimates via adaptive methods
 Given an initial sparse estimate, we can derive a new ["adaptive"](http://pages.cs.wisc.edu/~shao/stat992/zou2006.pdf) penalty and refit the _graphical lasso_ using data dependent weights [[Zhou et al.](http://www.jmlr.org/papers/volume12/zhou11a/zhou11a.pdf), [Meinhausen et al.](http://stat.ethz.ch/~nicolai/relaxo.pdf)]. Thus, the adaptive variant of the _graphical lasso_ (\ref{eqn:graphlasso}) amounts to 
 
 $$\begin{align}
@@ -365,6 +364,8 @@ It is clear that the estimated values of the true support are much more accurate
 
 
 ## Discussion
+In this post, we've briefly overviewed the relationship between Markov networks and inverse covariance, discussed the graphical lasso algorithm, and toured through some of the core features of the first release of [skggm](https://github.com/jasonlaska/skggm).
+
 The following chart depicting the various features supported in skggm and contrasting this with currently available tools for scikit-learn.  
 
 <img style="margin: 0 auto;display: block;" src="assets/sklearn_skggm_compare.png" width="600" />
@@ -375,6 +376,6 @@ A summary of skggm's core features for estimating Gaussian graphical models.
 </div>
 <br>
 
-This is just the first release of an ongoing effort. We'd love your feedback on which algorithms we should provide bindings for next and how you're using the package. We also welcome contributions. 
+Development of skggm is an ongoing effort. We'd love your feedback on which algorithms and techniques we should include and how you're using the package. We also welcome contributions. 
 
 [@jasonlaska](https://github.com/jasonlaska) and [@mnarayan](https://github.com/mnarayan), October 10, 2016.
