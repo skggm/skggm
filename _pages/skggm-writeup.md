@@ -386,3 +386,6 @@ Development of skggm is an ongoing effort. We'd love your feedback on which algo
 _Acknowledgements: The authors would like to thank Jason Crawford for reading drafts of this post and providing feedback. Some introductory material and figures have been adapted from @mnarayan's dissertation._
 
 [@jasonlaska](https://github.com/jasonlaska) and [@mnarayan](https://github.com/mnarayan), October 10, 2016.
+
+<br>
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
