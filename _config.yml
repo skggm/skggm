@@ -18,7 +18,7 @@ title: "skggm"
 description: > # this means to ignore newlines until "baseurl:"
   Gaussian graphical models for scikit-learn
 baseurl: "/skggm" # the subpath of your site, e.g. /blog
-url: "https://jasonlaska.github.io" # the base hostname & protocol for your site
+url: "https://skggm.github.io" # the base hostname & protocol for your site
 # twitter_username: jekyllrb
 # github_username:  jekyll
 
