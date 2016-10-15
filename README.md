@@ -4,7 +4,7 @@ In the last decade, learning networks that encode conditional indepedence relati
 However, many statistical advances and best practices in fitting such models to data are not yet widely adopted and not available in common python packages for machine learning. Furthermore, inverse covariance estimation is an active area of research where researchers continue to improve algorithms and estimators.
 With `skggm` we seek to provide these new developments to a wider audience, and also enable researchers to effectively benchmark their methods in regimes relevant to their applications of interest.
 
-While `skggm` is currently geared toward _Gaussian graphical models_, we hope to eventually evolve it to support _Generalized graphical models_.  Read more [here](https://jasonlaska.github.io/skggm/tour).
+While `skggm` is currently geared toward _Gaussian graphical models_, we hope to eventually evolve it to support _Generalized graphical models_.  Read more [here](https://skggm.github.io/skggm/tour).
 
 ## Inverse Covariance Estimation
 
@@ -24,9 +24,9 @@ In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible 
 ### Quick start
 To get started, install the package (via pip, see below) and:
  
-- read the tour of skggm at [https://jasonlaska.github.io/skggm/tour](https://jasonlaska.github.io/skggm/tour)
+- read the tour of skggm at [https://skggm.github.io/skggm/tour](https://skggm.github.io/skggm/tour)
 - read [@mnarayan](https://github.com/mnarayan)'s [talk](https://dx.doi.org/10.6084/m9.figshare.4003380) and check out the companion examples [here](https://github.com/neuroquant/jf2016-skggm) (live via binder at [here](http://mybinder.org/repo/neuroquant/jf2016-skggm)). Presented at HHMI, Janelia Farms, October 2016. 
-- basic usage examples can be found in [examples/estimator_suite.py](https://github.com/jasonlaska/skggm/blob/master/examples/estimator_suite.py)
+- basic usage examples can be found in [examples/estimator_suite.py](https://github.com/skggm/skggm/blob/master/examples/estimator_suite.py)
 
 ---
 
@@ -40,9 +40,9 @@ This is an ongoing effort. We'd love your feedback on which algorithms and techn
 An overview of the skggm graphical lasso facilities is depicted by the following diagram:
 <p align="center"><img src="images/skggm_workflow.png" alt="sklearn/skggm feature comparison" width="600"></p>
 
-Information on basic usage can be found at [https://jasonlaska.github.io/skggm/tour](https://jasonlaska.github.io/skggm/tour).  The package includes the following classes and submodules.
+Information on basic usage can be found at [https://skggm.github.io/skggm/tour](https://skggm.github.io/skggm/tour).  The package includes the following classes and submodules.
 
-- **QuicGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L138-L239)
+- **QuicGraphLasso** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L138-L239)
 
     _QuicGraphLasso_ is an implementation of [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) wrapped as a scikit-learn compatible estimator \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\] . The estimator can be run in `default` mode for a fixed penalty or in `path` mode to explore a sequence of penalties efficiently.  The penalty `lam` can be a scalar or matrix.
 
@@ -50,15 +50,15 @@ Information on basic usage can be found at [https://jasonlaska.github.io/skggm/t
 
     The interface largely mirrors the built-in _[GraphLasso](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLasso.html)_ although some param names have been changed (e.g., `alpha` to `lam`). Some notable advantages of this implementation over _GraphLasso_ are support for a matrix penalization term and speed.
 
-- **QuicGraphLassoCV** [[doc]](https://github.com/jasonlaska/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L372-L468)
+- **QuicGraphLassoCV** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L372-L468)
     
     _QuicGraphLassoCV_ is an optimized cross-validation model selection implementation similar to scikit-learn's _[GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html)_. As with _QuicGraphLasso_, this implementation also supports matrix penalization.
 
-- **QuicGraphLassoEBIC** [[doc]](https://github.com/jasonlaska/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L644-L717)
+- **QuicGraphLassoEBIC** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L644-L717)
 
     _QuicGraphLassoEBIC_ is provided as a convenience class to use the _Extended Bayesian Information Criteria_ (EBIC) for model selection \[[Foygel et al.](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\].  
 
-- **ModelAverage** [[doc]](https://github.com/jasonlaska/skggm/blob/master/inverse_covariance/model_average.py#L72-L172)
+- **ModelAverage** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/model_average.py#L72-L172)
     
     _ModelAverage_ is an ensemble meta-estimator that computes several fits with a user-specified `estimator` and averages the support of the resulting precision estimates.  The result is a `proportion_` matrix indicating the sample probability of a non-zero at each index. This is a similar facility to scikit-learn's _[RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html)_) but for the graph lasso.
 
@@ -70,7 +70,7 @@ Information on basic usage can be found at [https://jasonlaska.github.io/skggm/t
 
     The random penalty can be chosen in a variety of ways, specified by the `penalization` parameter.  This technique is also known as _stability selection_ or _random lasso_.
 
-- **AdaptiveGraphLasso** [[doc]](https://github.com/jasonlaska/skggm/blob/master/inverse_covariance/adaptive_graph_lasso.py#L13-L48)
+- **AdaptiveGraphLasso** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/adaptive_graph_lasso.py#L13-L48)
 
     _AdaptiveGraphLasso_ performs a two step estimation procedure: 
     
