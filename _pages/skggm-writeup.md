@@ -31,7 +31,7 @@ Figure 2. A burning fire causes both smoke and heat. Smoke and heat are always o
 </small></i></center>
 </div>
 <br>
-Thus, in applications that seek to interpret edges as some form of direct influence, more sophisticated graphical models that eliminate spurious or misleading relationships are desirable. This motivates the usage of Markov networks, popularly known as _Gaussian graphical models_ for Gaussian distributed data. First, we briefly introduce the notion of Markov networks for general probability distributions before considering the case of multivariate Gaussians. Then, we consider a particularly efficient way to estimate Gaussian graphical models via the inverse covariance. Last, but not least, we lay out how [skggm](https://github.com/jasonlaska/skggm) implements a variety of important maximum likelihood estimators for the inverse covariance.  
+Thus, in applications that seek to interpret edges as some form of direct influence, more sophisticated graphical models that eliminate spurious or misleading relationships are desirable. This motivates the usage of Markov networks, popularly known as _Gaussian graphical models_ for Gaussian distributed data. First, we briefly introduce the notion of Markov networks for general probability distributions before considering the case of multivariate Gaussians. Then, we consider a particularly efficient way to estimate Gaussian graphical models via the inverse covariance. Last, but not least, we lay out how [skggm](https://github.com/skggm/skggm) implements a variety of important maximum likelihood estimators for the inverse covariance.  
 
 
 * TOC
@@ -111,7 +111,7 @@ Figure 4. Equivalence between zeros in the inverse covariance matrix and absence
 </small></i></center>
 </div>
 <br>
-The inverse covariance matrix is an important quantity of interest as it gives us an efficient way of obtaining the structure of the Markov network. The lasso regularized maximum likelihood estimator, otherwise known as the _graphical lasso_ (\ref{eqn:graphlasso}) explained below, is a popular statistical method for estimating such inverse covariances from high dimensional data. In the python package [skggm](https://github.com/jasonlaska/skggm) we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the _graphical lasso_ and a collection of modern best practices for working with the _graphical lasso_ and its variants.  
+The inverse covariance matrix is an important quantity of interest as it gives us an efficient way of obtaining the structure of the Markov network. The lasso regularized maximum likelihood estimator, otherwise known as the _graphical lasso_ (\ref{eqn:graphlasso}) explained below, is a popular statistical method for estimating such inverse covariances from high dimensional data. In the python package [skggm](https://github.com/skggm/skggm) we provide a [scikit-learn](http://scikit-learn.org)-compatible implementation of the _graphical lasso_ and a collection of modern best practices for working with the _graphical lasso_ and its variants.  
 
 The concept of Markov networks has been extended to many other measures of association beyond the standard covariance. These include covariances between variables in the Fourier domain (cross-spectral density) encountered in [time-series analyses](https://www.stat.berkeley.edu/~brill/Papers/graphmodels.pdf) and [information theoretic measures](http://ita.ucsd.edu/workshop/06/papers/71.pdf). Moreover, for some non-Gaussian distributions, zeros in a [generalized inverse covariance](https://arxiv.org/abs/1212.0478) can provide conditional independence relationships analogous to standard inverse covariance explained above. **Given the general importance of the inverse covariance, we expect methods for estimating it to be useful for many other classes of graphical models beyond standard Gaussian graphical models.
 Thus, while skggm currently supports standard inverse covariances for multivariate normal distributions, we hope this implementation will serve as a foundational building block for generalized classes of graphical models.** 
@@ -155,7 +155,7 @@ Figure 5. Overview of the skggm graphical lasso facilities.
 </small></i></center>
 </div>
 <br>
-The core estimator provided in [skggm](https://github.com/jasonlaska/skggm) is `QuicGraphLasso` which is a scikit-learn compatible interface to [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf), a proximal Newton-type algorithm that solves the _graphical lasso_ (\ref{eqn:graphlasso}) objective.  
+The core estimator provided in [skggm](https://github.com/skggm/skggm) is `QuicGraphLasso` which is a scikit-learn compatible interface to [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf), a proximal Newton-type algorithm that solves the _graphical lasso_ (\ref{eqn:graphlasso}) objective.  
 
 {% highlight python %}
 from inverse_covariance import QuicGraphLasso
@@ -253,7 +253,7 @@ An example is shown in Figure 6. The `QuicGraphLassoCV` estimates are much spars
 
 In this trial of this example, the Frobenius scoring function performed better than log-likelihood and KL-divergence, however, this does not reflect how they might compare with different underlying networks and/or in larger dimensions.  
 
-Code for the example above and those that follow can be found in [skggm](https://github.com/jasonlaska/skggm) in [examples/estimator_suite.py](https://github.com/jasonlaska/skggm/blob/master/examples/estimator_suite.py).
+Code for the example above and those that follow can be found in [skggm](https://github.com/skggm/skggm) in [examples/estimator_suite.py](https://github.com/skggm/skggm/blob/master/examples/estimator_suite.py).
 
 ### Model selection via EBIC (more sparse)
 An alternative to cross-validation is the _Extended Bayesian Information Criteria_ (EBIC) \[[Foygel et al.](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\],
@@ -369,7 +369,7 @@ It is clear that the estimated values of the true support are much more accurate
 
 
 ## Discussion
-In this post, we've briefly overviewed the relationship between Markov networks and inverse covariance, discussed estimation via the _graphical lasso_, and toured through some of the core features of the first release of [skggm](https://github.com/jasonlaska/skggm). We have additional [jupyter notebooks](https://github.com/neuroquant/jf2016-skggm) and accompanying [slides](http://neurostats.org/jf2016-skggm) that work through inverse covariance estimation for more difficult network structures.
+In this post, we've briefly overviewed the relationship between Markov networks and inverse covariance, discussed estimation via the _graphical lasso_, and toured through some of the core features of the first release of [skggm](https://github.com/skggm/skggm). We have additional [jupyter notebooks](https://github.com/neuroquant/jf2016-skggm) and accompanying [slides](http://neurostats.org/jf2016-skggm) that work through inverse covariance estimation for more difficult network structures.
 
 The following chart depicts the various features supported in skggm and contrasts this with currently available tools for scikit-learn.  
 
