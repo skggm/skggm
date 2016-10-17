@@ -89,7 +89,6 @@ class RepeatedKFold(_BaseRepeatedKFold):
         fold_sizes[:n % n_folds] += 1
 
         for idxs in self.idxs:
-            print idxs
             current = 0
             for fold_size in fold_sizes:
                 start, stop = current, current + fold_size
