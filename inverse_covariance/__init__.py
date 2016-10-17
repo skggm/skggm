@@ -15,6 +15,7 @@ from .metrics import (
 )
 from .model_average import ModelAverage
 from .adaptive_graph_lasso import AdaptiveGraphLasso
+from .cross_validation import RepeatedKFold
 
 __all__ = [
     'InverseCovarianceEstimator',
@@ -28,4 +29,5 @@ __all__ = [
     'ebic',
     'ModelAverage',
     'AdaptiveGraphLasso',
+    'RepeatedKFold',
 ]

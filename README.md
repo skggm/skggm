@@ -167,3 +167,6 @@ We've provided a utility function `inverse_covariance.plot_util.trace_plot` that
 
 * ["The graphical lasso: New Insights and alternatives"](https://web.stanford.edu/~hastie/Papers/glassoinsights.pdf) Mazumder and Hastie, 2012.
 
+### Repeated KFold cross-validation
+
+* ["Cross-validation pitfalls when selecting and assessing regression and classification models"](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3994246/) D. Krstajic, L. Buturovic, D. Leahy, and S. Thomas, 2014.

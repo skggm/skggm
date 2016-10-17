@@ -2,13 +2,14 @@ import time
 import collections
 import operator
 import numpy as np
+import scipy.sparse as sp
 
 from sklearn.covariance import EmpiricalCovariance
 from sklearn.utils import check_array, as_float_array
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.externals.joblib import Parallel, delayed
-#from sklearn.model_selection import check_cv, cross_val_score # >= 0.18
-from sklearn.cross_validation import check_cv, cross_val_score # < 0.18
+#from sklearn.model_selection import cross_val_score # >= 0.18
+from sklearn.cross_validation import cross_val_score # < 0.18
 
 from . import pyquic
 from .inverse_covariance import (
@@ -16,6 +17,9 @@ from .inverse_covariance import (
     _init_coefs,
     _compute_error,
     _validate_path,
+)
+from .cross_validation import (
+    RepeatedKFold,
 )
 
 
@@ -397,16 +401,12 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         Determines the cross-validation splitting strategy.
         Possible inputs for cv are:
         
-        - None, to use the default 3-fold cross-validation,
-        - integer, to specify the number of folds.
+        - None, to use the default 3-fold, 3-trial RepeatedKFold cross-validation,
+        - integer, to specify the number of folds (3-trial RepeatedKFold).
+        - tuple, (n_folds, n_trials) 
         - An object to be used as a cross-validation generator.
         - An iterable yielding train/test splits.
         
-        For integer/None inputs :class:`KFold` is used.
-        
-        Refer :ref:`User Guide <cross_validation>` for the various
-        cross-validation strategies that can be used here.
-    
     n_refinements: strictly positive integer
         The number of times the grid is refined. Not used if explicit
         values of alphas are passed.
@@ -514,7 +514,20 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         # initialize
         X = check_array(X, ensure_min_features=2, estimator=self)
         X = as_float_array(X, copy=False, force_all_finite=False)
-        cv = check_cv(self.cv, X, y, classifier=False)
+        
+        if self.cv is None:
+            cv = (3, 3)
+        elif isinstance(self.cv, int):
+            cv = (self.cv, 3) # upgrade with default number of trials
+        
+        if isinstance(cv, tuple):
+            if not sp.issparse(X):
+                n_samples = len(X)
+            else:
+                n_samples = X.shape[0]
+            
+            cv = RepeatedKFold(n_samples, n_folds=cv[0], n_trials=cv[1])
+
         self.init_coefs(X)
 
         # get path
