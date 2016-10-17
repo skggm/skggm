@@ -1,5 +1,8 @@
+import numpy as np
 from abc import ABCMeta, abstractmethod
+from sklearn.externals.six import with_metaclass
 from sklearn.cross_validation import _PartitionIterator
+from sklearn.utils import check_random_state
 
 
 class _BaseRepeatedKFold(with_metaclass(ABCMeta, _PartitionIterator)):
@@ -23,9 +26,10 @@ class _BaseRepeatedKFold(with_metaclass(ABCMeta, _PartitionIterator)):
                 ("Cannot have number of folds n_folds={0} greater"
                  " than the number of samples: {1}.").format(n_folds, n))
 
-        if not isinstance(n_trials, int) and n_trials > 0:
-            raise TypeError("n_trials must be int and greater than 0;"
+        if not isinstance(n_trials, int) or n_trials <= 0:
+            raise ValueError("n_trials must be int and greater than 0;"
                             " got {0}".format(n_trials))
+            
         self.n_trials = n_trials
         self.random_state = random_state
 
@@ -69,12 +73,14 @@ class RepeatedKFold(_BaseRepeatedKFold):
     sklearn.cross_validation.ShuffleSplit
     """
     def __init__(self, n, n_folds=3, n_trials=3, random_state=None):
-        super(KFold, self).__init__(n, n_folds, n_trials, random_state)
+        super(RepeatedKFold, self).__init__(n, n_folds, n_trials, random_state)
         rng = check_random_state(self.random_state)
 
         self.idxs = []
         for tt in range(self.n_trials):
-            self.idxs.append(rng.shuffle(np.arange(n)))
+            idxs = np.arange(n)
+            rng.shuffle(idxs)
+            self.idxs.append(idxs)
 
     def _iter_test_indices(self):
         n = self.n
@@ -83,6 +89,7 @@ class RepeatedKFold(_BaseRepeatedKFold):
         fold_sizes[:n % n_folds] += 1
 
         for idxs in self.idxs:
+            print idxs
             current = 0
             for fold_size in fold_sizes:
                 start, stop = current, current + fold_size
