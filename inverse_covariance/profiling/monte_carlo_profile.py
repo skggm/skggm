@@ -6,10 +6,6 @@ from sklearn.externals.joblib import Parallel, delayed
 from .. import QuicGraphLasso, QuicGraphLassoCV
 
 
-plt.ion()
-prng = np.random.RandomState(1)
-
-
 def _sample_mvn(n_samples, cov, prng):
     '''Draw a multivariate normal sample from the graph defined by cov.
     
@@ -67,9 +63,9 @@ class MonteCarloProfile(object):
         will be overriden by with penalty selected by ms_estimator.
         If None, this will use QuicGraphLasso.
 
-    graph :  A function (or instance ?) that returns a graph, specifically the 
-        has method that returns cov, prec, adj matrixes of the graph. (default=None)
-        method name should be sample()
+    graph :  An instance of a class with the method `.sample(n_features, alpha)`
+        that returns (cov, prec, adj).
+        graph.sample() will be used to draw a new graph instance in each trial.
 
     n_samples_grid : int (default=10) or array of floats
         Grid points for choosing number of samples.
@@ -92,6 +88,7 @@ class MonteCarloProfile(object):
 
     seed : np.random.RandomState seed. (default=2)
 
+
     Attributes
     ----------
     grid_ : array of size (n_samples_grid, ) or n_samples_grid
@@ -113,12 +110,17 @@ class MonteCarloProfile(object):
         self.n_trials = n_trials
         self.ms_estimator = ms_estimator  
         self.mc_estimator = mc_estimator
+        self.graph = graph
         self.n_samples_grid = n_samples_grid
         self.alpha_grid = alpha_grid
         self.metrics = metrics
         self.verbose = verbose
         self.n_jobs = n_jobs
         self.prng = np.random.RandomState(seed)
+
+        if self.graph is None:
+            raise ValueError("Graph generation instance required.")
+            return
 
         if self.ms_estimator is None:
             self.ms_estimator = QuicGraphLassoCV()
@@ -158,7 +160,7 @@ class MonteCarloProfile(object):
                 )
 
             # draw a new fixed graph for alpha
-            cov, prec, adj = graph.sample(self.n_features, alpha)
+            cov, prec, adj = self.graph.sample(self.n_features, alpha)
 
             # track nnz of graph precision
             precision_nnz = np.count_nonzero(prec.flat)
@@ -203,7 +205,8 @@ class MonteCarloProfile(object):
 
                 for key in self.metrics:
                     results_by_key = np.array([t[key] for t in trials])
-                    self.results_[key][adx, sidx] = 1. * np.sum(results_by_key) / self.n_trials
+                    self.results_[key][aidx, sidx] =\
+                            1. * np.sum(results_by_key) / self.n_trials
 
             if self.verbose:
                 for key in self.metrics:
