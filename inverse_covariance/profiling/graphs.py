@@ -39,7 +39,7 @@ def lattice(prng, n_features, alpha, random_sign=False):
 
 
 def cluster(prng, n_features, alpha, n_groups=2, random_sign=False, 
-            adj_type='banded', chain_blocks=True):
+            adj_type='cluster', chain_blocks=True):
     """Returns the adjacency matrix for a cluster network.
 
     This function creates disjoint groupf of variables, where each group is 
@@ -57,7 +57,7 @@ def cluster(prng, n_features, alpha, n_groups=2, random_sign=False,
 
     random_sign : bool (default=False)
 
-    adj_type : 'banded' or 'cluster'
+    adj_type : 'banded' or 'cluster' (default='cluster')
 
     chain_blocks : bool (default=True)
     
@@ -107,10 +107,10 @@ class Graph(object):
        
 
     network_kwargs : dict of args for adjacency functions
-        network_type == 'lattice'
+        network_type: 'lattice'
         set keys: 'random_sign' 
 
-        network_type == 'cluster'
+        network_type: 'cluster'
         set keys: 'adj_type', 'random_sign', 'n_groups', 'chain_blocks'
 
     seed : int
