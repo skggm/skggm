@@ -1,55 +1,11 @@
-def exact_support(prec, prec_hat):
-    # Q: why do we need something like this?, and why must eps be so big?
-    # Q: can we automatically determine what this threshold should be?    
-    eps = .2
-    #eps = np.finfo(prec_hat.dtype).eps # too small
-    prec_hat[np.abs(prec_hat) <= eps] = 0.0
-    
-    not_empty = np.count_nonzero(np.triu(prec, 1)) > 0
-    
-    return not_empty & np.array_equal(
-            np.nonzero(np.triu(prec, 1).flat)[0],
-            np.nonzero(np.triu(prec_hat, 1).flat)[0])
-
-def approx_support(prec, prec_hat, prob=.01):
-    """
-    Returns True if model selection error is less than or equal to prob%
-    """        
-    #eps = .2
-    #prec_hat[np.abs(prec_hat) <= eps] = 0.0
-
-    # Why does np.nonzero/np.flatnonzero create so much problems? 
-    A = np.flatnonzero(np.triu(prec,1))
-    B = np.flatnonzero(np.triu(prec_hat,1))
-    ud = np.flatnonzero(np.triu(np.ones(prec.shape),1))
-    notA = np.setdiff1d(ud,A)
-
-    B_in_A_bool = np.in1d(B,A) # true positives
-    B_notin_A_bool = np.in1d(B,notA) # false positives
-    #print np.sum(B_in_A_bool), np.shape(A)[0]
-    #print np.sum(B_notin_A_bool), np.shape(notA)[0]
-    
-    if np.shape(A)[0]:
-        tpr = float(np.sum(B_in_A_bool))/len(A)
-        tnr = 1.0-tpr
-    else:
-        tpr = 0.0
-        tnr = 0.0        
-    if np.shape(notA)[0]:
-        fpr = float(np.sum(B_notin_A_bool))/len(notA)
-    else:
-        fpr = 0.0
-        
-    #print tnr,fpr
-    
-    return np.less_equal(tnr+fpr,prob), tpr, fpr
+import numpy as np
 
 
 def _nonzero_intersection(m, m_hat):
-    '''Count the number of nonzeros
+    '''Count the number of nonzeros in and between m and m_hat.
 
-    Returns:
-
+    Returns
+    ----------
     m_nnz :  number of nonzeros in m (w/o diagonal)
     
     m_hat_nnz : number of nonzeros in m_hat (w/o diagonal)
@@ -94,3 +50,38 @@ def support_difference_count(m, m_hat):
     '''
     m_nnz, m_hat_nnz, intersection_nnz = _nonzero_intersection(m, m_hat)
     return (m_nnz + m_hat_nnz - (2 * intersection_nnz)) / 2.0
+
+
+def has_exact_support(m, m_hat):
+    '''Returns 1 if support_difference_count is zero, 0 else.  
+    '''
+    m_nnz, m_hat_nnz, intersection_nnz = _nonzero_intersection(m, m_hat)
+    return int((m_nnz + m_hat_nnz - (2 * intersection_nnz)) == 0)
+
+
+def has_approx_support(m, m_hat, prob=.01):
+    """Returns 1 if model selection error is less than or equal to prob rate, 
+    0 else.
+    """        
+    # why does np.nonzero/np.flatnonzero create so much problems? 
+    m_nnz = np.flatnonzero(np.triu(m, 1))
+    m_hat_nnz = np.flatnonzero(np.triu(m_hat, 1))
+    
+    upper_diagonal_mask = np.flatnonzero(np.triu(np.ones(m.shape), 1))
+    not_m_nnz = np.setdiff1d(upper_diagonal_mask, m_nnz)
+
+    intersection = np.in1d(m_hat_nnz, m_nnz) # true positives
+    not_intersection = np.in1d(m_hat_nnz, not_m_nnz) # false positives
+    
+    true_positive_rate = 0.0
+    true_negative_rate = 0.0
+    if np.shape(m_nnz)[0]:
+        true_positive_rate = 1. * np.sum(intersection) / len(m_nnz)
+        true_negative_rate = 1. - true_positive_rate        
+
+    false_positive_rate = 0.0
+    if np.shape(not_m_nnz)[0]:
+        false_positive_rate = 1. * np.sum(not_intersection) / len(not_m_nnz)        
+            
+    return np.less_equal(true_negative_rate + false_positive_rate, prob)
+
