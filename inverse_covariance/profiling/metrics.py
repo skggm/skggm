@@ -62,26 +62,21 @@ def has_exact_support(m, m_hat):
 def has_approx_support(m, m_hat, prob=.01):
     """Returns 1 if model selection error is less than or equal to prob rate, 
     0 else.
+
+    NOTE: why does np.nonzero/np.flatnonzero create so much problems? 
     """        
-    # why does np.nonzero/np.flatnonzero create so much problems? 
-    m_nnz = np.flatnonzero(np.triu(m, 1))
-    m_hat_nnz = np.flatnonzero(np.triu(m_hat, 1))
+    m_nz = np.flatnonzero(np.triu(m, 1))
+    m_hat_nz = np.flatnonzero(np.triu(m_hat, 1))
     
     upper_diagonal_mask = np.flatnonzero(np.triu(np.ones(m.shape), 1))
-    not_m_nnz = np.setdiff1d(upper_diagonal_mask, m_nnz)
+    not_m_nz = np.setdiff1d(upper_diagonal_mask, m_nnz)
 
-    intersection = np.in1d(m_hat_nnz, m_nnz) # true positives
-    not_intersection = np.in1d(m_hat_nnz, not_m_nnz) # false positives
+    intersection = np.in1d(m_hat_nz, m_nz) # true positives
+    not_intersection = np.in1d(m_hat_nz, not_m_nz) # false positives
     
-    true_positive_rate = 0.0
-    true_negative_rate = 0.0
-    if np.shape(m_nnz)[0]:
-        true_positive_rate = 1. * np.sum(intersection) / len(m_nnz)
-        true_negative_rate = 1. - true_positive_rate        
-
-    false_positive_rate = 0.0
-    if np.shape(not_m_nnz)[0]:
-        false_positive_rate = 1. * np.sum(not_intersection) / len(not_m_nnz)        
+    true_positive_rate = 1. * np.sum(intersection) / len(m_nz)
+    true_negative_rate = 1. - true_positive_rate        
+    false_positive_rate = 1. * np.sum(not_intersection) / len(not_m_nz)        
             
     return np.less_equal(true_negative_rate + false_positive_rate, prob)
 
