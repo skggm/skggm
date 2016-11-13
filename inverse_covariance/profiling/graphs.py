@@ -42,7 +42,7 @@ def cluster(prng, n_features, alpha, n_groups=2, random_sign=False,
             adj_type='cluster', chain_blocks=True):
     """Returns the adjacency matrix for a cluster network.
 
-    This function creates disjoint groupf of variables, where each group is 
+    This function creates disjoint group of variables, where each group is 
     size n_features/n_groups.  The graph can be made fully connected using 
     chaining assumption when chain_blocks=True (default).
     
@@ -121,11 +121,25 @@ class Graph(object):
         self.network_kwargs = network_kwargs
         self.prng = np.random.RandomState(seed)
 
-    def _make_diagonally_dominant(self, adjacency):    
+    def _to_diagonally_dominant(self, adjacency):
+        '''Make unweighted adjacency matrix M diagonally dominant using the 
+        Laplacian.
+        '''    
+        adjacency += np.diag(np.sum(adjacency != 0, axis=1) + 0.01)
+        return adjacency
+
+    def _to_diagonally_dominant_weighted(self, adjacency):
+        '''Make weighted adjacency matrix M diagonally dominant using the 
+        Laplacian.
+
+        QUESTION:  Which is it?
+        NOTE:  This was called make_diagonally_dominant() in examples
+               but weighted in matlab version.
+        '''    
         adjacency += np.diag(np.sum(np.abs(adjacency), axis=1) + 0.01)
         return adjacency
 
-    def _make_correlation(self, adjacency):
+    def _to_correlation(self, adjacency):
         """Call only after diagonal dominance is ensured. 
         TODO: Check for diagonally dominant adjacency first. 
         """   
@@ -174,9 +188,7 @@ class Graph(object):
                               "or 'cluster'"))
             return
 
-        precision = self._make_diagonally_dominant(adjacency)
-        precision = self._make_correlation(precision)
-        covariance = np.linalg.inv(precision)
-        covariance = self._make_correlation(covariance)
+        precision = self._to_correlation(self._to_diagonally_dominant_weighted(adjacency))
+        covariance = self._to_correlation(np.linalg.inv(precision))
         return covariance, precision, adjacency
 
