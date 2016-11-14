@@ -225,3 +225,41 @@ class TestMetrics(object):
         result = metrics.has_approx_support(m, m_hat, 0.5)
         print m, m_hat, result
         assert result == expected 
+
+
+    @pytest.mark.parametrize("m, m_hat, expected", [
+        (np.array([
+            [1, 2, 3],
+            [1, 2, 3],
+            [1, 2, 3]]),
+         np.array([
+            [1, 2, 3],
+            [1, 2, 3],
+            [1, 2, 3]]),
+        0
+        ),
+        (np.array([
+            [2, 1, 0],
+            [1, 2, 3],
+            [0, 5, 6]]),
+         np.array([
+            [1, 1, 0],
+            [1, 2, 0],
+            [0, 0, 3]]),
+        3.0
+        ),
+        (np.array([
+            [0, 1, 0],
+            [1, 0, 3],
+            [0, 5, 0]]),
+         np.array([
+            [0, 1, 1],
+            [1, 0, 0],
+            [1, 0, 0]]),
+        3.16227766017
+        ),
+    ])
+    def test_error_fro(self, m, m_hat, expected):
+        result = metrics.error_fro(m, m_hat)
+        print m, m_hat, result
+        np.testing.assert_array_almost_equal(result, expected)

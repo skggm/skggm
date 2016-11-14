@@ -7,6 +7,7 @@ from .metrics import (
     support_difference_count,
     has_exact_support,
     has_approx_support,
+    error_fro,
 )
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     'support_difference_count',
     'has_exact_support',
     'has_approx_support',
+    'error_fro',
 ]

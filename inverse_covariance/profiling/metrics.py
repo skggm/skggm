@@ -85,3 +85,6 @@ def has_approx_support(m, m_hat, prob=0.01):
             
     return int(np.less_equal(true_negative_rate + false_positive_rate, prob))
 
+
+def error_fro(m, m_hat):
+    return np.linalg.norm(np.triu(m - m_hat, 1), ord='fro')
