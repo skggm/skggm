@@ -33,7 +33,7 @@ def support_false_positive_count(m, m_hat):
     m_hat in one triangle, not including the diagonal.
     '''
     m_nnz, m_hat_nnz, intersection_nnz = _nonzero_intersection(m, m_hat)
-    return (m_hat_nnz - intersection_nnz) / 2.0
+    return int((m_hat_nnz - intersection_nnz) / 2.0)
 
 
 def support_false_negative_count(m, m_hat):
@@ -41,7 +41,7 @@ def support_false_negative_count(m, m_hat):
     m_hat in one triangle, not including the diagonal.
     '''
     m_nnz, m_hat_nnz, intersection_nnz = _nonzero_intersection(m, m_hat)
-    return (m_nnz - intersection_nnz) / 2.0
+    return int((m_nnz - intersection_nnz) / 2.0)
 
 
 def support_difference_count(m, m_hat):
@@ -49,7 +49,7 @@ def support_difference_count(m, m_hat):
     not including the diagonal. 
     '''
     m_nnz, m_hat_nnz, intersection_nnz = _nonzero_intersection(m, m_hat)
-    return (m_nnz + m_hat_nnz - (2 * intersection_nnz)) / 2.0
+    return int((m_nnz + m_hat_nnz - (2 * intersection_nnz)) / 2.0)
 
 
 def has_exact_support(m, m_hat):
@@ -59,7 +59,7 @@ def has_exact_support(m, m_hat):
     return int((m_nnz + m_hat_nnz - (2 * intersection_nnz)) == 0)
 
 
-def has_approx_support(m, m_hat, prob=.01):
+def has_approx_support(m, m_hat, prob=0.01):
     """Returns 1 if model selection error is less than or equal to prob rate, 
     0 else.
 
@@ -69,14 +69,19 @@ def has_approx_support(m, m_hat, prob=.01):
     m_hat_nz = np.flatnonzero(np.triu(m_hat, 1))
     
     upper_diagonal_mask = np.flatnonzero(np.triu(np.ones(m.shape), 1))
-    not_m_nz = np.setdiff1d(upper_diagonal_mask, m_nnz)
+    not_m_nz = np.setdiff1d(upper_diagonal_mask, m_nz)
 
     intersection = np.in1d(m_hat_nz, m_nz) # true positives
     not_intersection = np.in1d(m_hat_nz, not_m_nz) # false positives
     
-    true_positive_rate = 1. * np.sum(intersection) / len(m_nz)
-    true_negative_rate = 1. - true_positive_rate        
-    false_positive_rate = 1. * np.sum(not_intersection) / len(not_m_nz)        
+    true_positive_rate = 0.0
+    if len(m_nz):
+        true_positive_rate = 1. * np.sum(intersection) / len(m_nz)
+        true_negative_rate = 1. - true_positive_rate        
+    
+    false_positive_rate = 0.0
+    if len(not_m_nz):
+        false_positive_rate = 1. * np.sum(not_intersection) / len(not_m_nz)        
             
-    return np.less_equal(true_negative_rate + false_positive_rate, prob)
+    return int(np.less_equal(true_negative_rate + false_positive_rate, prob))
 
