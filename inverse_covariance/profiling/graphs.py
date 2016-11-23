@@ -95,7 +95,7 @@ def cluster(prng, n_features, alpha, n_groups=2, random_sign=False,
 
 
 class Graph(object):
-    """Returns the adjacency matrix for a specified network via the .sample()
+    """Returns the adjacency matrix for a specified network via the .create()
     method.
 
     Parameters
@@ -148,7 +148,7 @@ class Graph(object):
         adjacency /= d[:, np.newaxis]
         return adjacency
 
-    def sample(self, n_features, alpha):
+    def create(self, n_features, alpha):
         """Draw a new graph.
 
         Parameters
