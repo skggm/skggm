@@ -63,9 +63,9 @@ class MonteCarloProfile(object):
         will be overriden by with penalty selected by ms_estimator.
         If None, this will use QuicGraphLasso.
 
-    graph :  An instance of a class with the method `.sample(n_features, alpha)`
+    graph :  An instance of a class with the method `.create(n_features, alpha)`
         that returns (cov, prec, adj).
-        graph.sample() will be used to draw a new graph instance in each trial.
+        graph.create() will be used to draw a new graph instance in each trial.
 
     n_samples_grid : int (default=10) or array of floats
         Grid points for choosing number of samples.
@@ -73,7 +73,7 @@ class MonteCarloProfile(object):
         Else uses array as grid.
 
     alpha_grid : int (default=5) or array of floats
-        Grid points used in making new graphs via graph.sample().
+        Grid points used in making new graphs via graph.create().
         If integer, defines a logarithmic grid (0.14, 0.4)
         Else, uses array as grid.
 
@@ -160,7 +160,7 @@ class MonteCarloProfile(object):
                 )
 
             # draw a new fixed graph for alpha
-            cov, prec, adj = self.graph.sample(self.n_features, alpha)
+            cov, prec, adj = self.graph.create(self.n_features, alpha)
 
             # track nnz of graph precision
             precision_nnz = np.count_nonzero(prec.flat)
