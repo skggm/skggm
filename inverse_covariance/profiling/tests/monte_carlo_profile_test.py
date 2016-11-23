@@ -10,7 +10,7 @@ from inverse_covariance import (
 
 
 class FakeGraph(object):
-    def sample(self, n_features, alpha):
+    def create(self, n_features, alpha):
         identity = np.eye(n_features)
         return identity, identity, identity
 
