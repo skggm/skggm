@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-from sklearn import datasets
 
 from inverse_covariance.profiling import MonteCarloProfile
 from inverse_covariance import (
@@ -52,9 +51,8 @@ class TestMonteCarloProfile(object):
         }),
     ])
     def test_integration_monte_carlo_profile(self, params_in):
-        X = datasets.load_diabetes().data
         mc = MonteCarloProfile(**params_in)
-        mc.fit(X)
+        mc.fit()
 
         assert len(mc.results_) == len(params_in['metrics'])
         for key in params_in['metrics']:

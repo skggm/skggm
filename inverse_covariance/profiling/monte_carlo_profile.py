@@ -19,8 +19,7 @@ def _sample_mvn(n_samples, cov, prng):
     prng : np.random.RandomState instance.
     '''
     n_features, _ = cov.shape
-    X = prng.multivariate_normal(np.zeros(n_features), cov, size=n_samples)
-    return X
+    return prng.multivariate_normal(np.zeros(n_features), cov, size=n_samples)
 
 
 def _mc_trial(estimator, metrics, n_samples, cov, prec, prng):
