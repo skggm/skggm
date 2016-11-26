@@ -53,7 +53,7 @@ def lattice(prng, n_features, alpha, random_sign=False, low=0.3, high=0.7):
     return sp.linalg.toeplitz(c=row, r=row)
 
 
-def blocks(block, n_blocks=2, chain_blocks=True):
+def blocks(prng, block, n_blocks=2, chain_blocks=True):
     """Replicates `block` matrix n_blocks times diagonally to create a
     square matrix of size n_features = block.size[0] * n_blocks and with zeros
     along the diagonal.
@@ -88,7 +88,7 @@ def blocks(block, n_blocks=2, chain_blocks=True):
         dep_groups += chain_groups
         
     adjacency = np.kron(dep_groups, block)
-    adjacency[np.where(np.eye(n_features))] = 0  # TODO: check that where is actually needed here
+    adjacency[np.where(np.eye(n_features))] = 0 
     return adjacency
 
 

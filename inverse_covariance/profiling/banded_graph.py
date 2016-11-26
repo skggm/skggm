@@ -64,7 +64,8 @@ class BandedGraph(Graph):
                             low=self.low,
                             high=self.high) 
 
-        adjacency = blocks(block_adj,
+        adjacency = blocks(self.prng,
+                           block_adj,
                            n_blocks=self.n_blocks,
                            chain_blocks=self.chain_blocks)
 

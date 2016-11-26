@@ -9,6 +9,16 @@ from .metrics import (
     has_approx_support,
     error_fro,
 )
+from .graphs import (
+    lattice,
+    blocks,
+    Graph,
+)
+from .banded_graph import BandedGraph 
+from .cluster_graph import ClusterGraph 
+from .lattice_graph import LatticeGraph 
+from .erdos_renyi_graph import ErdosRenyiGraph 
+
 
 __all__ = [
     'AverageError',
@@ -20,4 +30,11 @@ __all__ = [
     'has_exact_support',
     'has_approx_support',
     'error_fro',
+    'lattice',
+    'blocks',
+    'Graph',
+    'BandedGraph',
+    'ClusterGraph',
+    'LatticeGraph',
+    'ErdosRenyiGraph',
 ]
