@@ -32,8 +32,9 @@ class ErdosRenyiGraph(Graph):
         n_features : int 
 
         alpha : float (0,1) 
-            # TODO: Better comment on this parameter.
             The complexity / sparsity factor.
+            This is (1 - alpha_0) in sklearn.datasets.make_sparse_spd_matrix 
+            where alpha_0 is the probability that a coefficient is zero.
         
         Returns
         -----------  
