@@ -57,11 +57,11 @@ class BandedGraph(Graph):
         """
         n_block_features = int(np.floor(1. * n_features / self.n_blocks))
         if n_block_features * self.n_blocks != n_features:
-            print 'Warning: {} not divisible by {}. Using n_features = {}'.format(
-                n_features,
-                self.n_blocks,
-                n_block_features * self.n_blocks,
-                )
+            raise ValueError(('Error: n_features {} not divisible by n_blocks {}.'
+                              'Use n_features = n_blocks * int').format(
+                            n_features,
+                            self.n_blocks)
+            return
 
         block_adj = lattice(self.prng, n_block_features, alpha,
                             random_sign=self.random_sign,
