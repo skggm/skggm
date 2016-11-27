@@ -31,17 +31,16 @@ class LatticeGraph(Graph):
     seed : int
         Seed for np.random.RandomState seed. (default=1)
     """
-    def __init__(self, random_sign=False, low=0.7, high=0.7, 
-                 n_blocks=2, chain_blocks=True, **kwargs):
+    def __init__(self, random_sign=False, low=0.7, high=0.7, **kwargs):
         self.random_sign = random_sign
         self.low = low
         self.high = high
-        self.n_blocks = n_blocks
-        self.chain_blocks = chain_blocks
         super(LatticeGraph, self).__init__(**kwargs)
 
-    def create(self, n_features, alpha):
+    def prototype_adjacency(self, n_block_features, alpha):
         """Build a new graph.
+
+        Doc for ".create(n_features, alpha)"
 
         Parameters
         -----------        
@@ -64,24 +63,7 @@ class LatticeGraph(Graph):
         -----------  
         (n_features, n_features) matrices: covariance, precision, adjacency
         """
-        n_block_features = int(np.floor(1. * n_features / self.n_blocks))
-        if n_block_features * self.n_blocks != n_features:
-            raise ValueError(('Error: n_features {} not divisible by n_blocks {}.'
-                              'Use n_features = n_blocks * int').format(
-                            n_features,
-                            self.n_blocks))
-            return
-
-        block_adj = lattice(self.prng, n_block_features, alpha,
-                            random_sign=self.random_sign,
-                            low=self.low,
-                            high=self.high) 
-
-        adjacency = blocks(self.prng,
-                           block_adj,
-                           n_blocks=self.n_blocks,
-                           chain_blocks=self.chain_blocks)
-
-        precision = self.to_precision(adjacency)
-        covariance = self.to_covariance(precision)
-        return covariance, precision, adjacency
+        return lattice(self.prng, n_block_features, alpha,
+                       random_sign=self.random_sign,
+                       low=self.low,
+                       high=self.high) 

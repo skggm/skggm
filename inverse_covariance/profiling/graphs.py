@@ -126,10 +126,19 @@ class Graph(object):
 
     Parameters
     ----------- 
+    n_blocks : int (default=2)
+        Number of blocks.  Returned matrix will be square with 
+        shape n_block_features * n_blocks.
+
+    chain_blocks : bool (default=True)
+        Apply random lattice structure to chain blocks together.
+
     seed : int
         Seed for np.random.RandomState seed. (default=1)
     """
-    def __init__(self, seed=1):
+    def __init__(self, n_blocks=2, chain_blocks=True, seed=1):
+        self.n_blocks = n_blocks
+        self.chain_blocks = chain_blocks
         self.seed = seed
         self.prng = np.random.RandomState(self.seed)
 
@@ -142,8 +151,12 @@ class Graph(object):
     def to_covariance(self, precision):
         return _to_correlation(np.linalg.inv(precision))
 
+    def prototype_adjacency(self, n_block_features, alpha):
+        """Override this method with a custom base graph."""
+        pass
+
     def create(self, n_features, alpha):
-        """Build a new graph.
+        """Build a new graph with block structure.
 
         Parameters
         -----------        
@@ -156,4 +169,20 @@ class Graph(object):
         -----------  
         (n_features, n_features) matrices: covariance, precision, adjacency 
         """
-        pass
+        n_block_features = int(np.floor(1. * n_features / self.n_blocks))
+        if n_block_features * self.n_blocks != n_features:
+            raise ValueError(('Error: n_features {} not divisible by n_blocks {}.'
+                              'Use n_features = n_blocks * int').format(
+                            n_features,
+                            self.n_blocks))
+            return
+
+        block_adj = self.prototype_adjacency(n_block_features, alpha)
+        adjacency = blocks(self.prng,
+                           block_adj,
+                           n_blocks=self.n_blocks,
+                           chain_blocks=self.chain_blocks)
+
+        precision = self.to_precision(adjacency)
+        covariance = self.to_covariance(precision)
+        return covariance, precision, adjacency

@@ -16,6 +16,13 @@ class ErdosRenyiGraph(Graph):
     spd_high : float (0, 1)
         Equivalent to make_sparse_spd_matrix `largest_coef`
 
+    n_blocks : int (default=2)
+        Number of blocks.  Returned matrix will be square with 
+        shape n_block_features * n_blocks.
+
+    chain_blocks : bool (default=True)
+        Apply random lattice structure to chain blocks together.
+
     seed : int
         Seed for np.random.RandomState seed. (default=1)
     """
@@ -24,8 +31,10 @@ class ErdosRenyiGraph(Graph):
         self.spd_high = spd_high
         super(ErdosRenyiGraph, self).__init__(**kwargs)
 
-    def create(self, n_features, alpha):
+    def prototype_adjacency(self, n_block_features, alpha):
         """Build a new graph.
+
+        Doc for ".create(n_features, alpha)"
 
         Parameters
         -----------        
@@ -40,12 +49,8 @@ class ErdosRenyiGraph(Graph):
         -----------  
         (n_features, n_features) matrices: covariance, precision, adjacency
         """
-        adjacency = make_sparse_spd_matrix(n_features,
-                                           alpha=np.abs(1.0 - alpha), 
-                                           smallest_coef=self.spd_low,
-                                           largest_coef=self.spd_high,
-                                           random_state=self.prng)
-
-        precision = self.to_precision(adjacency)
-        covariance = self.to_covariance(precision)
-        return covariance, precision, adjacency
+        return make_sparse_spd_matrix(n_block_features,
+                                      alpha=np.abs(1.0 - alpha), 
+                                      smallest_coef=self.spd_low,
+                                      largest_coef=self.spd_high,
+                                      random_state=self.prng)

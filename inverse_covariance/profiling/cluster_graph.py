@@ -28,16 +28,15 @@ class ClusterGraph(Graph):
     seed : int
         Seed for np.random.RandomState seed. (default=1)
     """
-    def __init__(self, low=0.7, high=0.7, n_blocks=2, chain_blocks=True, 
-                 **kwargs):
+    def __init__(self, low=0.7, high=0.7, **kwargs):
         self.low = low
         self.high = high
-        self.n_blocks = n_blocks
-        self.chain_blocks = chain_blocks
         super(ClusterGraph, self).__init__(**kwargs)
 
-    def create(self, n_features, alpha=None):
+    def prototype_adjacency(self, n_block_features, alpha=None):
         """Build a new graph.
+
+        Doc for ".create(n_features, alpha)"
 
         Parameters
         -----------        
@@ -51,34 +50,12 @@ class ClusterGraph(Graph):
             (n_blocks * n_block_features**2 - n_blocks) / 2
         
         edges and exactly this amount if chain_blocks=False.
-        
-        TODO: We could use alpha to increase/decrease the number of blocks here
-              to take advantage of the parameter and test for differing 
-              complexity.
 
         Returns
         -----------  
         (n_features, n_features) matrices: covariance, precision, adjacency 
         """
-        n_block_features = int(np.floor(1. * n_features / self.n_blocks))
-        if n_block_features * self.n_blocks != n_features:
-            raise ValueError(('Error: n_features {} not divisible by n_blocks {}.'
-                              'Use n_features = n_blocks * int').format(
-                            n_features,
-                            self.n_blocks))
-            return
+        return (-np.ones((n_block_features, n_block_features)) * 0.5 + 
+                self.prng.uniform(low=self.low, high=self.high,
+                                  size=(n_block_features, n_block_features)))
 
-        block_adj = (-np.ones((n_block_features, n_block_features)) * 0.5 + 
-                     self.prng.uniform(
-                        low=self.low,
-                        high=self.high,
-                        size=(n_block_features, n_block_features)))
-
-        adjacency = blocks(self.prng,
-                           block_adj,
-                           n_blocks=self.n_blocks,
-                           chain_blocks=self.chain_blocks)
-
-        precision = self.to_precision(adjacency)
-        covariance = self.to_covariance(precision)
-        return covariance, precision, adjacency
