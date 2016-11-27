@@ -69,9 +69,10 @@ class ClusterGraph(Graph):
             return
 
         block_adj = (-np.ones((n_block_features, n_block_features)) * 0.5 + 
-                     self.prng.uniform(low=self.low,
-                                  high=self.high,
-                                  size=(n_block_features, n_block_features)))
+                     self.prng.uniform(
+                        low=self.low,
+                        high=self.high,
+                        size=(n_block_features, n_block_features)))
 
         adjacency = blocks(self.prng,
                            block_adj,
