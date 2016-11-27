@@ -10,7 +10,7 @@ from inverse_covariance.profiling import (
     has_exact_support,
     has_approx_support,
     error_fro,
-    BandedGraph,
+    LatticeGraph,
 )
 
 plt.ion()
@@ -32,7 +32,7 @@ metrics = {
 ###############################################################################
 # Run MC trials
 
-mc = MonteCarloProfile(n_features=50, n_trials=10, graph=BandedGraph(),
+mc = MonteCarloProfile(n_features=50, n_trials=10, graph=LatticeGraph(),
                        n_samples_grid=10, alpha_grid=5, metrics=metrics, 
                        verbose=True)
 mc.fit()
