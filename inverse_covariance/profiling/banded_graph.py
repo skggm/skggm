@@ -60,7 +60,7 @@ class BandedGraph(Graph):
             raise ValueError(('Error: n_features {} not divisible by n_blocks {}.'
                               'Use n_features = n_blocks * int').format(
                             n_features,
-                            self.n_blocks)
+                            self.n_blocks))
             return
 
         block_adj = lattice(self.prng, n_block_features, alpha,
