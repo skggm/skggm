@@ -1,18 +1,14 @@
 from __future__ import absolute_import
 
 import numpy as np 
-from .graphs import Graph, lattice
+from .graphs import Graph, lattice, blocks
 
 
 class LatticeGraph(Graph):
-    """Returns the adjacency matrix for a lattice network via .create().
+    """Returns the adjacency matrix for a lattice/banded network via .create().
 
-    The resulting network is a Toeplitz matrix with random values summing 
-    between -1 and 1 and zeros along the diagonal. 
-    
-    The range of the values can be controlled via the parameters low and high.  
-    If random_sign is false, all entries will be negative, otherwise their sign
-    will be modulated at random with probability 1/2.
+    The graph can be made fully connected using chaining assumption when 
+    chain_blocks=True (default).
 
     Parameters
     ----------- 
@@ -25,19 +21,27 @@ class LatticeGraph(Graph):
     high : float (0, 1) > low (default=0.7)
         Upper bound for np.random.RandomState.uniform before normalization.
 
+    n_blocks : int (default=2)
+        Number of blocks.  Returned matrix will be square with 
+        shape n_block_features * n_blocks.
+
+    chain_blocks : bool (default=True)
+        Apply random lattice structure to chain blocks together.
+
     seed : int
         Seed for np.random.RandomState seed. (default=1)
     """
-    def __init__(self, random_sign=False, low=0.7, high=0.7, **kwargs):
+    def __init__(self, random_sign=False, low=0.7, high=0.7, 
+                 n_blocks=2, chain_blocks=True, **kwargs):
         self.random_sign = random_sign
         self.low = low
         self.high = high
+        self.n_blocks = n_blocks
+        self.chain_blocks = chain_blocks
         super(LatticeGraph, self).__init__(**kwargs)
 
     def create(self, n_features, alpha):
         """Build a new graph.
-
-        Each row has maximum edges of np.ceil(alpha * n_features).
 
         Parameters
         -----------        
@@ -45,19 +49,39 @@ class LatticeGraph(Graph):
 
         alpha : float (0,1) 
             The complexity / sparsity factor.
-            
-            The lattice graph will have a maximum number of edges: 
-
-                ceil(alpha * n_features)
         
+            Each graph will have a minimum of 
+            
+                n_blocks * ceil(alpha * n_block_features)
+
+                where
+
+                n_block_features = floor(n_features / self.n_blocks)            
+            
+            edges and exactly this amount if chain_blocks=False. 
+
         Returns
         -----------  
         (n_features, n_features) matrices: covariance, precision, adjacency
         """
-        adjacency = lattice(self.prng, n_features, alpha,
+        n_block_features = int(np.floor(1. * n_features / self.n_blocks))
+        if n_block_features * self.n_blocks != n_features:
+            raise ValueError(('Error: n_features {} not divisible by n_blocks {}.'
+                              'Use n_features = n_blocks * int').format(
+                            n_features,
+                            self.n_blocks))
+            return
+
+        block_adj = lattice(self.prng, n_block_features, alpha,
                             random_sign=self.random_sign,
                             low=self.low,
                             high=self.high) 
+
+        adjacency = blocks(self.prng,
+                           block_adj,
+                           n_blocks=self.n_blocks,
+                           chain_blocks=self.chain_blocks)
+
         precision = self.to_precision(adjacency)
         covariance = self.to_covariance(precision)
         return covariance, precision, adjacency

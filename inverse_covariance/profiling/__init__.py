@@ -13,7 +13,6 @@ from .graphs import (
     blocks,
     Graph,
 )
-from .banded_graph import BandedGraph 
 from .cluster_graph import ClusterGraph 
 from .lattice_graph import LatticeGraph 
 from .erdos_renyi_graph import ErdosRenyiGraph 
@@ -30,7 +29,6 @@ __all__ = [
     'lattice',
     'blocks',
     'Graph',
-    'BandedGraph',
     'ClusterGraph',
     'LatticeGraph',
     'ErdosRenyiGraph',

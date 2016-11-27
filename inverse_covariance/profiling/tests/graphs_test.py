@@ -4,7 +4,6 @@ import pytest
 from inverse_covariance.profiling import (
     lattice,
     blocks,
-    BandedGraph,
     ClusterGraph,
     ErdosRenyiGraph,
     LatticeGraph,
@@ -119,14 +118,12 @@ class TestGraphs(object):
 
 
     @pytest.mark.parametrize("graph,seed", [
-        (BandedGraph(), None),
         (ClusterGraph(), None),
         (ErdosRenyiGraph(), None),
         (LatticeGraph(), None),
-        (BandedGraph(random_sign=True, chain_blocks=False, seed=3), 3),
+        (LatticeGraph(random_sign=True, chain_blocks=False, seed=3), 3),
         (ClusterGraph(n_blocks=5, seed=3), 3),
         (ErdosRenyiGraph(seed=3), 3),
-        (LatticeGraph(seed=3), 3),
     ])
     def test_graph_classes(self, graph, seed):
         '''Simple smell test on inidivudal graph classes'''
