@@ -49,11 +49,7 @@ class LatticeGraph(Graph):
         
         Returns
         -----------  
-        covariance : 
-
-        precision : 
-
-        adjacency : 
+        (n_features, n_features) matrices: covariance, precision, adjacency
         """
         adjacency = lattice(self.prng, n_features, alpha,
                             random_sign=self.random_sign,

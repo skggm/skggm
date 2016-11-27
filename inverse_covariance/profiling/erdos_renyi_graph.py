@@ -37,11 +37,7 @@ class ErdosRenyiGraph(Graph):
         
         Returns
         -----------  
-        covariance : 
-
-        precision : 
-
-        adjacency : 
+        (n_features, n_features) matrices: covariance, precision, adjacency
         """
         adjacency = make_sparse_spd_matrix(n_features,
                                            alpha=np.abs(1.0 - alpha), 

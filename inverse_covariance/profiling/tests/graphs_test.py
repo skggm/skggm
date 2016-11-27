@@ -118,13 +118,17 @@ class TestGraphs(object):
         assert np.sum(adjacency.flat) != (n_block_features**2 - n_block_features) * n_blocks
 
 
-    @pytest.mark.parametrize("graph", [
-        (BandedGraph()),
-        (ClusterGraph()),
-        (ErdosRenyiGraph()),
-        (LatticeGraph()),
+    @pytest.mark.parametrize("graph,seed", [
+        (BandedGraph(), None),
+        (ClusterGraph(), None),
+        (ErdosRenyiGraph(), None),
+        (LatticeGraph(), None),
+        (BandedGraph(random_sign=True, chain_blocks=False, seed=3), 3),
+        (ClusterGraph(n_blocks=5, seed=3), 3),
+        (ErdosRenyiGraph(seed=3), 3),
+        (LatticeGraph(seed=3), 3),
     ])
-    def test_graph_classes(self, graph):
+    def test_graph_classes(self, graph, seed):
         '''Simple smell test on inidivudal graph classes'''
         n_features = 50
         alpha = 0.1
@@ -138,4 +142,6 @@ class TestGraphs(object):
         assert np.sum(covariance.flat) > 0
         assert np.sum(precision.flat) > 0
         assert np.sum(adjacency.flat) > 0
+        if seed is not None:
+            assert graph.seed == seed
 

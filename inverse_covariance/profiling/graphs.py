@@ -130,7 +130,8 @@ class Graph(object):
         Seed for np.random.RandomState seed. (default=1)
     """
     def __init__(self, seed=1):
-        self.prng = np.random.RandomState(seed)
+        self.seed = seed
+        self.prng = np.random.RandomState(self.seed)
 
     def to_precision(self, adjacency, weighted=True):
         if weighted:
@@ -153,10 +154,6 @@ class Graph(object):
         
         Returns
         -----------  
-        covariance : 
-
-        precision : 
-
-        adjacency : 
+        (n_features, n_features) matrices: covariance, precision, adjacency 
         """
         pass

@@ -49,11 +49,7 @@ class ClusterGraph(Graph):
         
         Returns
         -----------  
-        covariance : 
-
-        precision : 
-
-        adjacency : 
+        (n_features, n_features) matrices: covariance, precision, adjacency 
         """
         n_block_features = int(np.floor(1. * n_features / self.n_blocks))
 
