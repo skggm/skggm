@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import numpy as np
 from sklearn.base import clone
 from sklearn.utils import check_array, as_float_array

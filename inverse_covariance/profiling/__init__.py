@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from .monte_carlo_profile import MonteCarloProfile
 from .metrics import (
     support_false_positive_count,

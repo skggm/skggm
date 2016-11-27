@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import numpy as np 
 from sklearn.datasets import make_sparse_spd_matrix
 from .graphs import Graph 
