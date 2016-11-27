@@ -57,7 +57,7 @@ class MonteCarloProfile(object):
 
     ms_estimator : "Model selection estimator" (default=None)
         An inverse covariance estimator instance. This estimator must be able to
-        select a penalization parameter and can be accessed via the instance 
+        select a penalization parameter that can be accessed via the instance 
         variable .lam_.  
 
     mc_estimator : "Monte Carlo trial estimator" (default=None)
