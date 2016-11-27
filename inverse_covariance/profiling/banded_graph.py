@@ -48,9 +48,18 @@ class BandedGraph(Graph):
         n_features : int 
 
         alpha : float (0,1) 
-            # TODO: Better comment on this parameter.
             The complexity / sparsity factor.
         
+            Each graph will have a minimum of 
+            
+                n_blocks * ceil(alpha * n_block_features)
+
+                where
+
+                n_block_features = floor(n_features / self.n_blocks)            
+            
+            edges and exactly this amount if chain_blocks=False. 
+
         Returns
         -----------  
         (n_features, n_features) matrices: covariance, precision, adjacency

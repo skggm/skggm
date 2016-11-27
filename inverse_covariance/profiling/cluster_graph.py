@@ -36,17 +36,26 @@ class ClusterGraph(Graph):
         self.chain_blocks = chain_blocks
         super(ClusterGraph, self).__init__(**kwargs)
 
-    def create(self, n_features, alpha):
+    def create(self, n_features, alpha=None):
         """Build a new graph.
 
         Parameters
         -----------        
         n_features : int 
 
-        alpha : float (0,1) 
-            # TODO: Better comment on this parameter.
-            The complexity / sparsity factor.
+        [alpha] : float (0,1) 
+            Unused.
+
+        Each graph will have a minimum of 
         
+            (n_blocks * n_block_features**2 - n_blocks) / 2
+        
+        edges and exactly this amount if chain_blocks=False.
+        
+        TODO: We could use alpha to increase/decrease the number of blocks here
+              to take advantage of the parameter and test for differing 
+              complexity.
+
         Returns
         -----------  
         (n_features, n_features) matrices: covariance, precision, adjacency 

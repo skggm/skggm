@@ -44,8 +44,11 @@ class LatticeGraph(Graph):
         n_features : int 
 
         alpha : float (0,1) 
-            # TODO: Better comment on this parameter.
             The complexity / sparsity factor.
+            
+            The lattice graph will have a maximum number of edges: 
+
+                ceil(alpha * n_features)
         
         Returns
         -----------  
