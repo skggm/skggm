@@ -52,6 +52,12 @@ class ClusterGraph(Graph):
         (n_features, n_features) matrices: covariance, precision, adjacency 
         """
         n_block_features = int(np.floor(1. * n_features / self.n_blocks))
+        if n_block_features * self.n_blocks != n_features:
+            print 'Warning: {} not divisible by {}. Using n_features = {}'.format(
+                n_features,
+                self.n_blocks,
+                n_block_features * self.n_blocks,
+                )
 
         block_adj = (-np.ones((n_block_features, n_block_features)) * 0.5 + 
                      self.prng.uniform(low=self.low,

@@ -53,13 +53,15 @@ class BandedGraph(Graph):
         
         Returns
         -----------  
-        covariance : 
-
-        precision : 
-
-        adjacency : 
+        (n_features, n_features) matrices: covariance, precision, adjacency
         """
         n_block_features = int(np.floor(1. * n_features / self.n_blocks))
+        if n_block_features * self.n_blocks != n_features:
+            print 'Warning: {} not divisible by {}. Using n_features = {}'.format(
+                n_features,
+                self.n_blocks,
+                n_block_features * self.n_blocks,
+                )
 
         block_adj = lattice(self.prng, n_block_features, alpha,
                             random_sign=self.random_sign,
