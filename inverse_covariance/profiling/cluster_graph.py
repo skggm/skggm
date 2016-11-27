@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 import numpy as np 
-from .graphs import Graph, blocks
+from .graphs import Graph
 
 
 class ClusterGraph(Graph):
