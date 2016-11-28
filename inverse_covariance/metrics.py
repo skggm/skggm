@@ -1,5 +1,4 @@
-"""Metrics for cross validation with Gaussian graphical models.
-"""
+"""Metrics for cross validation with Gaussian graphical models."""
 import numpy as np
 from sklearn.utils.extmath import fast_logdet
 

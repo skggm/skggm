@@ -1,5 +1,4 @@
-"""Various utilities for Gaussian graphical models.
-"""
+"""Various utilities for Gaussian graphical models."""
 import numpy as np
 from sklearn.utils.testing import assert_array_equal
 from matplotlib import pyplot as plt

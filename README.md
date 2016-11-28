@@ -86,7 +86,13 @@ Information on basic usage can be found at [https://skggm.github.io/skggm/tour](
 
 - **inverse_covariance.profiling**
 
-    Submodule that includes `profiling.AverageError`, `profiling.StatisticalPower` to compare performance between methods.  This is a work in progress, more to come soon!
+    The `.profiling` submodule contains a `MonteCarloProfiling()` class for evaluating  methods over different graphs and metrics.  We currently include the following graph types:
+
+        - LatticeGraph
+        - ClusterGraph
+        - ErdosRenyiGraph (via sklearn)
+
+    An example of how to use these tools can be found in `examples/profiling_example.py`.
 
 ## Installation
 

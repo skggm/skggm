@@ -59,9 +59,40 @@ class TestMonteCarloProfile(object):
             assert key in mc.results_
             assert np.sum(mc.results_[key].flat) > 0
             assert mc.results_[key].shape == (len(mc.alphas_), len(mc.grid_))
-        
+
         assert len(mc.precision_nnz_) == len(mc.alphas_)
         assert mc.precision_nnz_[0] == params_in['n_features'] # for eye
+
+        if isinstance(mc.n_samples_grid, int):
+            assert len(mc.grid_) == mc.n_samples_grid
+        else:
+            assert mc.grid_ == mc.n_samples_grid
+
+        if isinstance(mc.alpha_grid, int):
+            assert len(mc.alphas_) == mc.alpha_grid
+        else:
+            assert mc.alphas_ == mc.alpha_grid
+
+
+    @pytest.mark.parametrize("params_in", [
+        ({
+            'n_trials': 20,
+            'n_features': 10,
+        }),
+    ])
+    def test_integration_monte_carlo_profile_default(self, params_in):
+        '''Use default graph and metrics. '''
+        mc = MonteCarloProfile(**params_in)
+        mc.fit()
+
+        assert len(mc.results_) > 0
+
+        for key in mc.results_:
+            assert key in mc.results_
+            assert np.sum(mc.results_[key].flat) > 0
+            assert mc.results_[key].shape == (len(mc.alphas_), len(mc.grid_))
+
+        assert len(mc.precision_nnz_) == len(mc.alphas_)
 
         if isinstance(mc.n_samples_grid, int):
             assert len(mc.grid_) == mc.n_samples_grid

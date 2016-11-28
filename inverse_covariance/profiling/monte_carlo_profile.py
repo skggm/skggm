@@ -1,8 +1,12 @@
+from __future__ import absolute_import
+
 import numpy as np 
 from sklearn.base import clone
 from sklearn.datasets import make_sparse_spd_matrix
 from sklearn.externals.joblib import Parallel, delayed
 
+from .metrics import error_fro
+from .erdos_renyi_graph import ErdosRenyiGraph
 from .. import QuicGraphLasso, QuicGraphLassoCV
 
 
@@ -53,7 +57,7 @@ class MonteCarloProfile(object):
 
     ms_estimator : "Model selection estimator" (default=None)
         An inverse covariance estimator instance. This estimator must be able to
-        select a penalization parameter and can be accessed via the instance 
+        select a penalization parameter that can be accessed via the instance 
         variable .lam_.  
 
     mc_estimator : "Monte Carlo trial estimator" (default=None)
@@ -65,6 +69,7 @@ class MonteCarloProfile(object):
     graph :  An instance of a class with the method `.create(n_features, alpha)`
         that returns (cov, prec, adj).
         graph.create() will be used to draw a new graph instance in each trial.
+        default: ErdosRenyiGraph()
 
     n_samples_grid : int (default=10) or array of floats
         Grid points for choosing number of samples.
@@ -78,6 +83,7 @@ class MonteCarloProfile(object):
 
     metrics : dict of functions: scalar = func(prec, prec_estimate)
         The key for each function will be used for reporting results.
+        default: {'frobenius': error_fro}
 
     verbose : bool (default=False)
         Print out progress information.
@@ -104,7 +110,8 @@ class MonteCarloProfile(object):
     """
     def __init__(self, n_features=50, n_trials=100, ms_estimator=None,
                  mc_estimator=None, graph=None, n_samples_grid=10, alpha_grid=5,
-                 metrics={}, verbose=False,  n_jobs=1, seed=2):
+                 metrics={'frobenius': error_fro}, verbose=False,  n_jobs=1, 
+                 seed=2):
         self.n_features = n_features
         self.n_trials = n_trials
         self.ms_estimator = ms_estimator  
@@ -118,8 +125,7 @@ class MonteCarloProfile(object):
         self.prng = np.random.RandomState(seed)
 
         if self.graph is None:
-            raise ValueError("Graph generation instance required.")
-            return
+            self.graph = ErdosRenyiGraph()
 
         if self.ms_estimator is None:
             self.ms_estimator = QuicGraphLassoCV()
