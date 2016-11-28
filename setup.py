@@ -57,15 +57,16 @@ with open('requirements.txt') as f:
 
 
 setup(name='skggm',
-    version='0.1.0',
+    version='0.2.0',
     description='Gaussian graphical models for scikit-learn.',
     author='Jason Laska and Manjari Narayan',
+    license='MIT',
     packages=[
         'inverse_covariance',
         'inverse_covariance.profiling',
         'inverse_covariance.pyquic'],
     install_requires=INSTALL_REQUIRES,
-    url='https://github.com/jasonlaska/skggm',
+    url='https://github.com/skggm/skggm',
     author_email='jlaska@gmail.com',
     ext_package='inverse_covariance',
     ext_modules=[ext_module],
