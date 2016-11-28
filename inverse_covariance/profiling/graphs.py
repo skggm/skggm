@@ -98,28 +98,27 @@ def blocks(prng, block, n_blocks=2, chain_blocks=True):
     return adjacency
 
 
-def _to_diagonally_dominant(adjacency):
-    """Make unweighted adjacency matrix M diagonally dominant using the 
-    Laplacian.
-    """    
-    adjacency += np.diag(np.sum(adjacency != 0, axis=1) + 0.01)
-    return adjacency
+def _to_diagonally_dominant(mat):
+    """Make matrix unweighted diagonally dominant using the Laplacian."""    
+    mat += np.diag(np.sum(mat != 0, axis=1) + 0.01)
+    return mat
 
 
-def _to_diagonally_dominant_weighted(adjacency):
-    """Make weighted adjacency matrix M diagonally dominant using the 
-    Laplacian.
-    """    
-    adjacency += np.diag(np.sum(np.abs(adjacency), axis=1) + 0.01)
-    return adjacency
+def _to_diagonally_dominant_weighted(mat):
+    """Make matrix weighted diagonally dominant using the Laplacian."""    
+    mat += np.diag(np.sum(np.abs(mat), axis=1) + 0.01)
+    return mat
 
 
-def _rescale_to_unit_diagonals(adjacency):
-    """Call only after diagonal dominance is ensured."""   
-    d = np.sqrt(np.diag(adjacency))
-    adjacency /= d
-    adjacency /= d[:, np.newaxis]
-    return adjacency
+def _rescale_to_unit_diagonals(mat):
+    """Rescale matrix to have unit diagonals.
+
+    Note: Call only after diagonal dominance is ensured.
+    """   
+    d = np.sqrt(np.diag(mat))
+    mat /= d
+    mat /= d[:, np.newaxis]
+    return mat
 
 
 class Graph(object):
