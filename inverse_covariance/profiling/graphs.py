@@ -31,23 +31,29 @@ def lattice(prng, n_features, alpha, random_sign=False, low=0.3, high=0.7):
         Upper bound for np.random.RandomState.uniform before normalization.
     """
     adj = np.zeros((n_features, n_features))
-    row = np.zeros((n_features,))
     degree = int(1 + np.round(alpha * n_features / 2.))
 
     if random_sign:
         sign_row = (-1.0 * np.ones(degree) + 
                     2 * (prng.uniform(low=0, high=1, size=degree) > .5))
     else:
-        # QUESTION to M:
-        # Why is the default all negatives?
         sign_row = -1.0 * np.ones(degree)
     
-    # populate shifted by 1 to avoid diagonal
-    row[1: 1 + degree] = sign_row * prng.uniform(low=low, high=high, size=degree)
+    MAX_ATTEMPTS = 5
+    attempt = 0
+    row = np.zeros((n_features,))
+    while np.sum(row) == 0 and attempt < MAX_ATTEMPTS:
+        row = np.zeros((n_features,))
+        row[1: 1 + degree] = sign_row * prng.uniform(low=low,
+                                                     high=high,
+                                                     size=degree)
+        attempt += 1
 
-    # QUESTION to M:
-    # Why is this normalized this way (can sum between 1 and -1)?
-    # What if the row sums to 0 (unlikely, but could be)? 
+    if np.sum(row) == 0:
+        raise Exception('InvalidLattice', 'Rows sum to 0.')
+        return
+
+    # sum-normalize and keep signs
     row /= np.abs(np.sum(row))  
 
     return sp.linalg.toeplitz(c=row, r=row)
@@ -103,10 +109,6 @@ def _to_diagonally_dominant(adjacency):
 def _to_diagonally_dominant_weighted(adjacency):
     """Make weighted adjacency matrix M diagonally dominant using the 
     Laplacian.
-
-    QUESTION:  Which is it?
-    NOTE:  This was called make_diagonally_dominant() in examples
-           but weighted in matlab version.
     """    
     adjacency += np.diag(np.sum(np.abs(adjacency), axis=1) + 0.01)
     return adjacency
