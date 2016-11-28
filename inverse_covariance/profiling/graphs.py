@@ -114,7 +114,7 @@ def _to_diagonally_dominant_weighted(adjacency):
     return adjacency
 
 
-def _to_correlation(adjacency):
+def _rescale_to_unit_diagonals(adjacency):
     """Call only after diagonal dominance is ensured."""   
     d = np.sqrt(np.diag(adjacency))
     adjacency /= d
@@ -144,14 +144,24 @@ class Graph(object):
         self.seed = seed
         self.prng = np.random.RandomState(self.seed)
 
-    def to_precision(self, adjacency, weighted=True):
+    def to_precision(self, adjacency, weighted=True, rescale=True):
         if weighted:
-            return _to_correlation(_to_diagonally_dominant_weighted(adjacency))
+            dd_adj = _to_diagonally_dominant_weighted(adjacency)
         else:
-            return _to_correlation(_to_diagonally_dominant(adjacency))
+            dd_adj = _to_diagonally_dominant(adjacency)
 
-    def to_covariance(self, precision):
-        return _to_correlation(np.linalg.inv(precision))
+        if rescale:
+            return _rescale_to_unit_diagonals(dd_adj)
+
+        return dd_adj
+
+    def to_covariance(self, precision, rescale=True):
+        covariance = np.linalg.inv(precision)
+        
+        if rescale:
+            return _rescale_to_unit_diagonals(covariance)
+
+        return covariance
 
     def prototype_adjacency(self, n_block_features, alpha):
         """Override this method with a custom base graph."""
