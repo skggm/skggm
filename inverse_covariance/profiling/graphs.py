@@ -39,6 +39,10 @@ def lattice(prng, n_features, alpha, random_sign=False, low=0.3, high=0.7):
     else:
         sign_row = -1.0 * np.ones(degree)
     
+    # in the *very unlikely* event that we draw a bad row that sums to zero
+    # (which is only possible when random_sign=True), we try again up to 
+    # MAX_ATTEMPTS=5 times.  If we are still unable to draw a good set of values
+    # something is probably wrong and we raise.
     MAX_ATTEMPTS = 5
     attempt = 0
     row = np.zeros((n_features,))
