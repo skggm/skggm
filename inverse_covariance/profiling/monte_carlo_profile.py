@@ -284,4 +284,3 @@ class MonteCarloProfile(object):
 
         self.is_fitted = True
         return self
-        
