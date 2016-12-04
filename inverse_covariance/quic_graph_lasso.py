@@ -553,7 +553,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         results = list()
         t0 = time.time()
         for rr in range(n_refinements):
-            if sc is None:
+            if self.sc is None:
                 # parallel version
                 this_result = Parallel(
                     n_jobs=self.n_jobs,
