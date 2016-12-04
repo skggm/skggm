@@ -60,15 +60,19 @@ def _mc_fit(indexed_params, estimator, metrics, prng):
 def _cpu_map(fun, param_grid, n_jobs):
     return Parallel(
         n_jobs=n_jobs,
-        verbose=False,
-        backend='threading',
-        #max_nbytes=None,
-        #batch_size=1,
+        verbose=True,
+        backend='threading', # any sklearn backend should work here
     )(
         delayed(fun)(
             params
         )
         for params in param_grid)
+
+
+def _spark_map(fun, indexed_param_grid, sc):
+    par_param_grid = sc.parallelize(indexed_param_grid, len(indexed_param_grid))
+    indexed_results = dict(par_param_grid.map(fun).collect())
+    return [indexed_out0[idx] for idx in range(len(param_grid))]
 
 
 class MonteCarloProfile(object):
@@ -120,8 +124,12 @@ class MonteCarloProfile(object):
     verbose : bool (default=False)
         Print out progress information.
 
-    n_jobs: int, optional
+    n_jobs: int (optional)
         number of jobs to run in parallel (default 1).
+
+    sc: sparkContext (optional)
+        If a sparkContext object is provided, n_jobs will be ignore and the 
+        work will be parallelized via spark.
 
     seed : np.random.RandomState seed. (default=2)
 
@@ -142,8 +150,8 @@ class MonteCarloProfile(object):
     """
     def __init__(self, n_features=50, n_trials=100, ms_estimator=None,
                  mc_estimator=None, graph=None, n_samples_grid=10, alpha_grid=5,
-                 metrics={'frobenius': error_fro}, verbose=False,  n_jobs=1, 
-                 seed=2):
+                 metrics={'frobenius': error_fro}, verbose=False,  n_jobs=1,
+                 sc=None, seed=2):
         self.n_features = n_features
         self.n_trials = n_trials
         self.ms_estimator = ms_estimator  
@@ -154,6 +162,7 @@ class MonteCarloProfile(object):
         self.metrics = metrics
         self.verbose = verbose
         self.n_jobs = n_jobs
+        self.sc = sc
         self.prng = np.random.RandomState(seed)
 
         if self.graph is None:
@@ -202,8 +211,11 @@ class MonteCarloProfile(object):
 
         if self.verbose:
             print 'Getting parameters via model selection...'
-            
-        ms_results = _cpu_map(ms_fit, indexed_param_grid, self.n_jobs)
+
+        if self.sc is not None:
+            mc_results = _spark_map(ms_fit, indexed_param_grid, self.sc)
+        else:
+            ms_results = _cpu_map(ms_fit, indexed_param_grid, self.n_jobs)
 
         # ensure results are ordered
         ms_results = sorted(ms_results, key=lambda r: r[0])
@@ -234,7 +246,10 @@ class MonteCarloProfile(object):
         if self.verbose:
             print 'Fitting MC trials...'
 
-        mc_results = _cpu_map(mc_fit, indexed_trial_param_grid, self.n_jobs)
+        if self.sc is not None:
+            mc_results = _spark_map(mc_fit, indexed_trial_param_grid, self.sc)
+        else:
+            mc_results = _cpu_map(mc_fit, indexed_trial_param_grid, self.n_jobs)
 
         # ensure results are ordered correctly
         mc_results = sorted(mc_results, key=lambda r: r[0])
