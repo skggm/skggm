@@ -60,7 +60,7 @@ class TestMonteCarloProfile(object):
             assert np.sum(mc.results_[key].flat) > 0
             assert mc.results_[key].shape == (len(mc.alphas_), len(mc.grid_))
 
-        assert len(mc.precision_nnz_) == len(mc.alphas_)
+        assert len(mc.precision_nnz_) == len(mc.alphas_) * len(mc.grid_)
         assert mc.precision_nnz_[0] == params_in['n_features'] # for eye
 
         if isinstance(mc.n_samples_grid, int):
@@ -92,7 +92,7 @@ class TestMonteCarloProfile(object):
             assert np.sum(mc.results_[key].flat) > 0
             assert mc.results_[key].shape == (len(mc.alphas_), len(mc.grid_))
 
-        assert len(mc.precision_nnz_) == len(mc.alphas_)
+        assert len(mc.precision_nnz_) == len(mc.alphas_) * len(mc.grid_)
 
         if isinstance(mc.n_samples_grid, int):
             assert len(mc.grid_) == mc.n_samples_grid
