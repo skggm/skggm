@@ -569,13 +569,20 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                     for train, test in cv)
             else:
                 # parallel via spark
+                train_test_grid = [(train, test) for (train, test) in cv]
+                indexed_param_grid = list(
+                    zip(range(len(train_test_grid)), train_test_grid)
+                )
+                par_param_grid = self.sc.parallelize(indexed_param_grid)
+                X_bc = self.sc.broadcast(X)
+
                 def _quic_path_spark(indexed_params):
-                    index, (train, test) = indexed_params
+                    index, (local_train, local_test) = indexed_params
                     local_X = X_bc.value
                     result = _quic_path(
-                        local_X[train],
+                        local_X[local_train],
                         path,
-                        X_test=local_X[test],
+                        X_test=local_X[local_test],
                         lam=self.lam, tol=self.tol, max_iter=self.max_iter, 
                         Theta0=self.Theta0, Sigma0=self.Sigma0, method=self.method,
                         verbose=self.verbose, score_metric=self.score_metric,
@@ -583,23 +590,13 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                     )
                     return index, result
                 
-                train_test_grid = [(train, test) for (train, test) in cv]
-                indexed_param_grid = list(
-                    zip(range(len(train_test_grid)), train_test_grid)
-                )
-                par_param_grid = self.sc.parallelize(indexed_param_grid)
-                X_bc = self.sc.broadcast(X)
-                y_bc = self.sc.broadcast(y)
-
                 indexed_results = dict(
                     par_param_grid.map(_quic_path_spark).collect()
                 )
                 this_result = [
                     indexed_results[idx] for idx in range(len(train_test_grid))
                 ]
-
                 X_bc.unpersist()
-                y_bc.unpersist()
 
 
             # Little dance to transform the list in what we need
