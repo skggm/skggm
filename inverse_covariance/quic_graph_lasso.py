@@ -409,12 +409,17 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         - An object to be used as a cross-validation generator.
         - An iterable yielding train/test splits.
         
-    n_refinements: strictly positive integer
+    n_refinements : strictly positive integer
         The number of times the grid is refined. Not used if explicit
         values of alphas are passed.
 
-    n_jobs: int, optional
+    n_jobs : int, optional
         number of jobs to run in parallel (default 1).
+
+    sc : sparkContext (default=None)
+        If not None and a valid SparkContext, the cross-validation iterations 
+        will be performed in parallel via Apache Spark.  In this case n_jobs 
+        will be unused.
 
     tol : float (default=1e-6)
         Convergence threshold.
@@ -470,10 +475,11 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
     """
     def __init__(self, lam=1.0, lams=4, n_refinements=4, cv=None, tol=1e-6,
                  max_iter=1000, Theta0=None, Sigma0=None, method='quic', 
-                 verbose=0, n_jobs=1, score_metric='log_likelihood',
+                 verbose=0, n_jobs=1, sc=None, score_metric='log_likelihood',
                  init_method='corrcoef', auto_scale=True):
         # GridCV params
         self.n_jobs = n_jobs
+        self.sc = sc
         self.cv = cv
         self.lam = lam
         self.lams = lams
@@ -546,20 +552,55 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         results = list()
         t0 = time.time()
         for rr in range(n_refinements):
-            # parallel version
-            this_result = Parallel(
-                n_jobs=self.n_jobs,
-                verbose=self.verbose,
-            )(
-                delayed(_quic_path)(
-                    X[train],
-                    path,
-                    X_test=X[test],
-                    lam=self.lam, tol=self.tol, max_iter=self.max_iter, 
-                    Theta0=self.Theta0, Sigma0=self.Sigma0, method=self.method,
-                    verbose=self.verbose, score_metric=self.score_metric,
-                    init_method=self.init_method)
-                for train, test in cv)
+            if sc is None:
+                # parallel version
+                this_result = Parallel(
+                    n_jobs=self.n_jobs,
+                    verbose=self.verbose,
+                )(
+                    delayed(_quic_path)(
+                        X[train],
+                        path,
+                        X_test=X[test],
+                        lam=self.lam, tol=self.tol, max_iter=self.max_iter, 
+                        Theta0=self.Theta0, Sigma0=self.Sigma0, method=self.method,
+                        verbose=self.verbose, score_metric=self.score_metric,
+                        init_method=self.init_method)
+                    for train, test in cv)
+            else:
+                # parallel via spark
+                def _quic_path_spark(indexed_params):
+                    index, (train, test) = indexed_params
+                    local_X = X_bc.value
+                    result = _quic_path(
+                        local_X[train],
+                        path,
+                        X_test=local_X[test],
+                        lam=self.lam, tol=self.tol, max_iter=self.max_iter, 
+                        Theta0=self.Theta0, Sigma0=self.Sigma0, method=self.method,
+                        verbose=self.verbose, score_metric=self.score_metric,
+                        init_method=self.init_method
+                    )
+                    return index, result
+                
+                train_test_grid = [(train, test) for (train, test) in cv]
+                indexed_param_grid = list(
+                    zip(range(len(train_test_grid)), train_test_grid)
+                )
+                par_param_grid = self.sc.parallelize(indexed_param_grid)
+                X_bc = self.sc.broadcast(X)
+                y_bc = self.sc.broadcast(y)
+
+                indexed_results = dict(
+                    par_param_grid.map(_quic_path_spark).collect()
+                )
+                this_result = [
+                    indexed_results[idx] for idx in range(len(train_test_grid))
+                ]
+
+                X_bc.unpersist()
+                y_bc.unpersist()
+
 
             # Little dance to transform the list in what we need
             covs, _, scores = zip(*this_result)
