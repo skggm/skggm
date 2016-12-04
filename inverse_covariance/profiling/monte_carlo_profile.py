@@ -40,7 +40,7 @@ def _ms_fit(indexed_params, estimator, n_features, graph, prng):
     ms_estimator = clone(estimator)
     ms_estimator.fit(X)
 
-    return index, (cov, prec, adj), ms_estimator.lam_, n_samples
+    return index, ((cov, prec, adj), ms_estimator.lam_, n_samples)
 
 
 def _mc_fit(indexed_params, estimator, metrics, prng):
@@ -72,7 +72,9 @@ def _cpu_map(fun, param_grid, n_jobs):
 def _spark_map(fun, indexed_param_grid, sc):
     par_param_grid = sc.parallelize(indexed_param_grid, len(indexed_param_grid))
     indexed_results = dict(par_param_grid.map(fun).collect())
-    return [indexed_out0[idx] for idx in range(len(param_grid))]
+    return [
+        (idx, indexed_results[idx]) for idx in range(len(indexed_param_grid))
+    ]
 
 
 class MonteCarloProfile(object):
@@ -213,7 +215,7 @@ class MonteCarloProfile(object):
             print 'Getting parameters via model selection...'
 
         if self.sc is not None:
-            mc_results = _spark_map(ms_fit, indexed_param_grid, self.sc)
+            ms_results = _spark_map(ms_fit, indexed_param_grid, self.sc)
         else:
             ms_results = _cpu_map(ms_fit, indexed_param_grid, self.n_jobs)
 
@@ -222,7 +224,7 @@ class MonteCarloProfile(object):
 
         # track nnz of graph precision
         self.precision_nnz_ = [
-            np.count_nonzero(graph[1].flat) for _, graph, _, _ in ms_results
+            np.count_nonzero(graph[1].flat) for _, (graph, _, _) in ms_results
         ]
 
         # build param grid for mc trials
@@ -231,7 +233,7 @@ class MonteCarloProfile(object):
         #  (0, graph_0, lam_0, n_samples_), (1, graph_0, lam_0, n_samples_0),...
         trial_param_grid = [
             (nn, graph, lam, n_samples) 
-            for _, graph, lam, n_samples in ms_results 
+            for _, (graph, lam, n_samples) in ms_results 
             for nn in range(self.n_trials)
         ]
         indexed_trial_param_grid = list(
