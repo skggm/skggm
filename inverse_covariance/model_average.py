@@ -10,6 +10,8 @@ from .inverse_covariance import _init_coefs
 from . import QuicGraphLassoCV
 
 
+X_bc = None
+
 def _check_psd(m):
     return np.all(np.linalg.eigvals(m) >= 0)
 
@@ -82,6 +84,7 @@ def _fit(indexed_params, penalization, lam, lam_perturb, lam_scale_, estimator,
 
     if X is None:
         # this implies a spark context, use broadcast data
+        global X_bc
         local_X = X_bc.value
     else:
         local_X = X
@@ -345,12 +348,13 @@ class ModelAverage(BaseEstimator):
                 n_jobs=self.n_jobs
             )
         else:
+            global X_bc 
             X_bc = self.sc.broadcast(X)
             results = _spark_map(
                 fit_fun,
                 indexed_param_grid,
-                sc,
-                seed
+                self.sc,
+                self.seed
             )
             X_bc.unpersist()
 
