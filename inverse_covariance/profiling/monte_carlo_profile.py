@@ -69,12 +69,26 @@ def _cpu_map(fun, param_grid, n_jobs, verbose):
         for params in param_grid)
 
 
-def _spark_map(fun, indexed_param_grid, sc):
-    par_param_grid = sc.parallelize(indexed_param_grid, len(indexed_param_grid))
-    indexed_results = dict(par_param_grid.map(fun).collect())
-    return [
-        (idx, indexed_results[idx]) for idx in range(len(indexed_param_grid))
-    ]
+def _spark_map(fun, indexed_param_grid, sc, seed):
+    '''We cannot pass a RandomState instance to each spark worker since it will
+    behave identically across partitions.  Instead, we explictly handle the 
+    partitions with a newly seeded instance.  
+
+    The seed for each partition will be the "seed" (MonteCarloProfile.seed) +
+    "split_index" which is the partition index.  
+
+    Following this trick:
+        https://wegetsignal.wordpress.com/2015/05/08/
+                generating-random-numbers-for-rdd-in-spark/
+    '''
+    def _wrap_random_state(split_index, partition):
+        prng = np.random.RandomState(seed + split_index)
+        yield map(partial(fun, prng=prng), partition)
+
+    par_param_grid = sc.parallelize(indexed_param_grid) 
+    indexed_results = par_param_grid.mapPartitionsWithIndex(
+        _wrap_random_state).collect()
+    return [item for sublist in indexed_results for item in sublist]
 
 
 class MonteCarloProfile(object):
@@ -133,7 +147,7 @@ class MonteCarloProfile(object):
         If a sparkContext object is provided, n_jobs will be ignore and the 
         work will be parallelized via spark.
 
-    seed : np.random.RandomState seed. (default=2)
+    seed : np.random.RandomState starting seed. (default=2)
 
 
     Attributes
@@ -165,6 +179,7 @@ class MonteCarloProfile(object):
         self.verbose = verbose
         self.n_jobs = n_jobs
         self.sc = sc
+        self.seed = seed
         self.prng = np.random.RandomState(seed)
 
         if self.graph is None:
@@ -215,7 +230,8 @@ class MonteCarloProfile(object):
             print 'Getting parameters via model selection...'
 
         if self.sc is not None:
-            ms_results = _spark_map(ms_fit, indexed_param_grid, self.sc)
+            ms_results = _spark_map(ms_fit, indexed_param_grid, self.sc,
+                                    self.seed)
         else:
             ms_results = _cpu_map(ms_fit, indexed_param_grid, self.n_jobs,
                                   self.verbose)
@@ -250,7 +266,8 @@ class MonteCarloProfile(object):
             print 'Fitting MC trials...'
 
         if self.sc is not None:
-            mc_results = _spark_map(mc_fit, indexed_trial_param_grid, self.sc)
+            mc_results = _spark_map(mc_fit, indexed_trial_param_grid, self.sc,
+                                    self.seed + len(param_grid))
         else:
             mc_results = _cpu_map(mc_fit, indexed_trial_param_grid, self.n_jobs,
                                   self.verbose)
