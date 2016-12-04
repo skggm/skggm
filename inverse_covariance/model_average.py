@@ -3,6 +3,8 @@ from __future__ import absolute_import
 import numpy as np
 from sklearn.base import BaseEstimator, clone
 from sklearn.utils import check_array, as_float_array
+from sklearn.externals.joblib import Parallel, delayed
+from functools import partial
 
 from .inverse_covariance import _init_coefs
 from . import QuicGraphLassoCV
@@ -12,26 +14,25 @@ def _check_psd(m):
     return np.all(np.linalg.eigvals(m) >= 0)
 
 
-def _fully_random_weights(n_features, lam_scale):
-    """Generate a symmetric random matrix with zeros along the diagonal.
-    """
+def _fully_random_weights(n_features, lam_scale, prng):
+    """Generate a symmetric random matrix with zeros along the diagonal."""
     weights = np.zeros((n_features, n_features))
     n_off_diag = (n_features ** 2 - n_features) / 2 
     weights[np.triu_indices(n_features, k=1)] =\
-            0.1 * lam_scale * np.random.randn(n_off_diag) + (0.25 * lam_scale)
+            0.1 * lam_scale * prng.randn(n_off_diag) + (0.25 * lam_scale)
     weights[weights < 0] = 0
     weights = weights + weights.T
     return weights
 
 
-def _random_weights(n_features, lam, lam_perturb):
+def _random_weights(n_features, lam, lam_perturb, prng):
     """Generate a symmetric random matrix with zeros along the diagnoal and 
     non-zero elements take the value {lam * lam_perturb, lam / lam_perturb} 
     with probability 1/2.
     """
     weights = np.zeros((n_features, n_features))
     n_off_diag = (n_features ** 2 - n_features) / 2
-    berns = np.random.binomial(1, 0.5, size=n_off_diag)
+    berns = prng.binomial(1, 0.5, size=n_off_diag)
     vals = np.zeros(berns.shape)
     vals[berns == 0] = 1. * lam * lam_perturb
     vals[berns == 1] = 1. * lam / lam_perturb
@@ -64,10 +65,113 @@ def _fix_weights(weight_fun, *args):
     return np.dot(mod_mat, weights, mod_mat)
 
 
-def _default_bootstrap(n_samples, num_subsamples):
-    """Returns an array of integers (0, n_samples-1)^num_subsamples.
+def _default_bootstrap(n_samples, num_subsamples, prng):
+    """Returns an array of integers (0, n_samples-1)^num_subsamples."""
+    return prng.permutation(n_samples)[:num_subsamples]
+
+
+def _fit(indexed_params, penalization, lam, lam_perturb, lam_scale_, estimator,
+         penalty_name, subsample, bootstrap, prng, X=None):
+    """Wrapper function outside of instance for fitting a single model average
+    trial.
+
+    If X is None, then we assume we are using a broadcast spark object. Else, 
+    we expect X to get passed into this function.
     """
-    return np.random.permutation(n_samples)[:num_subsamples]
+    index = indexed_params
+
+    if X is None:
+        # this implies a spark context, use broadcast data
+        local_X = X_bc.value
+    else:
+        local_X = X
+
+    n_samples, n_features = local_X.shape
+
+    prec_is_real = False
+    while not prec_is_real:
+        boot_lam = None
+        if penalization == 'subsampling':
+            pass
+        elif penalization == 'random':
+            boot_lam = _fix_weights(_random_weights, 
+                                    n_features,
+                                    lam,
+                                    lam_perturb,
+                                    prng)
+        elif penalization == 'fully-random':
+            boot_lam = _fix_weights(_fully_random_weights,
+                                    n_features,
+                                    lam_scale_,
+                                    prng)
+        else:
+            raise NotImplementedError(
+                    ("Only penalization = 'subsampling', "
+                    "'random', and 'fully-random' have "
+                    "been implemented. Found {}.".format(penalization)))
+
+        # new instance of estimator
+        new_estimator = clone(estimator)
+        if boot_lam is not None:
+            new_estimator.set_params(**{
+                penalty_name: boot_lam,
+            }) 
+
+        # fit estimator
+        num_subsamples = int(subsample * n_samples)
+        rp = bootstrap(n_samples, num_subsamples, prng)
+        new_estimator.fit(local_X[rp, :])
+
+        # check that new_estimator.precision_ is real
+        # if not, skip this boot_lam and try again
+        if isinstance(new_estimator.precision_, list):
+            prec_real_bools = []
+            for prec in new_estimator.precision_:
+                prec_real_bools.append(np.all(np.isreal(prec)))
+
+            prec_is_real = np.all(np.array(prec_real_bools) == True)
+        
+        elif isinstance(new_estimator.precision_, np.ndarray):
+            prec_is_real = np.all(np.isreal(new_estimator.precision_))
+
+        else:
+            raise ValueError("Estimator returned invalid precision_.")
+
+    return index, (boot_lam, rp, new_estimator)
+
+
+def _cpu_map(fun, param_grid, n_jobs, verbose=True):
+    return Parallel(
+        n_jobs=n_jobs,
+        verbose=verbose,
+        backend='threading', # any sklearn backend should work here
+    )(
+        delayed(fun)(
+            params
+        )
+        for params in param_grid)
+
+
+def _spark_map(fun, indexed_param_grid, sc, seed):
+    '''We cannot pass a RandomState instance to each spark worker since it will
+    behave identically across partitions.  Instead, we explictly handle the 
+    partitions with a newly seeded instance.  
+    
+    The seed for each partition will be the "seed" (MonteCarloProfile.seed) +
+    "split_index" which is the partition index.  
+    
+    Following this trick:
+        https://wegetsignal.wordpress.com/2015/05/08/
+                generating-random-numbers-for-rdd-in-spark/
+    '''
+    def _wrap_random_state(split_index, partition):
+        prng = np.random.RandomState(seed + split_index)
+        yield map(partial(fun, prng=prng), partition)
+
+    par_param_grid = sc.parallelize(indexed_param_grid) 
+    indexed_results = par_param_grid.mapPartitionsWithIndex(
+        _wrap_random_state).collect()
+    return [item for sublist in indexed_results for item in sublist]
 
 
 class ModelAverage(BaseEstimator):
@@ -135,10 +239,6 @@ class ModelAverage(BaseEstimator):
         Threshold for estimating supports from proportions.  This is provided
         for convience.
 
-    use_cache : bool (default=True)
-        If false, will optionally not cache each estimator instance and 
-        penalization instance (to save memory).
-
     penalty_name : string (default='lam')
         Name of the penalty kwarg in the estimator.  This parameter is 
         unimportant if penalization='subsampling'.
@@ -147,6 +247,15 @@ class ModelAverage(BaseEstimator):
         A function that takes n_samples, num_subsamples as inputs and returns 
         a list of sample indices in the range (0, n_samples-1).
         By default, indices are uniformly subsampled.
+
+    n_jobs: int (optional)
+        number of jobs to run in parallel (default 1).
+
+    sc: sparkContext (optional)
+        If a sparkContext object is provided, n_jobs will be ignore and the 
+        work will be parallelized via spark.
+
+    seed : np.random.RandomState starting seed. (default=2)
 
     Attributes
     ----------
@@ -173,9 +282,9 @@ class ModelAverage(BaseEstimator):
         Average matrix value used among lam_ for all estimators.
     """
     def __init__(self, estimator=None, n_trials=100, subsample=0.3, 
-                 normalize=True, lam=0.5, lam_perturb=0.5, penalization='random',
-                 use_cache=True, penalty_name='lam', support_thresh=0.5,
-                 bootstrap=_default_bootstrap):
+                 normalize=True, lam=0.5, lam_perturb=0.5, 
+                 penalization='random', penalty_name='lam', support_thresh=0.5, 
+                 bootstrap=_default_bootstrap, n_jobs=1, sc=None, seed=1):
         self.estimator = estimator 
         self.n_trials = n_trials
         self.subsample = subsample
@@ -183,10 +292,13 @@ class ModelAverage(BaseEstimator):
         self.lam = lam 
         self.lam_perturb = lam_perturb
         self.penalization = penalization
-        self.use_cache = use_cache
         self.penalty_name = penalty_name
         self.support_thresh = support_thresh
         self.bootstrap = bootstrap
+        self.n_jobs = n_jobs
+        self.sc = sc
+        self.seed = seed 
+        self.prng = np.random.RandomState(seed)
 
         self.proportion_ = None
         self.support_ = None
@@ -218,56 +330,38 @@ class ModelAverage(BaseEstimator):
         n_samples, n_features = X.shape
         _, self.lam_scale_ = _init_coefs(X, method='cov')
         
+        fit_fun = partial(_fit, 
+            penalization=self.penalization, lam=self.lam, 
+            lam_perturb=self.lam_perturb, lam_scale_=self.lam_scale_,
+            estimator=self.estimator, penalty_name=self.penalty_name, 
+            subsample=self.subsample, bootstrap=self.bootstrap
+        )
+        indexed_param_grid = [(nn,) for nn in range(self.n_trials)]
+
+        if self.sc is None:
+            results = _cpu_map(
+                partial(fit_fun, X=X, prng=self.prng),
+                indexed_param_grid,
+                n_jobs=self.n_jobs
+            )
+        else:
+            X_bc = self.sc.broadcast(X)
+            results = _spark_map(
+                fit_fun,
+                indexed_param_grid,
+                sc,
+                seed
+            )
+            X_bc.unpersist()
+
+        self.estimators_ = [e for _, (_, _, e) in results]
+        self.subsets_ = [s for _, (_, s, _) in results]
+        self.lams_ = [l for _, (l, _, _) in results]
+
+        # reduce
         self.lam_ = 0.0
         self.proportion_ = np.zeros((n_features, n_features))
-        for nn in range(self.n_trials):
-            prec_is_real = False
-            while not prec_is_real:
-                lam = None
-                if self.penalization == 'subsampling':
-                    pass
-                elif self.penalization == 'random':
-                    lam = _fix_weights(_random_weights, 
-                                       n_features,
-                                       self.lam,
-                                       self.lam_perturb)
-                elif self.penalization == 'fully-random':
-                    lam = _fix_weights(_fully_random_weights,
-                                       n_features,
-                                       self.lam_scale_)
-                else:
-                    raise NotImplementedError(
-                            ("Only penalization = 'subsampling', "
-                            "'random', and 'fully-random' have "
-                            "been implemented."))
-
-                # new instance of estimator
-                new_estimator = clone(self.estimator)
-                if lam is not None:
-                    new_estimator.set_params(**{
-                        self.penalty_name: lam,
-                    }) 
-
-                # fit estimator
-                num_subsamples = int(self.subsample * n_samples)
-                rp = self.bootstrap(n_samples, num_subsamples)
-                new_estimator.fit(X[rp, :])
-
-                # check that new_estimator.precision_ is real
-                # if not, skip this lam and try again
-                if isinstance(new_estimator.precision_, list):
-                    prec_real_bools = []
-                    for prec in new_estimator.precision_:
-                        prec_real_bools.append(np.all(np.isreal(prec)))
-
-                    prec_is_real = np.all(np.array(prec_real_bools) == True)
-                
-                elif isinstance(new_estimator.precision_, np.ndarray):
-                    prec_is_real = np.all(np.isreal(new_estimator.precision_))
-
-                else:
-                    raise ValueError("Estimator returned invalid precision_.")
-
+        for new_estimator in self.estimators_:
             # update proportions
             if isinstance(new_estimator.precision_, list):
                 for prec in new_estimator.precision_:
@@ -279,21 +373,14 @@ class ModelAverage(BaseEstimator):
             else:
                 raise ValueError("Estimator returned invalid precision_.")
 
-            # estimate support locations
-            threshold = self.support_thresh * self.n_trials
-            self.support_ = np.zeros(self.proportion_.shape)
-            self.support_[self.proportion_ > threshold] = 1.0
-
             # currently, dont estimate self.lam_ if penalty_name is different
             if self.penalty_name == 'lam':
-                self.lam_ += np.mean(new_estimator.lam_.flat)
-            
-            # save estimators, subsets, and lambdas
-            if self.use_cache:
-                self.estimators_.append(new_estimator)
-                self.subsets_.append(rp)
-                if lam is not None:
-                    self.lams_.append(lam)
+                self.lam_ += np.mean(new_estimator.lam_.flat)            
+
+        # estimate support locations
+        threshold = self.support_thresh * self.n_trials
+        self.support_ = np.zeros(self.proportion_.shape)
+        self.support_[self.proportion_ > threshold] = 1.0
 
         self.lam_ /= self.n_trials
         if self.normalize:

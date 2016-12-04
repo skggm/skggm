@@ -31,7 +31,6 @@ class TestModelAverage(object):
             'lam': 0.1,
             'lam_perturb': 0.1,
             'penalization': 'random',
-            'use_cache': True,
         }),
         ({
             'estimator': GraphLassoCV(),
@@ -39,8 +38,17 @@ class TestModelAverage(object):
             'normalize': True,
             'subsample': 0.3,
             'penalization': 'subsampling',
-            'use_cache': True,
             'penalty_name': 'alpha',
+        }),
+        ({
+            'estimator': QuicGraphLassoCV(),
+            'n_trials': 10,
+            'normalize': True,
+            'subsample': 0.3,
+            'lam': 0.1,
+            'lam_perturb': 0.1,
+            'penalization': 'random',
+            'n_jobs': 2,
         }),
     ])
     def test_integration_quic_graph_lasso_cv(self, params_in):
@@ -54,17 +62,13 @@ class TestModelAverage(object):
         n_examples, n_features = X.shape
 
         assert ma.proportion_.shape == (n_features, n_features)
-        if ma.use_cache:
-            assert len(ma.estimators_) == ma.n_trials
-            assert len(ma.subsets_) == ma.n_trials
-            if not ma.penalization == 'subsampling':
-                assert len(ma.lams_) == ma.n_trials
-            else:
-                assert len(ma.lams_) == 0
+        assert len(ma.estimators_) == ma.n_trials
+        assert len(ma.subsets_) == ma.n_trials
+        if not ma.penalization == 'subsampling':
+            assert len(ma.lams_) == ma.n_trials
         else:
-            assert len(ma.estimators_) == 0
-            assert len(ma.lams_) == 0
-            assert len(ma.subsets_) == 0
+            assert len(ma.lams_) == ma.n_trials
+            assert ma.lams_[0] is None
 
         for eidx, e in enumerate(ma.estimators_):
             assert isinstance(e, params_in['estimator'].__class__)
