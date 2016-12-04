@@ -5,6 +5,7 @@ import collections
 import operator
 import numpy as np
 import scipy.sparse as sp
+from functools import partial
 
 from sklearn.covariance import EmpiricalCovariance
 from sklearn.utils import check_array, as_float_array
@@ -576,17 +577,21 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                 par_param_grid = self.sc.parallelize(indexed_param_grid)
                 X_bc = self.sc.broadcast(X)
 
+                # wrap function parameters so we dont pick whole self object
+                quic_path = partial(
+                    _quic_path,
+                    path=path,
+                    lam=self.lam, tol=self.tol, max_iter=self.max_iter, 
+                    Theta0=self.Theta0, Sigma0=self.Sigma0, method=self.method,
+                    verbose=self.verbose, score_metric=self.score_metric,
+                    init_method=self.init_method
+                )
+
                 def _quic_path_spark(indexed_params):
                     index, (local_train, local_test) = indexed_params
-                    local_X = X_bc.value
-                    result = _quic_path(
-                        local_X[local_train],
-                        path,
-                        X_test=local_X[local_test],
-                        lam=self.lam, tol=self.tol, max_iter=self.max_iter, 
-                        Theta0=self.Theta0, Sigma0=self.Sigma0, method=self.method,
-                        verbose=self.verbose, score_metric=self.score_metric,
-                        init_method=self.init_method
+                    result = quic_path(
+                        X_bc.value[local_train],
+                        X_test=X_bc.value[local_test]
                     )
                     return index, result
                 
