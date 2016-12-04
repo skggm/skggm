@@ -50,17 +50,17 @@ def _mc_fit(indexed_params, estimator, metrics, prng):
     # compute mc trial
     X = _sample_mvn(n_samples, cov, prng)
     mc_estimator = clone(estimator)
+    mc_estimator.set_params(lam=lam)
     mc_estimator.fit(X)
-    mc_estimator.set_params(lam=lam) # **{'lam': lam}
     results = {k: f(prec, mc_estimator.precision_) for k,f in metrics.items()}
 
     return index, results
 
 
-def _cpu_map(fun, param_grid, n_jobs):
+def _cpu_map(fun, param_grid, n_jobs, verbose):
     return Parallel(
         n_jobs=n_jobs,
-        verbose=True,
+        verbose=verbose,
         backend='threading', # any sklearn backend should work here
     )(
         delayed(fun)(
@@ -217,7 +217,8 @@ class MonteCarloProfile(object):
         if self.sc is not None:
             ms_results = _spark_map(ms_fit, indexed_param_grid, self.sc)
         else:
-            ms_results = _cpu_map(ms_fit, indexed_param_grid, self.n_jobs)
+            ms_results = _cpu_map(ms_fit, indexed_param_grid, self.n_jobs,
+                                  self.verbose)
 
         # ensure results are ordered
         ms_results = sorted(ms_results, key=lambda r: r[0])
@@ -251,7 +252,8 @@ class MonteCarloProfile(object):
         if self.sc is not None:
             mc_results = _spark_map(mc_fit, indexed_trial_param_grid, self.sc)
         else:
-            mc_results = _cpu_map(mc_fit, indexed_trial_param_grid, self.n_jobs)
+            mc_results = _cpu_map(mc_fit, indexed_trial_param_grid, self.n_jobs,
+                                  self.verbose)
 
         # ensure results are ordered correctly
         mc_results = sorted(mc_results, key=lambda r: r[0])
