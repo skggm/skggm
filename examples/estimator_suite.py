@@ -238,7 +238,8 @@ def model_average(X, penalization):
     model = ModelAverage(
         n_trials=n_trials,
         penalization=penalization,
-        lam=lam)
+        lam=lam,
+        n_jobs=1)
     model.fit(X)
     print '   lam_: {}'.format(model.lam_)
     return model.proportion_, model.support_, model.lam_
@@ -275,7 +276,8 @@ def adaptive_model_average(X, penalization, method):
             estimator = ModelAverage(
                 n_trials=n_trials,
                 penalization=penalization,
-                lam=lam),
+                lam=lam,
+                n_jobs=1),
             method=method,
     )
     model.fit(X)
