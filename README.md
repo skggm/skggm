@@ -104,7 +104,7 @@ Information on basic usage can be found at [https://skggm.github.io/skggm/tour](
 
 can make use of this through either the `n_jobs` or `sc` (sparkContext) parameters.  
 
-Since these are naive implementations, it is not possible to enable parallelism on all three of objects simultaneously when they are being composited together. For example, in this snippet:
+Since these are naive implementations, it is not possible to enable parallel work on all three of objects simultaneously when they are being composited together. For example, in this snippet:
 
     model = ModelAverage(
         estimator=QuicGraphLassoCV(
