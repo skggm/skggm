@@ -118,7 +118,7 @@ Since these are naive implementations, it is not possible to enable parallelism 
     )
     model.fit(X)
 
-only one of `ModelAverage` or `QuicGraphLassoCV` can make use of the spark context. The problem size, number of trials, and horsepower of each worker/core will determine the resolution that will give the fastest performance.
+only one of `ModelAverage` or `QuicGraphLassoCV` can make use of the spark context. The problem size and number of trials will determine the resolution that will give the fastest performance.
 
 ## Installation
 
