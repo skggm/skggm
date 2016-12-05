@@ -111,7 +111,6 @@ Since these are naive implementations, it is not possible to enable parallel wor
             cv=2, 
             n_refinements=6,
         )
-        n_trials=n_trials,
         penalization=penalization,
         lam=lam,
         sc=spark.sparkContext,
