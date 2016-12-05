@@ -98,9 +98,9 @@ Information on basic usage can be found at [https://skggm.github.io/skggm/tour](
 
 `skggm` supports parallel computation through [sklearn.joblib](http://pythonhosted.org/joblib/) and [Apache Spark](http://spark.apache.org/).  Independent trials, cross validation, and other _embarrassingly parallel_ operations can be farmed out to multiple processes, cores, or worker machines.  In particular,
 
-    - QuicGraphLassoCV
-    - ModelAverage
-    - profiling.MonteCarloProfile
+- QuicGraphLassoCV
+- ModelAverage
+- profiling.MonteCarloProfile
 
 can make use of this through either the `n_jobs` or `sc` (sparkContext) parameters.  
 
