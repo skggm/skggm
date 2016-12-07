@@ -375,6 +375,15 @@ def _quic_path(X, path, X_test=None, lam=0.5, tol=1e-6,
     return covariances_, precisions_
 
 
+def _quic_path_spark(indexed_params, quic_path, X_bc):
+    index, (local_train, local_test) = indexed_params
+    result = quic_path(
+        X_bc.value[local_train],
+        X_test=X_bc.value[local_test]
+    )
+    return index, result
+
+
 class QuicGraphLassoCV(InverseCovarianceEstimator):
     """Sparse inverse covariance w/ cross-validated choice of the l1 penalty
     via quadratic approximation.  
@@ -587,16 +596,12 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                     init_method=self.init_method
                 )
 
-                def _quic_path_spark(indexed_params):
-                    index, (local_train, local_test) = indexed_params
-                    result = quic_path(
-                        X_bc.value[local_train],
-                        X_test=X_bc.value[local_test]
-                    )
-                    return index, result
-                
                 indexed_results = dict(
-                    par_param_grid.map(_quic_path_spark).collect()
+                    par_param_grid.map(partial(
+                        _quic_path_spark,
+                        quic_path=quic_path,
+                        X_bc=X_bc
+                    )).collect()
                 )
                 this_result = [
                     indexed_results[idx] for idx in range(len(train_test_grid))
