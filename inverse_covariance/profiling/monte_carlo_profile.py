@@ -257,20 +257,29 @@ class MonteCarloProfile(object):
             zip(range(len(trial_param_grid)), trial_param_grid)
         )
 
-        mc_fit = partial(_mc_fit, 
-                         estimator=self.mc_estimator,
-                         metrics=self.metrics,
-                         prng=self.prng)
+        mc_fit = partial(
+            _mc_fit, 
+            estimator=self.mc_estimator,
+            metrics=self.metrics
+        )
         
         if self.verbose:
             print 'Fitting MC trials...'
 
         if self.sc is not None:
-            mc_results = _spark_map(mc_fit, indexed_trial_param_grid, self.sc,
-                                    self.seed + len(param_grid))
+            mc_results = _spark_map(
+                mc_fit,
+                indexed_trial_param_grid,
+                self.sc,
+                self.seed + len(param_grid)
+            )
         else:
-            mc_results = _cpu_map(mc_fit, indexed_trial_param_grid, self.n_jobs,
-                                  self.verbose)
+            mc_results = _cpu_map(
+                partial(mc_fit, prng=self.prng),
+                indexed_trial_param_grid,
+                self.n_jobs,
+                self.verbose
+            )
 
         # ensure results are ordered correctly
         mc_results = sorted(mc_results, key=lambda r: r[0])
