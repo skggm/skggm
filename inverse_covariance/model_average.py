@@ -10,8 +10,6 @@ from .inverse_covariance import _init_coefs
 from . import QuicGraphLassoCV
 
 
-X_bc = None
-
 def _check_psd(m):
     return np.all(np.linalg.eigvals(m) >= 0)
 
@@ -84,8 +82,7 @@ def _fit(indexed_params, penalization, lam, lam_perturb, lam_scale_, estimator,
 
     if X is None:
         # this implies a spark context, use broadcast data
-        global X_bc
-        local_X = X_bc.value
+        local_X = X.value
     else:
         local_X = X
 
@@ -155,7 +152,7 @@ def _cpu_map(fun, param_grid, n_jobs, verbose=True):
         for params in param_grid)
 
 
-def _spark_map(fun, indexed_param_grid, sc, seed):
+def _spark_map(fun, indexed_param_grid, sc, seed, X_bc):
     '''We cannot pass a RandomState instance to each spark worker since it will
     behave identically across partitions.  Instead, we explictly handle the 
     partitions with a newly seeded instance.  
@@ -169,7 +166,7 @@ def _spark_map(fun, indexed_param_grid, sc, seed):
     '''
     def _wrap_random_state(split_index, partition):
         prng = np.random.RandomState(seed + split_index)
-        yield map(partial(fun, prng=prng), partition)
+        yield map(partial(fun, prng=prng, X=X_bc), partition)
 
     par_param_grid = sc.parallelize(indexed_param_grid) 
     indexed_results = par_param_grid.mapPartitionsWithIndex(
@@ -348,13 +345,13 @@ class ModelAverage(BaseEstimator):
                 n_jobs=self.n_jobs
             )
         else:
-            global X_bc 
             X_bc = self.sc.broadcast(X)
             results = _spark_map(
                 fit_fun,
                 indexed_param_grid,
                 self.sc,
-                self.seed
+                self.seed,
+                X_bc
             )
             X_bc.unpersist()
 
