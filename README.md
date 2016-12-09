@@ -94,6 +94,31 @@ Information on basic usage can be found at [https://skggm.github.io/skggm/tour](
 
     An example of how to use these tools can be found in `examples/profiling_example.py`.
 
+## Parallelization Support
+
+`skggm` supports parallel computation through [sklearn.joblib](http://pythonhosted.org/joblib/) and [Apache Spark](http://spark.apache.org/).  Independent trials, cross validation, and other _embarrassingly parallel_ operations can be farmed out to multiple processes, cores, or worker machines.  In particular,
+
+- `QuicGraphLassoCV`
+- `ModelAverage`
+- `profiling.MonteCarloProfile`
+
+can make use of this through either the `n_jobs` or `sc` (sparkContext) parameters.  
+
+Since these are naive implementations, it is not possible to enable parallel work on all three of objects simultaneously when they are being composited together. For example, in this snippet:
+
+    model = ModelAverage(
+        estimator=QuicGraphLassoCV(
+            cv=2, 
+            n_refinements=6,
+        )
+        penalization=penalization,
+        lam=lam,
+        sc=spark.sparkContext,
+    )
+    model.fit(X)
+
+only one of `ModelAverage` or `QuicGraphLassoCV` can make use of the spark context. The problem size and number of trials will determine the resolution that gives the fastest performance.
+
 ## Installation
 
 Clone this repo and run
@@ -118,8 +143,7 @@ This package requires the `lapack` libraries to by installed on your system. A c
 ## Tests
 To run the tests, execute the following lines.  
 
-    python -m pytest inverse_covariance/tests/
-    python -m pytest inverse_covariance/profiling/tests
+    python -m pytest inverse_covariance
 
 # Examples
 
