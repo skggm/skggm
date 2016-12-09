@@ -147,6 +147,10 @@ class Graph(object):
         self.seed = seed
         self.prng = np.random.RandomState(self.seed)
 
+        if n_blocks == 1 and chain_blocks:
+            raise ValueError("chain_blocks must be False when n_blocks is 1.")
+            return
+
     def to_precision(self, adjacency, weighted=True, rescale=True):
         if weighted:
             dd_adj = _to_diagonally_dominant_weighted(adjacency)
