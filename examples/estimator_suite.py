@@ -215,9 +215,9 @@ def model_average(X, penalization):
            return the raw proportions for "cov" and the threshold support estimate
            for prec.
     '''
-    n_trials = 20
+    n_trials = 100
     print 'ModelAverage with:'
-    print '   estimator: QuicGraphLassoCV (default)'
+    print '   estimator: QuicGraphLasso (default)'
     print '   n_trials: {}'.format(n_trials)
     print '   penalization: {}'.format(penalization)
     
@@ -251,9 +251,9 @@ def adaptive_model_average(X, penalization, method):
 
     NOTE:  Only method = 'binary' really makes sense in this case.
     '''
-    n_trials = 20
+    n_trials = 100
     print 'Adaptive ModelAverage with:'
-    print '   estimator: QuicGraphLassoCV (default)'
+    print '   estimator: QuicGraphLasso (default)'
     print '   n_trials: {}'.format(n_trials)
     print '   penalization: {}'.format(penalization)
     print '   adaptive-method: {}'.format(method)  
@@ -447,8 +447,8 @@ if __name__ == "__main__":
 
     # Default ModelAverage
     params = [
-        ('ModelAverage CV : random', 'random'),
-        ('ModelAverage CV : fully-random', 'fully-random'),
+        ('ModelAverage : random', 'random'),
+        ('ModelAverage : fully-random', 'fully-random'),
     ]
     for name, model_selector in params:
         start_time = time.time()

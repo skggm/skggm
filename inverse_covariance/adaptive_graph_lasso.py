@@ -103,33 +103,32 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         n_samples, n_features = X.shape
 
         # perform first estimate
-        new_estimator = clone(self.estimator)
-        new_estimator.fit(X)
+        self.estimator.fit(X)
 
         if self.method == 'binary':
             # generate weights
-            self.lam_ = self._binary_weights(new_estimator)
+            self.lam_ = self._binary_weights(self.estimator)
 
             # perform second step adaptive estimate
-            self.estimator_ = QuicGraphLasso(lam=self.lam_ * new_estimator.lam_, 
+            self.estimator_ = QuicGraphLasso(lam=self.lam_ * self.estimator.lam_, 
                                              mode='default',
                                              init_method='cov',
                                              auto_scale=False) 
             self.estimator_.fit(X)
         
         elif self.method == 'inverse_squared':
-            self.lam_ = self._inverse_squared_weights(new_estimator)
+            self.lam_ = self._inverse_squared_weights(self.estimator)
 
             # perform second step adaptive estimate
-            self.estimator_ = QuicGraphLassoCV(lam=self.lam_ * new_estimator.lam_,
+            self.estimator_ = QuicGraphLassoCV(lam=self.lam_ * self.estimator.lam_,
                                                auto_scale=False) 
             self.estimator_.fit(X)
         
         elif self.method == 'inverse':
-            self.lam_ = self._inverse_weights(new_estimator)
+            self.lam_ = self._inverse_weights(self.estimator)
 
             # perform second step adaptive estimate
-            self.estimator_ = QuicGraphLassoCV(lam=self.lam_ * new_estimator.lam_,
+            self.estimator_ = QuicGraphLassoCV(lam=self.lam_ * self.estimator.lam_,
                                                auto_scale=False)
             self.estimator_.fit(X)
 
