@@ -143,8 +143,7 @@ This package requires the `lapack` libraries to by installed on your system. A c
 ## Tests
 To run the tests, execute the following lines.  
 
-    python -m pytest inverse_covariance/tests/
-    python -m pytest inverse_covariance/profiling/tests
+    python -m pytest inverse_covariance
 
 # Examples
 
