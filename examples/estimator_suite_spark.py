@@ -266,7 +266,7 @@ def _count_support_diff(m, m_hat):
 
 
 if __name__ == "__main__":
-    n_samples = 400 
+    n_samples = 600 
     n_features = 50 
     cv_folds = 3
 
@@ -417,6 +417,7 @@ if __name__ == "__main__":
     
     num_rows = len(named_mats) / 3
     num_plots = int(np.ceil(num_rows / 4.))
+    figs = []
     for nn in range(num_plots):
         fig = plt.figure(figsize=(10, 8))
         plt.subplots_adjust(left=0.02, right=0.98, hspace=0.4)
@@ -429,9 +430,7 @@ if __name__ == "__main__":
 
             vmax = np.abs(this_mat).max()
             ax = plt.subplot(4, 3, i + 1)
-            plt.imshow(np.ma.masked_values(this_mat, 0),
-                       interpolation='nearest', vmin=-vmax, vmax=vmax,
-                       cmap=plt.cm.RdBu_r)
+            plt.imshow(np.ma.masked_values(this_mat, 0), interpolation='nearest')
             plt.xticks(())
             plt.yticks(())
             if lam is None or lam == '':
@@ -441,4 +440,11 @@ if __name__ == "__main__":
             ax.set_axis_bgcolor('.7')
 
         plt.suptitle(suptitle + ' (page {})'.format(nn), fontsize=14)
-        display(fig)
+        figs.append(fig)
+        
+
+    #
+    # In separate cells, run each of these commands
+    #
+    display(fig[0])
+    display(fig[1])
