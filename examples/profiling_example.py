@@ -34,7 +34,7 @@ metrics = {
 
 mc = MonteCarloProfile(n_features=50, n_trials=10, graph=LatticeGraph(),
                        n_samples_grid=10, alpha_grid=5, metrics=metrics, 
-                       verbose=True)
+                       verbose=True, n_jobs=4)
 mc.fit()
 
 ###############################################################################
