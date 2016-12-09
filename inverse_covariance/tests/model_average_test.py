@@ -100,5 +100,3 @@ class TestModelAverage(object):
                 
         assert np.min(ma.proportion_) >= 0.0
         assert np.max(ma.proportion_) > 0.0
-
-
