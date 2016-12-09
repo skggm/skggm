@@ -7,7 +7,7 @@ from sklearn.externals.joblib import Parallel, delayed
 from functools import partial
 
 from .inverse_covariance import _init_coefs
-from . import QuicGraphLassoCV
+from . import QuicGraphLasso
 
 
 def _check_psd(m):
@@ -307,9 +307,9 @@ class ModelAverage(BaseEstimator):
         self.lams_ = []
         self.subsets_ = []
 
-        # default to QuicGraphLassoCV
+        # default to QuicGraphLasso
         if self.estimator is None:
-            self.estimator = QuicGraphLassoCV()
+            self.estimator = QuicGraphLasso()
 
         if self.penalization != 'subsampling' and\
                 not hasattr(self.estimator, self.penalty_name):

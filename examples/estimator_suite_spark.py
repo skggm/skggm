@@ -163,7 +163,7 @@ def model_average(X, penalization):
     '''
     n_trials = 100
     print 'ModelAverage with:'
-    print '   estimator: QuicGraphLassoCV (default)'
+    print '   estimator: QuicGraphLasso (default)'
     print '   n_trials: {}'.format(n_trials)
     print '   penalization: {}'.format(penalization)
     
@@ -199,7 +199,7 @@ def adaptive_model_average(X, penalization, method):
     '''
     n_trials = 100
     print 'Adaptive ModelAverage with:'
-    print '   estimator: QuicGraphLassoCV (default)'
+    print '   estimator: QuicGraphLasso (default)'
     print '   n_trials: {}'.format(n_trials)
     print '   penalization: {}'.format(penalization)
     print '   adaptive-method: {}'.format(method)  
@@ -350,8 +350,8 @@ if __name__ == "__main__":
 
     # Default ModelAverage
     params = [
-        ('ModelAverage CV : random', 'random'),
-        ('ModelAverage CV : fully-random', 'fully-random'),
+        ('ModelAverage : random', 'random'),
+        ('ModelAverage : fully-random', 'fully-random'),
     ]
     for name, model_selector in params:
         start_time = time.time()
@@ -412,7 +412,7 @@ if __name__ == "__main__":
 
     # plots must be inline for notebooks on databricks
 
-    named_mats = precs
+    named_mats = plot_precs
     suptitle = 'Precision Estimates'
     
     num_rows = len(named_mats) / 3
@@ -441,5 +441,4 @@ if __name__ == "__main__":
             ax.set_axis_bgcolor('.7')
 
         plt.suptitle(suptitle + ' (page {})'.format(nn), fontsize=14)
-        plt.show()
         display(fig)

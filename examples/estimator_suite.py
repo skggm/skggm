@@ -217,7 +217,7 @@ def model_average(X, penalization):
     '''
     n_trials = 20
     print 'ModelAverage with:'
-    print '   estimator: QuicGraphLassoCV (default)'
+    print '   estimator: QuicGraphLasso (default)'
     print '   n_trials: {}'.format(n_trials)
     print '   penalization: {}'.format(penalization)
     
@@ -253,7 +253,7 @@ def adaptive_model_average(X, penalization, method):
     '''
     n_trials = 20
     print 'Adaptive ModelAverage with:'
-    print '   estimator: QuicGraphLassoCV (default)'
+    print '   estimator: QuicGraphLasso (default)'
     print '   n_trials: {}'.format(n_trials)
     print '   penalization: {}'.format(penalization)
     print '   adaptive-method: {}'.format(method)  
@@ -447,8 +447,8 @@ if __name__ == "__main__":
 
     # Default ModelAverage
     params = [
-        ('ModelAverage CV : random', 'random'),
-        ('ModelAverage CV : fully-random', 'fully-random'),
+        ('ModelAverage : random', 'random'),
+        ('ModelAverage : fully-random', 'fully-random'),
     ]
     for name, model_selector in params:
         start_time = time.time()
