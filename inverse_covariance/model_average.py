@@ -80,12 +80,11 @@ def _fit(indexed_params, penalization, lam, lam_perturb, lam_scale_, estimator,
     """
     index = indexed_params
 
-    if X is None:
-        # this implies a spark context, use broadcast data
-        local_X = X.value
-    else:
+    if isinstance(X, np.ndarray):
         local_X = X
-
+    else:
+        local_X = X.value
+        
     n_samples, n_features = local_X.shape
 
     prec_is_real = False
