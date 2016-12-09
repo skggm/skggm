@@ -1,13 +1,15 @@
 import numpy as np
 import pytest
 
-from sklearn import datasets
-
 from inverse_covariance import (
     QuicGraphLassoEBIC,
     AdaptiveGraphLasso,
     QuicGraphLassoCV,
 )
+from inverse_covariance.profiling import (
+    ClusterGraph,
+)
+
 
 class TestAdaptiveGraphLasso(object):
     @pytest.mark.parametrize("params_in", [
@@ -55,8 +57,15 @@ class TestAdaptiveGraphLasso(object):
         '''
         Just tests inputs/outputs (not validity of result).
         '''
-        X = datasets.load_diabetes().data
-        n_examples, n_features = X.shape
+        n_features = 20
+        n_samples = 25
+        cov, prec, adj = ClusterGraph(
+            n_blocks=1,
+            chain_blocks=False,
+            seed=1,
+        ).create(n_features, 0.8)
+        prng = np.random.RandomState(2)
+        X = prng.multivariate_normal(np.zeros(n_features), cov, size=n_samples)
         
         model = AdaptiveGraphLasso(**params_in)
         model.fit(X)

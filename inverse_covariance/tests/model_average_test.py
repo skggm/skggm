@@ -1,11 +1,12 @@
 import numpy as np
 import pytest
 
-from sklearn import datasets
 from sklearn.covariance import GraphLassoCV
 
 from inverse_covariance import QuicGraphLassoCV, QuicGraphLasso, ModelAverage
-
+from inverse_covariance.profiling import (
+    ClusterGraph,
+)
 
 class TestModelAverage(object):
     @pytest.mark.parametrize("params_in", [
@@ -18,7 +19,7 @@ class TestModelAverage(object):
         }),
         ({
             'estimator': QuicGraphLasso(lam=0.5, mode='trace'),
-            'n_trials': 15,
+            'n_trials': 10,
             'normalize': False,
             'subsample': 0.6,
             'penalization': 'fully-random',
@@ -27,7 +28,7 @@ class TestModelAverage(object):
             'estimator': QuicGraphLassoCV(),
             'n_trials': 10,
             'normalize': True,
-            'subsample': 0.3,
+            'subsample': 0.8,
             'lam': 0.1,
             'lam_perturb': 0.1,
             'penalization': 'random',
@@ -36,12 +37,12 @@ class TestModelAverage(object):
             'estimator': GraphLassoCV(),
             'n_trials': 10,
             'normalize': True,
-            'subsample': 0.3,
+            'subsample': 0.8,
             'penalization': 'subsampling',
             'penalty_name': 'alpha',
         }),
         ({
-            'estimator': QuicGraphLassoCV(),
+            'estimator': QuicGraphLasso(),
             'n_trials': 10,
             'normalize': True,
             'subsample': 0.3,
@@ -55,7 +56,16 @@ class TestModelAverage(object):
         '''
         Just tests inputs/outputs (not validity of result).
         '''
-        X = datasets.load_diabetes().data
+        n_features = 10
+        n_samples = 10
+        cov, prec, adj = ClusterGraph(
+            n_blocks=1,
+            chain_blocks=False,
+            seed=1,
+        ).create(n_features, 0.8)
+        prng = np.random.RandomState(2)
+        X = prng.multivariate_normal(np.zeros(n_features), cov, size=n_samples)
+
         ma = ModelAverage(**params_in)
         ma.fit(X)
 
