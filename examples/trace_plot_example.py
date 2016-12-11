@@ -53,15 +53,59 @@ def show_quic_coefficient_trace(X):
     trace_plot(estimator.precision_, estimator.path_, n_edges=20)
 
 
+def show_quic_coefficient_trace_truth(X, truth):
+    path = np.logspace(
+        np.log10(0.01), np.log10(1.0), num=50, endpoint=True
+    )[::-1]
+    estimator = QuicGraphLasso(
+            lam=1.0,
+            path=path,
+            mode='path')
+    estimator.fit(X)
+    trace_plot(
+        estimator.precision_, estimator.path_, n_edges=6, ground_truth=truth
+    )
+
+
 if __name__ == "__main__":
     # example 1
     n_samples = 10
     n_features = 5
     X, cov, prec = make_data(n_samples, n_features)
+
+    print 'Showing basic Erdos-Renyi example with '
+    print '   n_samples=10'
+    print '   n_features=5'
+    print '   n_edges=20'
     show_quic_coefficient_trace(X)
+
+    # use ground truth for display
+    print 'Showing basic Erdos-Renyi example with '
+    print '   n_samples=100'
+    print '   n_features=5'
+    print '   n_edges=6'
+    print '   ground_truth (shows only false pos and negatives)'
+    show_quic_coefficient_trace_truth(X, prec)
 
     # example 2
     n_samples = 110
     n_features = 100
     X, cov, prec = make_data_banded(n_samples, n_features)
+
+    print 'Showing basic Lattice example with '
+    print '   n_samples=110'
+    print '   n_features=100'
+    print '   n_blocks=2'
+    print '   random_sign=True'
+    print '   n_edges=20'
     show_quic_coefficient_trace(X)
+
+    # use ground truth for display
+    print 'Showing basic Lattice example with '
+    print '   n_samples=110'
+    print '   n_features=100'
+    print '   n_blocks=2'
+    print '   random_sign=True'
+    print '   n_edges=6'
+    print '   ground_truth (shows only false pos and negatives)'
+    show_quic_coefficient_trace_truth(X, prec)

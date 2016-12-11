@@ -12,7 +12,7 @@ def _check_path(in_path):
     assert_array_equal(path, in_path)
 
 
-def trace_plot(precisions, path, n_edges=20, edges=[]):
+def trace_plot(precisions, path, n_edges=20, ground_truth=None, edges=[]):
     """Plot the change in precision (or covariance) coefficients as a function 
     of changing lambda and l1-norm.  Always ignores diagonals.
 
@@ -31,10 +31,15 @@ def trace_plot(precisions, path, n_edges=20, edges=[]):
         Only plots the maximum magnitude values (evaluating the last precision 
         matrix).
 
+    ground_truth : 2D ndarray, shape (n_features, n_features) (default=None)
+        If not None, plot the top n_edges/2 false positive and top n_edges/2
+        false negative indices when compared to ground_truth.
+
     edges : list (default=[])
         If not empty, use edges to determine which indicies of each precision
         matrix to track.  Should be arranged to index precisions[0].flat.
-        If non-empty, n_edges will be ignored.
+        
+        If non-empty, n_edges and ground_truth will be ignored.
     """
     _check_path(path)
     assert len(path) == len(precisions)
@@ -47,7 +52,36 @@ def trace_plot(precisions, path, n_edges=20, edges=[]):
     if not edges:
         base_precision = np.copy(precisions[-1])
         base_precision[np.triu_indices(base_precision.shape[0])] = 0
-        edges = np.argsort(np.abs(base_precision.flat))[::-1][: n_edges]
+        
+        if ground_truth is None:
+            # top n_edges strongest coefficients
+            edges = np.argsort(np.abs(base_precision.flat))[::-1][: n_edges]
+        else:
+            # top n_edges/2 false positives and negatives compared to truth
+            assert ground_truth.shape == precisions[0].shape 
+            masked_gt = np.copy(ground_truth)
+            masked_gt[np.triu_indices(ground_truth.shape[0])] = 0
+
+            intersection = np.intersect1d(
+                np.nonzero(base_precision.flat)[0],
+                np.nonzero(masked_gt.flat)[0]
+            )
+
+            # false positives
+            fp_precision = np.copy(base_precision)
+            fp_precision.flat[intersection] = 0
+            fp_edges = np.argsort(
+                np.abs(fp_precision.flat)
+            )[::-1][: n_edges/2]
+
+            # false negatives
+            fn_precision = np.copy(masked_gt)
+            fn_precision.flat[intersection] = 0
+            fn_edges = np.argsort(
+                np.abs(fn_precision.flat)
+            )[::-1][: n_edges/2]
+
+            edges = list(fp_edges) + list(fn_edges)
 
     assert len(edges) < len(precisions[0].flat)
     assert np.max(edges) < len(precisions[0].flat)
