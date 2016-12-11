@@ -12,7 +12,7 @@ def _check_path(in_path):
     assert_array_equal(path, in_path)
 
 
-def trace_plot(precisions, path, n_edges=20):
+def trace_plot(precisions, path, n_edges=20, edges=[]):
     """Plot the change in precision (or covariance) coefficients as a function 
     of changing lambda and l1-norm.  Always ignores diagonals.
 
@@ -30,6 +30,11 @@ def trace_plot(precisions, path, n_edges=20):
         Max number of edges to plot for each precision matrix along the path.
         Only plots the maximum magnitude values (evaluating the last precision 
         matrix).
+
+    edges : list (default=[])
+        If not empty, use edges to determine which indicies of each precision
+        matrix to track.  Should be arranged to index precisions[0].flat.
+        If non-empty, n_edges will be ignored.
     """
     _check_path(path)
     assert len(path) == len(precisions)
@@ -39,9 +44,14 @@ def trace_plot(precisions, path, n_edges=20):
     dim, _ = precisions[0].shape
 
     # determine which indices to track
-    base_precision = np.copy(precisions[-1])
-    base_precision[np.triu_indices(base_precision.shape[0])] = 0
-    sidx = np.argsort(np.abs(base_precision.flat))[::-1][: n_edges]
+    if not edges:
+        base_precision = np.copy(precisions[-1])
+        base_precision[np.triu_indices(base_precision.shape[0])] = 0
+        edges = np.argsort(np.abs(base_precision.flat))[::-1][: n_edges]
+
+    assert len(edges) < len(precisions[0].flat)
+    assert np.max(edges) < len(precisions[0].flat)
+    assert np.min(edges) >= 0
 
     # reshape data a bit:  
     # flatten each matrix into a column (so that coeffs are examples)
@@ -49,7 +59,7 @@ def trace_plot(precisions, path, n_edges=20):
     l1_norms = []
     coeffs = np.zeros((dim**2, len(precisions)))
     for ridx, result in enumerate(precisions):
-        coeffs[sidx, ridx] = result.flat[sidx]
+        coeffs[edges, ridx] = result.flat[edges]
         l1_norms.append(np.linalg.norm(coeffs[:, ridx]))
 
     # remove any zero rows
