@@ -446,5 +446,5 @@ if __name__ == "__main__":
     #
     # In separate cells, run each of these commands
     #
-    display(fig[0])
-    display(fig[1])
+    display(figs[0])
+    display(figs[1])
