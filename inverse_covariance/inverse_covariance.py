@@ -49,8 +49,7 @@ def _compute_error(comp_cov, covariance_, precision_, score_metric='frobenius'):
         If False, the error norm is returned.
     """
     if score_metric == "frobenius":
-        error = comp_cov - covariance_
-        return np.sum(error ** 2)                        
+        return np.linalg.norm(np.triu(comp_cov - covariance_, 1), ord='fro')                       
     elif score_metric == "spectral":
         error = comp_cov - covariance_
         return np.amax(np.linalg.svdvals(np.dot(error.T, error)))
