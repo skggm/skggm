@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 import numpy as np
-from sklearn.base import BaseEstimator 
+from sklearn.base import BaseEstimator
 
 from . import metrics
 
@@ -9,47 +9,50 @@ from . import metrics
 def _init_coefs(X, method='corrcoef'):
     if method == 'corrcoef':
         return np.corrcoef(X, rowvar=False), 1.0
-    elif method == 'cov':   
+    elif method == 'cov':
         init_cov = np.cov(X, rowvar=False)
         return init_cov, np.max(np.abs(np.triu(init_cov)))
     elif callable(method):
         return method(X)
     else:
-        raise ValueError(("initialize_method must be 'corrcoef' or 'cov', "
-            "passed \'{}\' .".format(method)))
+        raise ValueError(
+            ("initialize_method must be 'corrcoef' or 'cov', "
+             "passed \'{}\' .".format(method))
+        )
 
 
-def _compute_error(comp_cov, covariance_, precision_, score_metric='frobenius'):
+def _compute_error(comp_cov, covariance_, precision_,
+                   score_metric='frobenius'):
     """Computes the covariance error vs. comp_cov.
-        
+
     Parameters
     ----------
     comp_cov : array-like, shape = (n_features, n_features)
         The precision to compare with.
         This should normally be the test sample covariance/precision.
-            
+
     scaling : bool
         If True, the squared error norm is divided by n_features.
         If False (default), the squared error norm is not rescaled.
 
     score_metric : str
-        The type of norm used to compute the error between the estimated 
-        self.precision, self.covariance and the reference `comp_cov`. 
+        The type of norm used to compute the error between the estimated
+        self.precision, self.covariance and the reference `comp_cov`.
         Available error types:
-        
+
         - 'frobenius' (default): sqrt(tr(A^t.A))
         - 'spectral': sqrt(max(eigenvalues(A^t.A))
-        - 'kl': kl-divergence 
+        - 'kl': kl-divergence
         - 'quadratic': quadratic loss
         - 'log_likelihood': negative log likelihood
-    
+
     squared : bool
         Whether to compute the squared error norm or the error norm.
         If True (default), the squared error norm is returned.
         If False, the error norm is returned.
     """
     if score_metric == "frobenius":
-        return np.linalg.norm(np.triu(comp_cov - covariance_, 1), ord='fro')                       
+        return np.linalg.norm(np.triu(comp_cov - covariance_, 1), ord='fro')
     elif score_metric == "spectral":
         error = comp_cov - covariance_
         return np.amax(np.linalg.svdvals(np.dot(error.T, error)))
@@ -74,20 +77,20 @@ def _validate_path(path):
 
     new_path = np.array(sorted(set(path), reverse=True))
     if new_path[0] != path[0]:
-        print 'Warning: Path must be sorted largest to smallest.'
+        print('Warning: Path must be sorted largest to smallest.')
 
     return new_path
 
-    
+
 class InverseCovarianceEstimator(BaseEstimator):
     """
     Base class for inverse covariance estimators.
 
-    Provides initialization method, metrics, scoring function, 
+    Provides initialization method, metrics, scoring function,
     and ebic model selection.
 
     Parameters
-    -----------            
+    -----------
     score_metric : one of 'log_likelihood' (default), 'frobenius', 'spectral',
                   'kl', or 'quadratic'
         Used for computing self.score().
@@ -98,8 +101,8 @@ class InverseCovarianceEstimator(BaseEstimator):
         where the scalar parameter will be used to scale the penalty lam.
 
     auto_scale : bool
-        If True, will compute self.lam_scale_ = max off-diagonal value when 
-        init_method='cov'. 
+        If True, will compute self.lam_scale_ = max off-diagonal value when
+        init_method='cov'.
         If false, then self.lam_scale_ = 1.
         lam_scale_ is used to scale user-supplied self.lam during fit.
 
@@ -107,14 +110,14 @@ class InverseCovarianceEstimator(BaseEstimator):
     ----------
     covariance_ : 2D ndarray, shape (n_features, n_features)
         Estimated covariance matrix
-        
+
         This can also be a len(path) list of
         2D ndarray, shape (n_features, n_features)
         (e.g., see mode='path' in QuicGraphLasso)
 
     precision_ : 2D ndarray, shape (n_features, n_features)
         Estimated pseudo-inverse matrix.
-        
+
         This can also be a len(path) list of
         2D ndarray, shape (n_features, n_features)
         (e.g., see mode='path' in QuicGraphLasso)
@@ -123,7 +126,7 @@ class InverseCovarianceEstimator(BaseEstimator):
         Estimated sample covariance matrix
 
     lam_scale_ : (float)
-        Additional scaling factor on lambda (due to magnitude of 
+        Additional scaling factor on lambda (due to magnitude of
         sample_covariance_ values).
     """
     def __init__(self, score_metric='log_likelihood', init_method='cov',
@@ -141,10 +144,9 @@ class InverseCovarianceEstimator(BaseEstimator):
         #   self.lam_scale_
         #   self.n_samples
         #   self.n_features
-        self.is_fitted = False 
+        self.is_fitted = False
 
         super(InverseCovarianceEstimator, self).__init__()
-
 
     def init_coefs(self, X):
         """Computes ...
@@ -163,13 +165,12 @@ class InverseCovarianceEstimator(BaseEstimator):
         if not self.auto_scale:
             self.lam_scale_ = 1.0
 
-
     def score(self, X_test, y=None):
-        """Computes the score between cov/prec of sample covariance of X_test 
+        """Computes the score between cov/prec of sample covariance of X_test
         and X via 'score_metric'.
 
         Note: We want to maximize score so we return the negative error.
-       
+
         Parameters
         ----------
         X_test : array-like, shape = [n_samples, n_features]
@@ -177,17 +178,17 @@ class InverseCovarianceEstimator(BaseEstimator):
             the number of samples and n_features is the number of features.
             X_test is assumed to be drawn from the same distribution than
             the data used in fit (including centering).
-        
+
         y : not used.
-        
+
         Returns
         -------
         result : float or list of floats
             The negative of the min error between `self.covariance_` and
             the sample covariance of X_test.
-        """        
+        """
         if isinstance(self.precision_, list):
-            print 'Warning: returning a list of scores.'
+            print('Warning: returning a list of scores.')
 
         S_test, lam_scale_test = _init_coefs(
                 X_test,
@@ -197,72 +198,74 @@ class InverseCovarianceEstimator(BaseEstimator):
         # maximize score with -error
         return -error
 
-
     def cov_error(self, comp_cov, score_metric='frobenius'):
         """Computes the covariance error vs. comp_cov.
 
         May require self.path_
-        
+
         Parameters
         ----------
         comp_cov : array-like, shape = (n_features, n_features)
             The precision to compare with.
             This should normally be the test sample covariance/precision.
-                
+
         scaling : bool
             If True, the squared error norm is divided by n_features.
             If False (default), the squared error norm is not rescaled.
 
         score_metric : str
-            The type of norm used to compute the error between the estimated 
-            self.precision, self.covariance and the reference `comp_cov`. 
+            The type of norm used to compute the error between the estimated
+            self.precision, self.covariance and the reference `comp_cov`.
             Available error types:
-            
+
             - 'frobenius' (default): sqrt(tr(A^t.A))
             - 'spectral': sqrt(max(eigenvalues(A^t.A))
-            - 'kl': kl-divergence 
+            - 'kl': kl-divergence
             - 'quadratic': quadratic loss
             - 'log_likelihood': negative log likelihood
-        
+
         squared : bool
             Whether to compute the squared error norm or the error norm.
             If True (default), the squared error norm is returned.
             If False, the error norm is returned.
-        
+
         Returns
         -------
         The min error between `self.covariance_` and `comp_cov`.
-        
+
         If self.precision_ is a list, returns errors for each matrix, otherwise
         returns a scalar.
-        """  
+        """
         if not isinstance(self.precision_, list):
-            return _compute_error(comp_cov,
-                                self.covariance_,
-                                self.precision_,
-                                score_metric)
+            return _compute_error(
+                comp_cov,
+                self.covariance_,
+                self.precision_,
+                score_metric
+            )
 
         path_errors = []
         for lidx, lam in enumerate(self.path_):
-            path_errors.append(_compute_error(comp_cov,
-                                            self.covariance_[lidx],
-                                            self.precision_[lidx],
-                                            score_metric))
+            path_errors.append(_compute_error(
+                comp_cov,
+                self.covariance_[lidx],
+                self.precision_[lidx],
+                score_metric)
+            )
 
         return np.array(path_errors)
 
-
     def ebic(self, gamma=0):
-        """Compute EBIC scores for each model. If model is not "path" then 
-        returns a scalar score value. 
+        """Compute EBIC scores for each model. If model is not "path" then
+        returns a scalar score value.
 
         May require self.path_
 
         See:
-            Extended Bayesian Information Criteria for Gaussian Graphical Models
-            R. Foygel and M. Drton
-            NIPS 2010
-    
+        Extended Bayesian Information Criteria for Gaussian Graphical Models
+        R. Foygel and M. Drton
+        NIPS 2010
+
         Parameters
         ----------
         gamma : (float) \in (0, 1)
@@ -294,16 +297,15 @@ class InverseCovarianceEstimator(BaseEstimator):
 
         return np.array(ebic_scores)
 
-
     def ebic_select(self, gamma=0):
         """Uses Extended Bayesian Information Criteria for model selection.
 
         Can only be used in path mode (doesn't really make sense otherwise).
 
         See:
-            Extended Bayesian Information Criteria for Gaussian Graphical Models
-            R. Foygel and M. Drton
-            NIPS 2010
+        Extended Bayesian Information Criteria for Gaussian Graphical Models
+        R. Foygel and M. Drton
+        NIPS 2010
 
         Parameters
         ----------
@@ -313,16 +315,18 @@ class InverseCovarianceEstimator(BaseEstimator):
 
         Returns
         -------
-        Lambda index with best ebic score.  When multiple ebic scores are the 
+        Lambda index with best ebic score.  When multiple ebic scores are the
         same, returns the smallest lambda (largest index) with minimum score.
         """
         if not isinstance(self.precision_, list):
-            raise NotImplementedError("EBIC requires multiple models to select from.")
+            raise NotImplementedError(
+                "EBIC requires multiple models to select from."
+            )
             return
 
         if not self.is_fitted:
             return
 
         ebic_scores = self.ebic(gamma=gamma)
-        min_indices = np.where(np.abs(ebic_scores - ebic_scores.min()) < 1e-10) 
-        return np.max(min_indices) 
+        min_indices = np.where(np.abs(ebic_scores - ebic_scores.min()) < 1e-10)
+        return np.max(min_indices)

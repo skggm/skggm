@@ -26,9 +26,9 @@ from .cross_validation import (
 )
 
 
-def quic(S, lam, mode='default', tol=1e-6, max_iter=1000, 
+def quic(S, lam, mode='default', tol=1e-6, max_iter=1000,
         Theta0=None, Sigma0=None, path=None, msg=0):
-    """Fits the inverse covariance model according to the given training 
+    """Fits the inverse covariance model according to the given training
     data and parameters.
 
     Parameters
@@ -40,12 +40,12 @@ def quic(S, lam, mode='default', tol=1e-6, max_iter=1000,
 
     Returns
     -------
-    Theta : 
-    Sigma : 
-    opt : 
-    cputime : 
-    iters : 
-    dGap : 
+    Theta :
+    Sigma :
+    opt :
+    cputime :
+    iters :
+    dGap :
     """
     assert mode in ['default', 'path', 'trace'],\
             'mode = \'default\', \'path\' or \'trace\'.'
@@ -64,7 +64,7 @@ def quic(S, lam, mode='default', tol=1e-6, max_iter=1000,
     else:
         assert lam.shape == S.shape, 'lam, S shape mismatch.'
         _lam = as_float_array(lam, copy=False, force_all_finite=False)
- 
+
     # Defaults.
     optSize = 1
     iterSize = 1
@@ -111,7 +111,7 @@ def quic(S, lam, mode='default', tol=1e-6, max_iter=1000,
         Theta[:] = Theta0
         Sigma = np.empty(Sigma0.shape)
         Sigma[:] = Sigma0
-                    
+
     # Run QUIC.
     opt = np.zeros(optSize)
     cputime = np.zeros(optSize)
@@ -129,7 +129,7 @@ def quic(S, lam, mode='default', tol=1e-6, max_iter=1000,
         iters = iters[0]
 
     # reshape Theta, Sigma in path mode
-    Theta_out = Theta 
+    Theta_out = Theta
     Sigma_out = Sigma
     if mode == 'path':
         Theta_out = []
@@ -143,25 +143,25 @@ def quic(S, lam, mode='default', tol=1e-6, max_iter=1000,
 
 class QuicGraphLasso(InverseCovarianceEstimator):
     """
-    Computes a sparse inverse covariance matrix estimation using quadratic 
-    approximation. 
+    Computes a sparse inverse covariance matrix estimation using quadratic
+    approximation.
 
-    The inverse covariance is estimated the sample covariance estimate 
-    $S$ as an input such that: 
+    The inverse covariance is estimated the sample covariance estimate
+    $S$ as an input such that:
 
     $T_hat = max_{\Theta} logdet(Theta) - Trace(ThetaS) - \lambda|\Theta|_1 $
 
     Parameters
-    -----------        
+    -----------
     lam : scalar or 2D ndarray, shape (n_features, n_features) (default=0.5)
         Regularization parameters per element of the inverse covariance matrix.
-        
-        If a scalar lambda is used, a penalty matrix will be generated 
+
+        If a scalar lambda is used, a penalty matrix will be generated
         containing lambda for all values in both upper and lower triangles
-        and zeros along the diagonal.  This differs from the scalar graphical 
-        lasso by the diagonal. To replicate the scalar formulation you must 
+        and zeros along the diagonal.  This differs from the scalar graphical
+        lasso by the diagonal. To replicate the scalar formulation you must
         manualy pass in lam * np.ones((n_features, n_features)).
-    
+
     mode : one of 'default', 'path', or 'trace'
         Computation mode.
 
@@ -171,12 +171,12 @@ class QuicGraphLasso(InverseCovarianceEstimator):
     max_iter : int (default=1000)
         Maximum number of Newton iterations.
 
-    Theta0 : 2D ndarray, shape (n_features, n_features) (default=None) 
-        Initial guess for the inverse covariance matrix. If not provided, the 
+    Theta0 : 2D ndarray, shape (n_features, n_features) (default=None)
+        Initial guess for the inverse covariance matrix. If not provided, the
         diagonal identity matrix is used.
 
     Sigma0 : 2D ndarray, shape (n_features, n_features) (default=None)
-        Initial guess for the covariance matrix. If not provided the diagonal 
+        Initial guess for the covariance matrix. If not provided the diagonal
         identity matrix is used.
 
     path : array of floats (default=None)
@@ -200,8 +200,8 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         where the scalar parameter will be used to scale the penalty lam.
 
     auto_scale : bool
-        If True, will compute self.lam_scale_ = max off-diagonal value when 
-        init_method='cov'. 
+        If True, will compute self.lam_scale_ = max off-diagonal value when
+        init_method='cov'.
         If false, then self.lam_scale_ = 1.
         lam_scale_ is used to scale user-supplied self.lam during fit.
 
@@ -228,7 +228,7 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         When mode='default', this is the lambda used in fit (lam * lam_scale_)
 
     lam_scale_ : (float)
-        Additional scaling factor on lambda (due to magnitude of 
+        Additional scaling factor on lambda (due to magnitude of
         sample_covariance_ values).
 
     path_ : None or array of floats
@@ -239,7 +239,7 @@ class QuicGraphLasso(InverseCovarianceEstimator):
 
     cputime_ :
 
-    iters_ :    
+    iters_ :
 
     duality_gap_ :
 
@@ -277,12 +277,12 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         self.is_fitted = False
 
         super(QuicGraphLasso, self).__init__(
-                score_metric=score_metric, 
+                score_metric=score_metric,
                 init_method=init_method,
                 auto_scale=auto_scale)
 
     def fit(self, X, y=None, **fit_params):
-        """Fits the inverse covariance model according to the given training 
+        """Fits the inverse covariance model according to the given training
         data and parameters.
 
         Parameters
@@ -298,7 +298,7 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         X = as_float_array(X, copy=False, force_all_finite=False)
         self.init_coefs(X)
         if self.method == 'quic':
-            (self.precision_, self.covariance_, self.opt_, self.cputime_, 
+            (self.precision_, self.covariance_, self.opt_, self.cputime_,
             self.iters_, self.duality_gap_) = quic(self.sample_covariance_,
                                                 self.lam * self.lam_scale_,
                                                 mode=self.mode,
@@ -329,10 +329,10 @@ class QuicGraphLasso(InverseCovarianceEstimator):
             print ('lam_ is an invalid parameter in path mode, '
                    'use self.lam_at_index')
         return self.lam_at_index(0)
-    
+
 
 def _quic_path(X, path, X_test=None, lam=0.5, tol=1e-6,
-         max_iter=1000, Theta0=None, Sigma0=None, method='quic', 
+         max_iter=1000, Theta0=None, Sigma0=None, method='quic',
          verbose=0, score_metric='log_likelihood',
          init_method='corrcoef'):
     """Wrapper to compute path for example X.
@@ -343,7 +343,7 @@ def _quic_path(X, path, X_test=None, lam=0.5, tol=1e-6,
 
     path = path.copy(order='C')
     if method == 'quic':
-        (precisions_, covariances_, opt_, cputime_, 
+        (precisions_, covariances_, opt_, cputime_,
         iters_, duality_gap_) = quic(S,
                                     lam,
                                     mode='path',
@@ -361,7 +361,7 @@ def _quic_path(X, path, X_test=None, lam=0.5, tol=1e-6,
         S_test, lam_scale_test = _init_coefs(
             X_test,
             method=init_method)
-        
+
         path_errors = []
         for lidx, lam in enumerate(path):
             path_errors.append(_compute_error(S_test,
@@ -371,7 +371,7 @@ def _quic_path(X, path, X_test=None, lam=0.5, tol=1e-6,
         scores_ = [-e for e in path_errors]
 
         return covariances_, precisions_, scores_
-    
+
     return covariances_, precisions_
 
 
@@ -386,21 +386,21 @@ def _quic_path_spark(indexed_params, quic_path, X_bc):
 
 class QuicGraphLassoCV(InverseCovarianceEstimator):
     """Sparse inverse covariance w/ cross-validated choice of the l1 penalty
-    via quadratic approximation.  
+    via quadratic approximation.
 
     This takes advantage of "path" mode in QuicGraphLasso.
     See sklearn.covariance.graph_lasso.GraphLassoCV.
 
     Parameters
-    -----------  
+    -----------
     lam : scalar or 2D ndarray, shape (n_features, n_features) (default=0.5)
         Regularization parameters per element of the inverse covariance matrix.
         The next parameter 'lams' scale this matrix as the lasso path is learned.
 
-        If a scalar lambda is used, a penalty matrix will be generated 
+        If a scalar lambda is used, a penalty matrix will be generated
         containing lambda for all values in both upper and lower triangles
-        and zeros along the diagonal.  This differs from the scalar graphical 
-        lasso by the diagonal. To replicate the scalar formulation you must 
+        and zeros along the diagonal.  This differs from the scalar graphical
+        lasso by the diagonal. To replicate the scalar formulation you must
         manualy pass in lam * np.ones((n_features, n_features)).
 
     lams : integer, or list positive float, optional
@@ -412,13 +412,13 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
     cv : int, cross-validation generator or an iterable, optional
         Determines the cross-validation splitting strategy.
         Possible inputs for cv are:
-        
+
         - None, to use the default 3-fold, 3-trial RepeatedKFold cross-validation,
         - integer, to specify the number of folds (3-trial RepeatedKFold).
-        - tuple, (n_folds, n_trials) 
+        - tuple, (n_folds, n_trials)
         - An object to be used as a cross-validation generator.
         - An iterable yielding train/test splits.
-        
+
     n_refinements : strictly positive integer
         The number of times the grid is refined. Not used if explicit
         values of alphas are passed.
@@ -427,8 +427,8 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         number of jobs to run in parallel (default 1).
 
     sc : sparkContext (default=None)
-        If not None and a valid SparkContext, the cross-validation iterations 
-        will be performed in parallel via Apache Spark.  In this case n_jobs 
+        If not None and a valid SparkContext, the cross-validation iterations
+        will be performed in parallel via Apache Spark.  In this case n_jobs
         will be unused.
 
     tol : float (default=1e-6)
@@ -437,12 +437,12 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
     max_iter : int (default=1000)
         Maximum number of Newton iterations.
 
-    Theta0 : 2D ndarray, shape (n_features, n_features) (default=None) 
-        Initial guess for the inverse covariance matrix. If not provided, the 
+    Theta0 : 2D ndarray, shape (n_features, n_features) (default=None)
+        Initial guess for the inverse covariance matrix. If not provided, the
         diagonal identity matrix is used.
 
     Sigma0 : 2D ndarray, shape (n_features, n_features) (default=None)
-        Initial guess for the covariance matrix. If not provided the diagonal 
+        Initial guess for the covariance matrix. If not provided the diagonal
         identity matrix is used.
 
     method : 'quic' or 'bigquic', ... (default=quic)
@@ -458,13 +458,13 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         where the scalar parameter will be used to scale the penalty lam.
 
     auto_scale : bool
-        If True, will compute self.lam_scale_ = max off-diagonal value when 
-        init_method='cov'. 
+        If True, will compute self.lam_scale_ = max off-diagonal value when
+        init_method='cov'.
         If false, then self.lam_scale_ = 1.
         lam_scale_ is used to scale user-supplied self.lam during fit.
 
     Attributes
-    ----------    
+    ----------
     covariance_ : 2D ndarray, shape (n_features, n_features)
         Estimated covariance matrix
 
@@ -473,18 +473,18 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
 
     lam_ : float
         Penalization parameter selected.
-    
+
     cv_lams_ : list of float
         All penalization parameters explored.
-    
+
     grid_scores: 2D numpy.ndarray (n_alphas, n_folds)
         Log-likelihood score on left-out data across folds.
-    
+
     n_iter_ : int
         Number of iterations run for the optimal alpha.
     """
     def __init__(self, lam=1.0, lams=4, n_refinements=4, cv=None, tol=1e-6,
-                 max_iter=1000, Theta0=None, Sigma0=None, method='quic', 
+                 max_iter=1000, Theta0=None, Sigma0=None, method='quic',
                  verbose=0, n_jobs=1, sc=None, score_metric='log_likelihood',
                  init_method='corrcoef', auto_scale=True):
         # GridCV params
@@ -521,7 +521,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
 
     def fit(self, X, y=None):
         """Fits the GraphLasso covariance model to X.
-        
+
         Closely follows sklearn.covariance.graph_lasso.GraphLassoCV.
 
         Parameters
@@ -532,18 +532,18 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         # initialize
         X = check_array(X, ensure_min_features=2, estimator=self)
         X = as_float_array(X, copy=False, force_all_finite=False)
-        
+
         if self.cv is None:
             cv = (3, 3)
         elif isinstance(self.cv, int):
             cv = (self.cv, 3) # upgrade with default number of trials
-        
+
         if isinstance(cv, tuple):
             if not sp.issparse(X):
                 n_samples = len(X)
             else:
                 n_samples = X.shape[0]
-            
+
             cv = RepeatedKFold(n_samples, n_folds=cv[0], n_trials=cv[1])
 
         self.init_coefs(X)
@@ -572,7 +572,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                         X[train],
                         path,
                         X_test=X[test],
-                        lam=self.lam, tol=self.tol, max_iter=self.max_iter, 
+                        lam=self.lam, tol=self.tol, max_iter=self.max_iter,
                         Theta0=self.Theta0, Sigma0=self.Sigma0, method=self.method,
                         verbose=self.verbose, score_metric=self.score_metric,
                         init_method=self.init_method)
@@ -590,7 +590,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                 quic_path = partial(
                     _quic_path,
                     path=path,
-                    lam=self.lam, tol=self.tol, max_iter=self.max_iter, 
+                    lam=self.lam, tol=self.tol, max_iter=self.max_iter,
                     Theta0=self.Theta0, Sigma0=self.Sigma0, method=self.method,
                     verbose=self.verbose, score_metric=self.score_metric,
                     init_method=self.init_method
@@ -625,7 +625,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                 # sometimes we get -np.inf in the result (in kl-loss)
                 scores = [s for s in scores if not np.isinf(s)]
                 if len(scores) == 0:
-                    this_score = -np.inf 
+                    this_score = -np.inf
                 else:
                     this_score = np.mean(scores)
 
@@ -634,7 +634,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
 
                 if np.isfinite(this_score):
                     last_finite_idx = index
-                
+
                 if this_score >= best_score:
                     best_score = this_score
                     best_index = index
@@ -646,18 +646,18 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                 # non-zero coefficients
                 lam_1 = results[0][0]
                 lam_0 = results[1][0]
-            
+
             elif (best_index == last_finite_idx
                     and not best_index == len(results) - 1):
                 # We have non-converged models on the upper bound of the
                 # grid, we need to refine the grid there
                 lam_1 = results[best_index][0]
                 lam_0 = results[best_index + 1][0]
-            
+
             elif best_index == len(results) - 1:
                 lam_1 = results[best_index][0]
                 lam_0 = 0.01 * results[best_index][0]
-            
+
             else:
                 lam_1 = results[best_index - 1][0]
                 lam_0 = results[best_index + 1][0]
@@ -674,7 +674,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         results = list(zip(*results))
         grid_scores = list(results[1])
         lams = list(results[0])
-        
+
         # Finally, compute the score with lambda = 0
         lams.append(0)
         grid_scores.append(cross_val_score(EmpiricalCovariance(), X,
@@ -685,7 +685,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
 
         # Finally fit the model with the selected lambda
         if self.method == 'quic':
-            (self.precision_, self.covariance_, self.opt_, self.cputime_, 
+            (self.precision_, self.covariance_, self.opt_, self.cputime_,
             self.iters_, self.duality_gap_) = quic(self.sample_covariance_,
                                                 self.lam_,
                                                 mode='default',
@@ -705,24 +705,24 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
 
 class QuicGraphLassoEBIC(InverseCovarianceEstimator):
     """
-    Computes a sparse inverse covariance matrix estimation using quadratic 
+    Computes a sparse inverse covariance matrix estimation using quadratic
     approximation and EBIC model selection. (Convenience Class)
 
     Note: This estimate can be obtained using the more general QuicGraphLasso
-          estimator and taking advantage of `ebic_select()` and 
+          estimator and taking advantage of `ebic_select()` and
           `lambda_at_index()` methods.
-    
+
     See analogous sklearn.linear_model.LassoLarsIC.
 
     Parameters
-    -----------        
+    -----------
     lam : scalar or 2D ndarray, shape (n_features, n_features) (default=0.5)
         Regularization parameters per element of the inverse covariance matrix.
-    
-        If a scalar lambda is used, a penalty matrix will be generated 
+
+        If a scalar lambda is used, a penalty matrix will be generated
         containing lambda for all values in both upper and lower triangles
-        and zeros along the diagonal.  This differs from the scalar graphical 
-        lasso by the diagonal. To replicate the scalar formulation you must 
+        and zeros along the diagonal.  This differs from the scalar graphical
+        lasso by the diagonal. To replicate the scalar formulation you must
         manualy pass in lam * np.ones((n_features, n_features)).
 
     path : array of floats or int (default=100)
@@ -740,12 +740,12 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
     max_iter : int (default=1000)
         Maximum number of Newton iterations.
 
-    Theta0 : 2D ndarray, shape (n_features, n_features) (default=None) 
-        Initial guess for the inverse covariance matrix. If not provided, the 
+    Theta0 : 2D ndarray, shape (n_features, n_features) (default=None)
+        Initial guess for the inverse covariance matrix. If not provided, the
         diagonal identity matrix is used.
 
     Sigma0 : 2D ndarray, shape (n_features, n_features) (default=None)
-        Initial guess for the covariance matrix. If not provided the diagonal 
+        Initial guess for the covariance matrix. If not provided the diagonal
         identity matrix is used.
 
     method : one of 'quic'... (default=quic)
@@ -759,8 +759,8 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
         where the scalar parameter will be used to scale the penalty lam.
 
     auto_scale : bool
-        If True, will compute self.lam_scale_ = max off-diagonal value when 
-        init_method='cov'. 
+        If True, will compute self.lam_scale_ = max off-diagonal value when
+        init_method='cov'.
         If false, then self.lam_scale_ = 1.
         lam_scale_ is used to scale user-supplied self.lam during fit.
 
@@ -812,7 +812,7 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
                 auto_scale=auto_scale)
 
     def fit(self, X, y=None, **fit_params):
-        """Fits the inverse covariance model according to the given training 
+        """Fits the inverse covariance model according to the given training
         data and parameters.
 
         Parameters
@@ -841,11 +841,11 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
 
         self.path_ = _validate_path(self.path_)
 
-        # fit along the path, temporarily populate 
+        # fit along the path, temporarily populate
         # self.precision_, self.covariance_ with path values so we can use our
         # inherited selection function
         if self.method == 'quic':
-            (self.precision_, self.covariance_, _, _, 
+            (self.precision_, self.covariance_, _, _,
             _, _) = quic(self.sample_covariance_,
                         self.lam * self.lam_scale_,
                         mode='path',
