@@ -5,24 +5,32 @@ python:
   # PyPy versions
   - "pypy"  # PyPy2 2.5.0
 
+# Pre-install packages for the ubuntu distribution
+cache:
+  apt: true
+  directories:
+  - $HOME/.cache/pip
+addons:
+  apt:
+    packages:
+      # these only required by the DISTRIB="ubuntu" builds:
+      - python-scipy
+      - libatlas3gf-base
+      - libatlas-dev
 env:
   matrix:
-    # This environment tests that scikit-learn can be built against
-    # versions of numpy, scipy with ATLAS that comes with Ubuntu Precise 12.04
-    - DISTRIB="ubuntu" PYTHON_VERSION="2.7" CYTHON_VERSION="0.23.4"
-      COVERAGE=true
-    # This environment tests the oldest supported anaconda env
-    - DISTRIB="conda" PYTHON_VERSION="2.7" INSTALL_MKL="false"
-      NUMPY_VERSION="1.6.2" SCIPY_VERSION="0.11.0" CYTHON_VERSION="0.23"
-      COVERAGE=true
-    # This environment tests the more recent anaconda env.
+    # Test environments similar to those for scikit-learn
+    # This environment tests a recent anaconda env.
     - DISTRIB="conda" PYTHON_VERSION="2.7" INSTALL_MKL="true"
       NUMPY_VERSION="1.11.2" SCIPY_VERSION="0.18.1" CYTHON_VERSION="0.25.2" 
       COVERAGE=true
+    # versions of numpy, scipy with ATLAS that comes with Ubuntu Precise 12.04
+    - DISTRIB="ubuntu" PYTHON_VERSION="2.7" CYTHON_VERSION="0.23.4"
+      COVERAGE=true 
 
 # command to install dependencies
 install:
   - pip install -r requirements.txt
   
 # command to run tests
-script: pytest inverse_covariance
+script: pytest
