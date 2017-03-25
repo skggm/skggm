@@ -13,9 +13,9 @@ from .graphs import (
     blocks,
     Graph,
 )
-from .cluster_graph import ClusterGraph 
-from .lattice_graph import LatticeGraph 
-from .erdos_renyi_graph import ErdosRenyiGraph 
+from .cluster_graph import ClusterGraph
+from .lattice_graph import LatticeGraph
+from .erdos_renyi_graph import ErdosRenyiGraph
 
 
 __all__ = [
