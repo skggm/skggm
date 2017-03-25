@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import sys
 import time
 import collections
 import operator
@@ -111,6 +112,11 @@ def quic(S, lam, mode='default', tol=1e-6, max_iter=1000,
         Theta[:] = Theta0
         Sigma = np.empty(Sigma0.shape)
         Sigma[:] = Sigma0
+
+    # Cython fix for Python3
+    # http://cython.readthedocs.io/en/latest/src/tutorial/strings.html
+    if sys.version_info[0] >= 3:
+        mode = mode.encode('utf-8')
 
     # Run QUIC.
     opt = np.zeros(optSize)
@@ -328,8 +334,8 @@ class QuicGraphLasso(InverseCovarianceEstimator):
     @property
     def lam_(self):
         if self.path_ is not None:
-            print ('lam_ is an invalid parameter in path mode, '
-                   'use self.lam_at_index')
+            print('lam_ is an invalid parameter in path mode, '
+                  'use self.lam_at_index')
         return self.lam_at_index(0)
 
 
