@@ -123,7 +123,7 @@ only one of `ModelAverage` or `QuicGraphLassoCV` can make use of the spark conte
 
 Clone this repo and run
 
-    python setup.py install
+    python setup.py install (python3 setup.py install)
 
 or via PyPI
 
@@ -134,6 +134,10 @@ or from a cloned repo
     cd inverse_covariance/pyquic
     make
 
+or to build pyquic for python3:
+
+    make python3
+
 **The package requires that `numpy`, `scipy`, and `cython` are installed independently into your environment first.**
 
 If you would like to fork the pyquic bindings directly, use the Makefile provided in `inverse_covariance/pyquic`.
@@ -143,7 +147,7 @@ This package requires the `lapack` libraries to by installed on your system. A c
 ## Tests
 To run the tests, execute the following lines.
 
-    python -m pytest inverse_covariance
+    python -m pytest inverse_covariance (python3 -m pytest inverse_covariance)
     flake8 inverse_covariance
 
 # Examples
