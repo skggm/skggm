@@ -1,14 +1,14 @@
 """
 Estimate Functional Connectivity using an estimator for Sparse Inverse Covariances
 ==================================================================================
-This example constructs a functional connectome using the sparse penalized MLE 
+This example constructs a functional connectome using the sparse penalized MLE
 estimator implemented using QUIC.
 
-This function extracts time-series from the ABIDE dataset, with nodes defined 
-using regions of interest from the 
+This function extracts time-series from the ABIDE dataset, with nodes defined
+using regions of interest from the
   Power-264 atlas (Power, 2011).
-  Power, Jonathan D., et al. "Functional network organization of the human 
-  brain." 
+  Power, Jonathan D., et al. "Functional network organization of the human
+  brain."
   Neuron 72.4 (2011): 665-678.
 
 Then we estimate separate inverse covariance matrices for one subject
@@ -44,7 +44,7 @@ abide.func=abide.func_preproc
 
 # print basic information on the dataset
 # 4D data
-print('First subject functional nifti images (4D) are at: %s' %abide.func[0])  
+print('First subject functional nifti images (4D) are at: %s' %abide.func[0])
 
 ###############################################################################
 # Masking: taking the signal in a sphere of radius 5mm around Power coords
@@ -89,7 +89,7 @@ elif estimator_type == 'QuicGraphLassoEBIC':
     estimator.fit(timeseries)
 
 elif estimator_type == 'AdaptiveQuicGraphLasso':
-    # Compute the sparse inverse covariance via 
+    # Compute the sparse inverse covariance via
     # AdaptiveGraphLasso + QuicGraphLassoEBIC + method='binary'
     model = AdaptiveGraphLasso(
             estimator=QuicGraphLassoEBIC(

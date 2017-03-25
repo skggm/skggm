@@ -12,8 +12,8 @@ from sklearn.covariance import EmpiricalCovariance
 from sklearn.utils import check_array, as_float_array
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.externals.joblib import Parallel, delayed
-#from sklearn.model_selection import cross_val_score  # NOQA >= 0.18
-from sklearn.cross_validation import cross_val_score  # < 0.18
+from sklearn.model_selection import cross_val_score  # NOQA >= 0.18
+#from sklearn.cross_validation import cross_val_score  # NOQA < 0.18
 
 from . import pyquic
 from .inverse_covariance import (
@@ -115,15 +115,16 @@ def quic(S, lam, mode='default', tol=1e-6, max_iter=1000,
 
     # Cython fix for Python3
     # http://cython.readthedocs.io/en/latest/src/tutorial/strings.html
+    quic_mode = mode
     if sys.version_info[0] >= 3:
-        mode = mode.encode('utf-8')
+        quic_mode = quic_mode.encode('utf-8')
 
     # Run QUIC.
     opt = np.zeros(optSize)
     cputime = np.zeros(optSize)
     dGap = np.zeros(optSize)
     iters = np.zeros(iterSize, dtype=np.uint32)
-    pyquic.quic(mode, Sn, S, _lam, path_len, path, tol, msg, max_iter,
+    pyquic.quic(quic_mode, Sn, S, _lam, path_len, path, tol, msg, max_iter,
                 Theta, Sigma, opt, cputime, iters, dGap)
 
     if optSize == 1:
@@ -855,7 +856,8 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
             )[::-1]
         elif isinstance(self.path, int):
             self.path_ = np.logspace(
-                    np.log10(lam_0), np.log10(lam_1), self.path)[::-1]
+                    np.log10(lam_0), np.log10(lam_1), self.path
+            )[::-1]
         else:
             self.path_ = self.path
 

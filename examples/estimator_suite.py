@@ -28,6 +28,10 @@ http://scikit-learn.org/stable/auto_examples/covariance/plot_sparse_cov.html
 plt.ion()
 
 
+def r_input(val):
+    eval(input(val))
+
+
 def make_data(n_samples, n_features):
     prng = np.random.RandomState(1)
     prec = make_sparse_spd_matrix(
@@ -516,4 +520,4 @@ if __name__ == "__main__":
 
     # display results
     show_results(plot_covs, plot_precs)
-    raw_input('Press any key to exit...')
+    r_input('Press any key to exit...')

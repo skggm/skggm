@@ -39,7 +39,7 @@ class TestMetrics(object):
     ])
     def test__nonzero_intersection(self, m, m_hat, expected):
         result = metrics._nonzero_intersection(m, m_hat)
-        print result
+        print(result)
         assert result == expected
 
     @pytest.mark.parametrize("m, m_hat, expected", [
@@ -76,7 +76,7 @@ class TestMetrics(object):
     ])
     def test_support_false_positive_count(self, m, m_hat, expected):
         result = metrics.support_false_positive_count(m, m_hat)
-        print result
+        print(result)
         assert result == expected
 
     @pytest.mark.parametrize("m, m_hat, expected", [
@@ -113,7 +113,7 @@ class TestMetrics(object):
     ])
     def test_support_false_negative_count(self, m, m_hat, expected):
         result = metrics.support_false_negative_count(m, m_hat)
-        print result
+        print(result)
         assert result == expected
 
     @pytest.mark.parametrize("m, m_hat, expected", [
@@ -150,7 +150,7 @@ class TestMetrics(object):
     ])
     def test_support_difference_count(self, m, m_hat, expected):
         result = metrics.support_difference_count(m, m_hat)
-        print result
+        print(result)
         assert result == expected
 
     @pytest.mark.parametrize("m, m_hat, expected", [
@@ -187,7 +187,7 @@ class TestMetrics(object):
     ])
     def test_has_exact_support(self, m, m_hat, expected):
         result = metrics.has_exact_support(m, m_hat)
-        print result
+        print(result)
         assert result == expected
 
     @pytest.mark.parametrize("m, m_hat, expected", [
@@ -224,7 +224,7 @@ class TestMetrics(object):
     ])
     def test_has_approx_support(self, m, m_hat, expected):
         result = metrics.has_approx_support(m, m_hat, 0.5)
-        print m, m_hat, result
+        print(m, m_hat, result)
         assert result == expected
 
     @pytest.mark.parametrize("m, m_hat, expected", [
@@ -261,5 +261,5 @@ class TestMetrics(object):
     ])
     def test_error_fro(self, m, m_hat, expected):
         result = metrics.error_fro(m, m_hat)
-        print m, m_hat, result
+        print(m, m_hat, result)
         np.testing.assert_array_almost_equal(result, expected)

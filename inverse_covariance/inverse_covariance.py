@@ -319,7 +319,7 @@ class InverseCovarianceEstimator(BaseEstimator):
         same, returns the smallest lambda (largest index) with minimum score.
         """
         if not isinstance(self.precision_, list):
-            raise NotImplementedError(
+            raise ValueError(
                 "EBIC requires multiple models to select from."
             )
             return

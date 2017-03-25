@@ -59,7 +59,7 @@ class TestQuicGraphLasso(object):
             np.linalg.norm(ic.opt_),
             np.linalg.norm(ic.duality_gap_),
         ]
-        print result_vec
+        print(result_vec)
         assert_allclose(expected, result_vec, rtol=1e-1)
 
     @pytest.mark.parametrize("params_in, expected", [
@@ -109,7 +109,7 @@ class TestQuicGraphLasso(object):
             np.linalg.norm(opt_),
             np.linalg.norm(duality_gap_),
         ]
-        print result_vec
+        print(result_vec)
         assert_allclose(expected, result_vec, rtol=1e-1)
 
     @pytest.mark.parametrize("params_in, expected", [
@@ -142,7 +142,7 @@ class TestQuicGraphLasso(object):
         elif isinstance(ic.lam_, np.ndarray):
             assert ic.lam_.shape == params_in['lam'].shape
 
-        print result_vec
+        print(result_vec)
         assert_allclose(expected, result_vec, rtol=1e-1)
 
         assert len(ic.grid_scores) == len(ic.cv_lams_)
@@ -169,7 +169,7 @@ class TestQuicGraphLasso(object):
         elif isinstance(ic.lam_, np.ndarray):
             assert ic.lam_.shape == params_in['lam'].shape
 
-        print result_vec
+        print(result_vec)
         assert_allclose(expected, result_vec, rtol=1e-1)
 
     def test_invalid_method(self):

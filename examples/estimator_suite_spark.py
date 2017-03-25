@@ -17,7 +17,7 @@ from inverse_covariance.profiling import (
 )
 
 '''
-This script reproduces parts of skggm/examples/estimator_suite.py using the 
+This script reproduces parts of skggm/examples/estimator_suite.py using the
 built-in inverse_covariance.profiling tools and spark support.
 
 To test on databricks:
@@ -34,7 +34,7 @@ To test on databricks:
 
     4) shift+return to run the cell
 
-To test on other Apache Spark systems: 
+To test on other Apache Spark systems:
     1) Define the variable `spark` to be your spark session.
 '''
 
@@ -81,9 +81,9 @@ def adaptive_graph_lasso(X, model_selector, method):
     '''
     metric = 'log_likelihood'
     print 'Adaptive {} with:'.format(model_selector)
-    print '   adaptive-method: {}'.format(method)  
+    print '   adaptive-method: {}'.format(method)
     if model_selector == 'QuicGraphLassoCV':
-        print '   metric: {}'.format(metric)  
+        print '   metric: {}'.format(metric)
         model = AdaptiveGraphLasso(
                 estimator=QuicGraphLassoCV(
                     cv=2, # cant deal w more folds at small size
@@ -94,7 +94,7 @@ def adaptive_graph_lasso(X, model_selector, method):
                 ),
                 method=method,
         )
-    
+
     elif model_selector == 'QuicGraphLassoEBIC':
         model = AdaptiveGraphLasso(
                 estimator=QuicGraphLassoEBIC(),
@@ -107,11 +107,11 @@ def adaptive_graph_lasso(X, model_selector, method):
 
 
 def quic_graph_lasso_ebic_manual(X, gamma=0):
-    '''Run QuicGraphLasso with mode='path' and gamma; use EBIC criteria for model 
-    selection.  
+    '''Run QuicGraphLasso with mode='path' and gamma; use EBIC criteria for model
+    selection.
 
-    The EBIC criteria is built into InverseCovarianceEstimator base class 
-    so we demonstrate those utilities here.  
+    The EBIC criteria is built into InverseCovarianceEstimator base class
+    so we demonstrate those utilities here.
     '''
     print 'QuicGraphLasso (manual EBIC) with:'
     print '   mode: path'
@@ -157,7 +157,7 @@ def model_average(X, penalization):
     '''Run ModelAverage in default mode (QuicGraphLassoCV) to obtain proportion
     matrix.
 
-    NOTE:  This returns precision_ proportions, not cov, prec estimates, so we 
+    NOTE:  This returns precision_ proportions, not cov, prec estimates, so we
            return the raw proportions for "cov" and the threshold support estimate
            for prec.
     '''
@@ -166,20 +166,20 @@ def model_average(X, penalization):
     print '   estimator: QuicGraphLasso (default)'
     print '   n_trials: {}'.format(n_trials)
     print '   penalization: {}'.format(penalization)
-    
+
     # if penalization is random, first find a decent scalar lam_ to build
     # random perturbation matrix around.  lam doesn't matter for fully-random.
-    lam = 0.5 
+    lam = 0.5
     if penalization == 'random':
         cv_model = QuicGraphLassoCV(
-            cv=2, 
+            cv=2,
             n_refinements=6,
             sc=spark.sparkContext,
             init_method='cov',
             score_metric=metric)
         cv_model.fit(X)
-        lam = cv_model.lam_    
-        print '   lam: {}'.format(lam)    
+        lam = cv_model.lam_
+        print '   lam: {}'.format(lam)
 
     model = ModelAverage(
         n_trials=n_trials,
@@ -202,21 +202,21 @@ def adaptive_model_average(X, penalization, method):
     print '   estimator: QuicGraphLasso (default)'
     print '   n_trials: {}'.format(n_trials)
     print '   penalization: {}'.format(penalization)
-    print '   adaptive-method: {}'.format(method)  
+    print '   adaptive-method: {}'.format(method)
 
     # if penalization is random, first find a decent scalar lam_ to build
     # random perturbation matrix around. lam doesn't matter for fully-random.
     lam = 0.5
     if penalization == 'random':
         cv_model = QuicGraphLassoCV(
-            cv=2, 
+            cv=2,
             n_refinements=6,
             sc=spark.sparkContext,
             init_method='cov',
             score_metric=metric)
         cv_model.fit(X)
-        lam = cv_model.lam_    
-        print '   lam: {}'.format(lam)  
+        lam = cv_model.lam_
+        print '   lam: {}'.format(lam)
 
     model = AdaptiveGraphLasso(
             estimator = ModelAverage(
@@ -266,13 +266,13 @@ def _count_support_diff(m, m_hat):
 
 
 if __name__ == "__main__":
-    n_samples = 600 
-    n_features = 50 
+    n_samples = 600
+    n_features = 50
     cv_folds = 3
 
     # make data
     X, true_cov, true_prec = make_data(n_samples, n_features)
-    
+
     plot_covs = [('True', true_cov),
                  ('True', true_cov),
                  ('True', true_cov)]
@@ -414,7 +414,7 @@ if __name__ == "__main__":
 
     named_mats = plot_precs
     suptitle = 'Precision Estimates'
-    
+
     num_rows = len(named_mats) / 3
     num_plots = int(np.ceil(num_rows / 4.))
     figs = []
@@ -441,7 +441,7 @@ if __name__ == "__main__":
 
         plt.suptitle(suptitle + ' (page {})'.format(nn), fontsize=14)
         figs.append(fig)
-        
+
 
     #
     # In separate cells, run each of these commands
