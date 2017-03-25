@@ -17,7 +17,7 @@ def _check_psd(m):
 def _fully_random_weights(n_features, lam_scale, prng):
     """Generate a symmetric random matrix with zeros along the diagonal."""
     weights = np.zeros((n_features, n_features))
-    n_off_diag = (n_features ** 2 - n_features) / 2
+    n_off_diag = int((n_features ** 2 - n_features) / 2)
     weights[np.triu_indices(n_features, k=1)] =\
         0.1 * lam_scale * prng.randn(n_off_diag) + (0.25 * lam_scale)
     weights[weights < 0] = 0
@@ -31,7 +31,7 @@ def _random_weights(n_features, lam, lam_perturb, prng):
     with probability 1/2.
     """
     weights = np.zeros((n_features, n_features))
-    n_off_diag = (n_features ** 2 - n_features) / 2
+    n_off_diag = int((n_features ** 2 - n_features) / 2)
     berns = prng.binomial(1, 0.5, size=n_off_diag)
     vals = np.zeros(berns.shape)
     vals[berns == 0] = 1. * lam * lam_perturb
