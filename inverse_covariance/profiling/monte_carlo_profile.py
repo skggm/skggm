@@ -1,9 +1,8 @@
 from __future__ import absolute_import
 
-import numpy as np 
+import numpy as np
 from functools import partial
 from sklearn.base import clone
-from sklearn.datasets import make_sparse_spd_matrix
 from sklearn.externals.joblib import Parallel, delayed
 
 from .metrics import error_fro
@@ -13,12 +12,12 @@ from .. import QuicGraphLasso, QuicGraphLassoCV
 
 def _sample_mvn(n_samples, cov, prng):
     '''Draw a multivariate normal sample from the graph defined by cov.
-    
+
     Parameters
-    ----------- 
+    -----------
     n_samples : int
 
-    cov : matrix of shape (n_features, n_features) 
+    cov : matrix of shape (n_features, n_features)
         Covariance matrix of the graph.
 
     prng : np.random.RandomState instance.
@@ -33,7 +32,7 @@ def _ms_fit(indexed_params, estimator, n_features, graph, prng):
 
     # draw a new fixed graph for alpha
     cov, prec, adj = graph.create(n_features, alpha)
-    
+
     # model selection (once per n_samples grid point)
     n_samples = int(grid_point * n_features)
     X = _sample_mvn(n_samples, cov, prng)
@@ -52,7 +51,7 @@ def _mc_fit(indexed_params, estimator, metrics, prng):
     mc_estimator = clone(estimator)
     mc_estimator.set_params(lam=lam)
     mc_estimator.fit(X)
-    results = {k: f(prec, mc_estimator.precision_) for k,f in metrics.items()}
+    results = {k: f(prec, mc_estimator.precision_) for k, f in metrics.items()}
 
     return index, results
 
@@ -61,7 +60,7 @@ def _cpu_map(fun, param_grid, n_jobs, verbose):
     return Parallel(
         n_jobs=n_jobs,
         verbose=verbose,
-        backend='threading', # any sklearn backend should work here
+        backend='threading',  # any sklearn backend should work here
     )(
         delayed(fun)(
             params
@@ -71,11 +70,11 @@ def _cpu_map(fun, param_grid, n_jobs, verbose):
 
 def _spark_map(fun, indexed_param_grid, sc, seed):
     '''We cannot pass a RandomState instance to each spark worker since it will
-    behave identically across partitions.  Instead, we explictly handle the 
-    partitions with a newly seeded instance.  
+    behave identically across partitions.  Instead, we explictly handle the
+    partitions with a newly seeded instance.
 
     The seed for each partition will be the "seed" (MonteCarloProfile.seed) +
-    "split_index" which is the partition index.  
+    "split_index" which is the partition index.
 
     Following this trick:
         https://wegetsignal.wordpress.com/2015/05/08/
@@ -85,22 +84,22 @@ def _spark_map(fun, indexed_param_grid, sc, seed):
         prng = np.random.RandomState(seed + split_index)
         yield map(partial(fun, prng=prng), partition)
 
-    par_param_grid = sc.parallelize(indexed_param_grid) 
+    par_param_grid = sc.parallelize(indexed_param_grid)
     indexed_results = par_param_grid.mapPartitionsWithIndex(
         _wrap_random_state).collect()
     return [item for sublist in indexed_results for item in sublist]
 
 
 class MonteCarloProfile(object):
-    """Compute performance metrics over multiple random trials (multivariate 
-    normal sample instances for a given graph). 
+    """Compute performance metrics over multiple random trials (multivariate
+    normal sample instances for a given graph).
 
-    The graph is sampled once to obtain a penalty (via the ms_estimator) and 
-    then sampled and fit for n_trials for each (alpha, n_samples) parameter 
+    The graph is sampled once to obtain a penalty (via the ms_estimator) and
+    then sampled and fit for n_trials for each (alpha, n_samples) parameter
     pair.
 
     Parameters
-    -----------        
+    -----------
     n_features : int (default=50)
         Fixed number of features to test.
 
@@ -108,24 +107,24 @@ class MonteCarloProfile(object):
         Number of examples to draw to measure P(recovery).
 
     ms_estimator : "Model selection estimator" (default=None)
-        An inverse covariance estimator instance. This estimator must be able to
-        select a penalization parameter that can be accessed via the instance 
-        variable .lam_.  
+        An inverse covariance estimator instance. This estimator must be able
+        to select a penalization parameter that can be accessed via the
+        instance variable .lam_.
 
     mc_estimator : "Monte Carlo trial estimator" (default=None)
-        An inverse covariance estimator instance. Estimator to use on each 
-        instance after selecting a penalty lambda. The penalty parameter 'lam' 
+        An inverse covariance estimator instance. Estimator to use on each
+        instance after selecting a penalty lambda. The penalty parameter 'lam'
         will be overriden by with penalty selected by ms_estimator.
         If None, this will use QuicGraphLasso.
 
-    graph :  An instance of a class with the method `.create(n_features, alpha)`
+    graph :  An instance of a class with the method .create(n_features, alpha)
         that returns (cov, prec, adj).
         graph.create() will be used to draw a new graph instance in each trial.
         default: ErdosRenyiGraph()
 
     n_samples_grid : int (default=10) or array of floats
         Grid points for choosing number of samples.
-        If integer, defines a linear grid (5, 200) 
+        If integer, defines a linear grid (5, 200)
         Else uses array as grid.
 
     alpha_grid : int (default=5) or array of floats
@@ -144,7 +143,7 @@ class MonteCarloProfile(object):
         number of jobs to run in parallel (default 1).
 
     sc: sparkContext (optional)
-        If a sparkContext object is provided, n_jobs will be ignore and the 
+        If a sparkContext object is provided, n_jobs will be ignore and the
         work will be parallelized via spark.
 
     seed : np.random.RandomState starting seed. (default=2)
@@ -165,12 +164,12 @@ class MonteCarloProfile(object):
         Each key corresponds to a function from metrics.
     """
     def __init__(self, n_features=50, n_trials=100, ms_estimator=None,
-                 mc_estimator=None, graph=None, n_samples_grid=10, alpha_grid=5,
-                 metrics={'frobenius': error_fro}, verbose=False,  n_jobs=1,
-                 sc=None, seed=2):
+                 mc_estimator=None, graph=None, n_samples_grid=10,
+                 alpha_grid=5, metrics={'frobenius': error_fro}, verbose=False,
+                 n_jobs=1, sc=None, seed=2):
         self.n_features = n_features
         self.n_trials = n_trials
-        self.ms_estimator = ms_estimator  
+        self.ms_estimator = ms_estimator
         self.mc_estimator = mc_estimator
         self.graph = graph
         self.n_samples_grid = n_samples_grid
@@ -197,7 +196,7 @@ class MonteCarloProfile(object):
             self.grid_ = np.linspace(5, 200, self.n_samples_grid)
         else:
             self.grid_ = self.n_samples_grid
-        
+
         if isinstance(self.alpha_grid, int):
             self.alphas_ = np.logspace(
                 np.log(0.15), np.log10(0.4), self.alpha_grid
@@ -208,26 +207,28 @@ class MonteCarloProfile(object):
         self.is_fitted = False
         self.results_ = None
         self.precision_nnz_ = None
- 
+
     def fit(self, X=None, y=None):
         n_alphas = len(self.alphas_)
         n_grids = len(self.grid_)
 
         self.precision_nnz_ = []
-        self.results_ = {k: np.zeros((n_alphas, n_grids)) for k in self.metrics}
+        self.results_ = {
+            k: np.zeros((n_alphas, n_grids)) for k in self.metrics
+        }
 
         # build an indexed set (or generator) of grid points
         param_grid = [(a, g) for a in self.alphas_ for g in self.grid_]
         indexed_param_grid = list(zip(range(len(param_grid)), param_grid))
 
-        ms_fit = partial(_ms_fit, 
+        ms_fit = partial(_ms_fit,
                          estimator=self.ms_estimator,
                          n_features=self.n_features,
-                         graph=self.graph, 
-                         prng=self.prng) 
+                         graph=self.graph,
+                         prng=self.prng)
 
         if self.verbose:
-            print 'Getting parameters via model selection...'
+            print('Getting parameters via model selection...')
 
         if self.sc is not None:
             ms_results = _spark_map(ms_fit, indexed_param_grid, self.sc,
@@ -247,10 +248,10 @@ class MonteCarloProfile(object):
         # build param grid for mc trials
         # following results in an grid where nn indexes each trial of each
         # param grid:
-        #  (0, graph_0, lam_0, n_samples_), (1, graph_0, lam_0, n_samples_0),...
+        #  (0, graph_0, lam_0, n_samples_), (1, graph_0, lam_0, n_samples_0),..
         trial_param_grid = [
-            (nn, graph, lam, n_samples) 
-            for _, (graph, lam, n_samples) in ms_results 
+            (nn, graph, lam, n_samples)
+            for _, (graph, lam, n_samples) in ms_results
             for nn in range(self.n_trials)
         ]
         indexed_trial_param_grid = list(
@@ -258,13 +259,13 @@ class MonteCarloProfile(object):
         )
 
         mc_fit = partial(
-            _mc_fit, 
+            _mc_fit,
             estimator=self.mc_estimator,
             metrics=self.metrics
         )
-        
+
         if self.verbose:
-            print 'Fitting MC trials...'
+            print('Fitting MC trials...')
 
         if self.sc is not None:
             mc_results = _spark_map(
@@ -289,7 +290,7 @@ class MonteCarloProfile(object):
 
         # reduce
         param_grid_matrix_index = [
-            (a, g) 
+            (a, g)
             for a in range(len(self.alphas_))
             for g in range(len(self.grid_))
         ]
@@ -300,13 +301,13 @@ class MonteCarloProfile(object):
             for key in self.metrics:
                 results_by_key = np.array([t[key] for t in trials])
                 self.results_[key][aidx, gidx] =\
-                        1. * np.sum(results_by_key) / self.n_trials
+                    1. * np.sum(results_by_key) / self.n_trials
 
         if self.verbose:
                 for key in self.metrics:
-                    print 'Results for {}: {}'.format(
+                    print('Results for {}: {}'.format(
                         key, self.results_[key][aidx, :]
-                    )
+                    ))
 
         self.is_fitted = True
         return self

@@ -2,10 +2,6 @@ import numpy as np
 import pytest
 
 from inverse_covariance.profiling import MonteCarloProfile
-from inverse_covariance import (
-    QuicGraphLassoCV,
-    QuicGraphLassoEBIC,
-)
 
 
 class FakeGraph(object):
@@ -40,7 +36,7 @@ class TestMonteCarloProfile(object):
             'graph': FakeGraph(),
             'metrics': metrics,
             'n_samples_grid': [2, 3],
-            'alpha_grid': [2,3],
+            'alpha_grid': [2, 3],
         }),
         ({
             'n_trials': 20,
@@ -61,7 +57,7 @@ class TestMonteCarloProfile(object):
             assert mc.results_[key].shape == (len(mc.alphas_), len(mc.grid_))
 
         assert len(mc.precision_nnz_) == len(mc.alphas_) * len(mc.grid_)
-        assert mc.precision_nnz_[0] == params_in['n_features'] # for eye
+        assert mc.precision_nnz_[0] == params_in['n_features']  # for eye
 
         if isinstance(mc.n_samples_grid, int):
             assert len(mc.grid_) == mc.n_samples_grid
@@ -72,7 +68,6 @@ class TestMonteCarloProfile(object):
             assert len(mc.alphas_) == mc.alpha_grid
         else:
             assert mc.alphas_ == mc.alpha_grid
-
 
     @pytest.mark.parametrize("params_in", [
         ({

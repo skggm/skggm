@@ -1,17 +1,17 @@
 from __future__ import absolute_import
 
-import numpy as np 
+import numpy as np
 from .graphs import Graph
 
 
 class ClusterGraph(Graph):
     """Returns the adjacency matrix for a cluster network via .create().
 
-    The graph can be made fully connected using chaining assumption when 
+    The graph can be made fully connected using chaining assumption when
     chain_blocks=True (default).
 
     Parameters
-    ----------- 
+    -----------
     low : float (0, 1) (default=0.3)
         Lower bound for np.random.RandomState.uniform cluster values.
 
@@ -19,7 +19,7 @@ class ClusterGraph(Graph):
         Upper bound for np.random.RandomState.uniform vluster values.
 
     n_blocks : int (default=2)
-        Number of blocks.  Returned matrix will be square with 
+        Number of blocks.  Returned matrix will be square with
         shape n_block_features * n_blocks.
 
     chain_blocks : bool (default=True)
@@ -39,23 +39,22 @@ class ClusterGraph(Graph):
         Doc for ".create(n_features, alpha)"
 
         Parameters
-        -----------        
-        n_features : int 
+        -----------
+        n_features : int
 
-        [alpha] : float (0,1) 
+        [alpha] : float (0,1)
             Unused.
 
-        Each graph will have a minimum of 
-        
+        Each graph will have a minimum of
+
             (n_blocks * n_block_features**2 - n_blocks) / 2
-        
+
         edges and exactly this amount if chain_blocks=False.
 
         Returns
-        -----------  
-        (n_features, n_features) matrices: covariance, precision, adjacency 
+        -----------
+        (n_features, n_features) matrices: covariance, precision, adjacency
         """
-        return (-np.ones((n_block_features, n_block_features)) * 0.5 + 
+        return (-np.ones((n_block_features, n_block_features)) * 0.5 +
                 self.prng.uniform(low=self.low, high=self.high,
                                   size=(n_block_features, n_block_features)))
-
