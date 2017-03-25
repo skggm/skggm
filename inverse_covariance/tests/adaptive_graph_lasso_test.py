@@ -15,7 +15,7 @@ class TestAdaptiveGraphLasso(object):
     @pytest.mark.parametrize("params_in", [
         ({
             'estimator': QuicGraphLassoCV(
-                        cv=2, 
+                        cv=2,
                         n_refinements=6,
                         init_method='cov',
                         score_metric='log_likelihood',
@@ -24,7 +24,7 @@ class TestAdaptiveGraphLasso(object):
         }),
         ({
             'estimator': QuicGraphLassoCV(
-                        cv=2, 
+                        cv=2,
                         n_refinements=6,
                         init_method='cov',
                         score_metric='log_likelihood',
@@ -33,7 +33,7 @@ class TestAdaptiveGraphLasso(object):
         }),
         ({
             'estimator': QuicGraphLassoCV(
-                        cv=2, 
+                        cv=2,
                         n_refinements=6,
                         init_method='cov',
                         score_metric='log_likelihood',
@@ -66,7 +66,7 @@ class TestAdaptiveGraphLasso(object):
         ).create(n_features, 0.8)
         prng = np.random.RandomState(2)
         X = prng.multivariate_normal(np.zeros(n_features), cov, size=n_samples)
-        
+
         model = AdaptiveGraphLasso(**params_in)
         model.fit(X)
         assert model.estimator_ is not None

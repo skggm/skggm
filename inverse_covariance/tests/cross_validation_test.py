@@ -26,8 +26,6 @@ def test_repeated_kfold_values():
     # Error when number of folds is <= 1
     assert_raises(ValueError, RepeatedKFold, 2, 0)
     assert_raises(ValueError, RepeatedKFold, 2, 1)
-    error_string = ("repeated k-fold cross validation requires at least one"
-                    " train / test split")
 
     # When n is not integer:
     assert_raises(ValueError, RepeatedKFold, 2.5, 2)

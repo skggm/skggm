@@ -1,17 +1,16 @@
 from __future__ import absolute_import
 
-import numpy as np 
 from .graphs import Graph, lattice
 
 
 class LatticeGraph(Graph):
     """Returns the adjacency matrix for a lattice/banded network via .create().
 
-    The graph can be made fully connected using chaining assumption when 
+    The graph can be made fully connected using chaining assumption when
     chain_blocks=True (default).
 
     Parameters
-    ----------- 
+    -----------
     random sign : bool (default=False)
         Randomly modulate each entry by 1 or -1 with probability of 1/2.
 
@@ -22,7 +21,7 @@ class LatticeGraph(Graph):
         Upper bound for np.random.RandomState.uniform before normalization.
 
     n_blocks : int (default=2)
-        Number of blocks.  Returned matrix will be square with 
+        Number of blocks.  Returned matrix will be square with
         shape n_block_features * n_blocks.
 
     chain_blocks : bool (default=True)
@@ -43,27 +42,27 @@ class LatticeGraph(Graph):
         Doc for ".create(n_features, alpha)"
 
         Parameters
-        -----------        
-        n_features : int 
+        -----------
+        n_features : int
 
-        alpha : float (0,1) 
+        alpha : float (0,1)
             The complexity / sparsity factor.
-        
-            Each graph will have a minimum of 
-            
+
+            Each graph will have a minimum of
+
                 n_blocks * ceil(alpha * n_block_features)
 
                 where
 
-                n_block_features = floor(n_features / self.n_blocks)            
-            
-            edges and exactly this amount if chain_blocks=False. 
+                n_block_features = floor(n_features / self.n_blocks)
+
+            edges and exactly this amount if chain_blocks=False.
 
         Returns
-        -----------  
+        -----------
         (n_features, n_features) matrices: covariance, precision, adjacency
         """
         return lattice(self.prng, n_block_features, alpha,
                        random_sign=self.random_sign,
                        low=self.low,
-                       high=self.high) 
+                       high=self.high)

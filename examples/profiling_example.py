@@ -16,6 +16,13 @@ from inverse_covariance.profiling import (
 plt.ion()
 
 
+def r_input(val):
+    if sys.version_info[0] >= 3:
+        return eval(input(val))
+
+    return raw_input(val)
+
+
 ###############################################################################
 # Setup metrics
 
@@ -33,7 +40,7 @@ metrics = {
 # Run MC trials
 
 mc = MonteCarloProfile(n_features=50, n_trials=10, graph=LatticeGraph(),
-                       n_samples_grid=10, alpha_grid=5, metrics=metrics, 
+                       n_samples_grid=10, alpha_grid=5, metrics=metrics,
                        verbose=True, n_jobs=4)
 mc.fit()
 
@@ -49,4 +56,4 @@ for key in metrics:
     plt.show()
 
 
-raw_input('Any key to exit.')
+r_input('Any key to exit.')

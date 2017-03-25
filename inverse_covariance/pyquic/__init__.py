@@ -1,3 +1,3 @@
-from .pyquic import (
+from .pyquic import (  # NOQA
     quic,
-)
+)  # NOQA
