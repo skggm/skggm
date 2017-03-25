@@ -29,7 +29,10 @@ plt.ion()
 
 
 def r_input(val):
-    eval(input(val))
+    if sys.version_info[0] >= 3:
+        return eval(input(val))
+
+    return raw_input(val)
 
 
 def make_data(n_samples, n_features):

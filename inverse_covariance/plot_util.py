@@ -1,10 +1,18 @@
 """Various utilities for Gaussian graphical models."""
+import sys
 import numpy as np
 from sklearn.utils.testing import assert_array_equal
 from matplotlib import pyplot as plt
 import seaborn  # NOQA
 
 plt.ion()
+
+
+def r_input(val):
+    if sys.version_info[0] >= 3:
+        return eval(input(val))
+
+    return raw_input(val)  # NOQA
 
 
 def _check_path(in_path):
@@ -121,4 +129,4 @@ def trace_plot(precisions, path, n_edges=20, ground_truth=None, edges=[]):
     plt.xlabel('log-Lambda')
 
     plt.show()
-    raw_input('Press any key to continue.')
+    r_input('Press any key to continue.')

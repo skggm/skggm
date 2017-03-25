@@ -55,7 +55,7 @@ def make_data(n_samples, n_features):
 def quic_graph_lasso_cv(X, metric):
     '''Run QuicGraphLassoCV on data with metric of choice.
 
-    Compare results with GridSearchCV + quic_graph_lasso.  The number of lambdas
+    Compare results with GridSearchCV + quic_graph_lasso. The number of lambdas
     tested should be much lower with similar final lam_ selected.
     '''
     print 'QuicGraphLassoCV with:'

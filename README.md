@@ -1,5 +1,5 @@
 # skggm : Gaussian graphical models in scikit-learn
-In the last decade, learning networks that encode conditional indepedence relationships has become an  important problem in machine learning and statistics. For many important probability distributions, such as multivariate Gaussians, this amounts to estimation of inverse covariance matrices. Inverse covariance estimation is now used widely in infer gene regulatory networks in cellular biology and neural interactions in the neuroscience. 
+In the last decade, learning networks that encode conditional indepedence relationships has become an  important problem in machine learning and statistics. For many important probability distributions, such as multivariate Gaussians, this amounts to estimation of inverse covariance matrices. Inverse covariance estimation is now used widely in infer gene regulatory networks in cellular biology and neural interactions in the neuroscience.
 
 However, many statistical advances and best practices in fitting such models to data are not yet widely adopted and not available in common python packages for machine learning. Furthermore, inverse covariance estimation is an active area of research where researchers continue to improve algorithms and estimators.
 With `skggm` we seek to provide these new developments to a wider audience, and also enable researchers to effectively benchmark their methods in regimes relevant to their applications of interest.
@@ -12,9 +12,9 @@ Given **n** independently drawn, **p**-dimensional Gaussian random samples <img 
 
 <p align="center"><img src="images/graphlasso_program.png" alt="\ell_1 penalized inverse covariance estimation" width="480"></p>
 
-where <img src="images/Lambda.png" alt="\Lambda" width="80"> is a symmetric matrix with non-negative entries and 
+where <img src="images/Lambda.png" alt="\Lambda" width="80"> is a symmetric matrix with non-negative entries and
 
-<p align="center"><img src="images/penalty.png" alt="penalty" width="200"></p> 
+<p align="center"><img src="images/penalty.png" alt="penalty" width="200"></p>
 
 Typically, the diagonals are not penalized by setting <img src="images/lambda_diagonals.png" alt="diagonals" width="170"> to ensure that <img src="images/Theta.png" alt="Theta" width="13"> remains positive definite. The objective reduces to the standard graphical lasso formulation of [Friedman et al.](http://statweb.stanford.edu/~tibs/ftp/glasso-bio.pdf) when all off diagonals of the penalty matrix take a constant scalar value <img src="images/scalar_penalty.png" alt="scalar_penalty" width="170">. The standard graphical lasso has been implemented in [scikit-learn](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html).
 
@@ -23,20 +23,20 @@ In this package we provide a [scikit-learn](http://scikit-learn.org)-compatible 
 
 ### Quick start
 To get started, install the package (via pip, see below) and:
- 
+
 - read the tour of skggm at [https://skggm.github.io/skggm/tour](https://skggm.github.io/skggm/tour)
-- read [@mnarayan](https://github.com/mnarayan)'s [talk](https://dx.doi.org/10.6084/m9.figshare.4003380) and check out the companion examples [here](https://github.com/neuroquant/jf2016-skggm) (live via binder at [here](http://mybinder.org/repo/neuroquant/jf2016-skggm)). Presented at HHMI, Janelia Farms, October 2016. 
+- read [@mnarayan](https://github.com/mnarayan)'s [talk](https://dx.doi.org/10.6084/m9.figshare.4003380) and check out the companion examples [here](https://github.com/neuroquant/jf2016-skggm) (live via binder at [here](http://mybinder.org/repo/neuroquant/jf2016-skggm)). Presented at HHMI, Janelia Farms, October 2016.
 - basic usage examples can be found in [examples/estimator_suite.py](https://github.com/skggm/skggm/blob/master/examples/estimator_suite.py)
 
 ---
 
-This is an ongoing effort. We'd love your feedback on which algorithms and techniques we should include and how you're using the package. We also welcome contributions. 
+This is an ongoing effort. We'd love your feedback on which algorithms and techniques we should include and how you're using the package. We also welcome contributions.
 
 [@jasonlaska](https://github.com/jasonlaska) and [@mnarayan](https://github.com/mnarayan)
 
 ---
 
-## Included in `inverse_covariance` 
+## Included in `inverse_covariance`
 An overview of the skggm graphical lasso facilities is depicted by the following diagram:
 <p align="center"><img src="images/skggm_workflow.png" alt="sklearn/skggm feature comparison" width="600"></p>
 
@@ -46,20 +46,20 @@ Information on basic usage can be found at [https://skggm.github.io/skggm/tour](
 
     _QuicGraphLasso_ is an implementation of [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) wrapped as a scikit-learn compatible estimator \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\] . The estimator can be run in `default` mode for a fixed penalty or in `path` mode to explore a sequence of penalties efficiently.  The penalty `lam` can be a scalar or matrix.
 
-    The primary outputs of interest are: `covariance_`, `precision_`, and `lam_`.  
+    The primary outputs of interest are: `covariance_`, `precision_`, and `lam_`.
 
     The interface largely mirrors the built-in _[GraphLasso](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLasso.html)_ although some param names have been changed (e.g., `alpha` to `lam`). Some notable advantages of this implementation over _GraphLasso_ are support for a matrix penalization term and speed.
 
 - **QuicGraphLassoCV** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L372-L468)
-    
+
     _QuicGraphLassoCV_ is an optimized cross-validation model selection implementation similar to scikit-learn's _[GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html)_. As with _QuicGraphLasso_, this implementation also supports matrix penalization.
 
 - **QuicGraphLassoEBIC** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L644-L717)
 
-    _QuicGraphLassoEBIC_ is provided as a convenience class to use the _Extended Bayesian Information Criteria_ (EBIC) for model selection \[[Foygel et al.](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\].  
+    _QuicGraphLassoEBIC_ is provided as a convenience class to use the _Extended Bayesian Information Criteria_ (EBIC) for model selection \[[Foygel et al.](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\].
 
 - **ModelAverage** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/model_average.py#L72-L172)
-    
+
     _ModelAverage_ is an ensemble meta-estimator that computes several fits with a user-specified `estimator` and averages the support of the resulting precision estimates.  The result is a `proportion_` matrix indicating the sample probability of a non-zero at each index. This is a similar facility to scikit-learn's _[RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html)_) but for the graph lasso.
 
     In each trial, this class will:
@@ -72,9 +72,9 @@ Information on basic usage can be found at [https://skggm.github.io/skggm/tour](
 
 - **AdaptiveGraphLasso** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/adaptive_graph_lasso.py#L13-L48)
 
-    _AdaptiveGraphLasso_ performs a two step estimation procedure: 
-    
-    1. Obtain an initial sparse estimate. 
+    _AdaptiveGraphLasso_ performs a two step estimation procedure:
+
+    1. Obtain an initial sparse estimate.
 
     2. Derive a new penalization matrix from the original estimate.  We currently provide three methods for this: `binary`, `1/|coeffs|`, and `1/|coeffs|^2`.  The `binary` method only requires the initial estimate's support (and this can be be used with _ModelAverage_ below).
 
@@ -102,13 +102,13 @@ Information on basic usage can be found at [https://skggm.github.io/skggm/tour](
 - `ModelAverage`
 - `profiling.MonteCarloProfile`
 
-can make use of this through either the `n_jobs` or `sc` (sparkContext) parameters.  
+can make use of this through either the `n_jobs` or `sc` (sparkContext) parameters.
 
 Since these are naive implementations, it is not possible to enable parallel work on all three of objects simultaneously when they are being composited together. For example, in this snippet:
 
     model = ModelAverage(
         estimator=QuicGraphLassoCV(
-            cv=2, 
+            cv=2,
             n_refinements=6,
         )
         penalization=penalization,
@@ -130,9 +130,9 @@ or via PyPI
     pip install skggm
 
 or from a cloned repo
-    
+
     cd inverse_covariance/pyquic
-    make 
+    make
 
 **The package requires that `numpy`, `scipy`, and `cython` are installed independently into your environment first.**
 
@@ -141,16 +141,17 @@ If you would like to fork the pyquic bindings directly, use the Makefile provide
 This package requires the `lapack` libraries to by installed on your system. A configuration example with these dependencies for Ubuntu and Anaconda 2 can be found [here](https://github.com/neuroquant/jf2016-skggm/blob/master/Dockerfile#L8-L13).
 
 ## Tests
-To run the tests, execute the following lines.  
+To run the tests, execute the following lines.
 
     python -m pytest inverse_covariance
+    flake8 inverse_covariance
 
 # Examples
 
-## Usage 
+## Usage
 In `examples/estimator_suite.py` we reproduce the [plot_sparse_cov](http://scikit-learn.org/stable/auto_examples/covariance/plot_sparse_cov.html) example from the scikit-learn documentation for each method provided (however, the variations chosen are not exhaustive).
 
-An example run for `n_examples=100` and `n_features=20` yielded the following results. 
+An example run for `n_examples=100` and `n_features=20` yielded the following results.
 
 <p align="center"><img src="images/estimator_suite_scorecard_100x20.png" alt="(n_examples, n_features) = (100, 20)" width="650"></p>
 
@@ -185,12 +186,12 @@ We've provided a utility function `inverse_covariance.plot_util.trace_plot` that
 
 * ["Relaxed Lasso"](http://stat.ethz.ch/~nicolai/relaxo.pdf) N. Meinshausen, December 2006.
 
-### Randomized model averaging 
+### Randomized model averaging
 
 * ["Stability Selection"](https://arxiv.org/pdf/0809.2932v2.pdf) N. Meinhausen and P. Buehlmann, May 2009
 
 * ["Random Lasso"](https://arxiv.org/abs/1104.3398) S. Wang, B. Nan, S. Rosset, and J. Zhu, Apr 2011
-            
+
 * ["Mixed effects models for resampled network statistics improves statistical power to find differences in multi-subject functional connectivity"](http://biorxiv.org/content/early/2016/03/14/027516) M. Narayan and G. Allen, March 2016
 
 ### Convergence test
