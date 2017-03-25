@@ -534,9 +534,11 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         X = as_float_array(X, copy=False, force_all_finite=False)
 
         if self.cv is None:
-            cv = (3, 3)
+            cv = (3, 10)
         elif isinstance(self.cv, int):
-            cv = (self.cv, 3) # upgrade with default number of trials
+            cv = (self.cv, 10) # upgrade with default number of trials
+    	elif isinstance(self.cv, tuple):
+    	    cv = self.cv
 
         if isinstance(cv, tuple):
             if not sp.issparse(X):
