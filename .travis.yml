@@ -10,11 +10,12 @@ cache:
         - $HOME/.cache/pip
 
 addons:
-    apt:
+    apt: true
     packages:
         - libatlas3gf-base
         - libatlas-dev
         - python-scipy
+	- cython
 
 # command to install dependencies
 install:
@@ -24,4 +25,4 @@ install:
     - python setup.py develop
 
 # command to run tests
-script: ./test_script.sh
+script: python -m pytest --showlocals --pyargs
