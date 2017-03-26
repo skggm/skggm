@@ -20,8 +20,8 @@ addons:
 # command to install dependencies
 install:
     - pip install -U pip wheel
-    - pip install -r requirements.txt
     - pip install --upgrade --install-option="--no-cython-compile" cython
+    - pip install -r requirements.txt
     - python setup.py develop
 
 # command to run tests
