@@ -15,7 +15,7 @@ addons:
         - libatlas3gf-base
         - libatlas-dev
         - python-scipy
-	- cython
+        - cython
 
 # command to install dependencies
 install:
