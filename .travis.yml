@@ -1,36 +1,26 @@
 language: python
+python: 2.7
 
-python:
-  - "2.7"
-  # PyPy versions
-  - "pypy"  # PyPy2 2.5.0
+sudo: false
 
 # Pre-install packages for the ubuntu distribution
 cache:
-  apt: true
-  directories:
-  - $HOME/.cache/pip
+    apt: true
+    directories:
+        - $HOME/.cache/pip
+
 addons:
-  apt:
+    apt:
     packages:
-      # these only required by the DISTRIB="ubuntu" builds:
-      - python-scipy
-      - libatlas3gf-base
-      - libatlas-dev
-env:
-  matrix:
-    # Test environments similar to those for scikit-learn
-    # This environment tests a recent anaconda env.
-    - DISTRIB="conda" PYTHON_VERSION="2.7" INSTALL_MKL="true"
-      NUMPY_VERSION="1.11.2" SCIPY_VERSION="0.18.1" CYTHON_VERSION="0.25.2" 
-      COVERAGE=true
-    # versions of numpy, scipy with ATLAS that comes with Ubuntu Precise 12.04
-    - DISTRIB="ubuntu" PYTHON_VERSION="2.7" CYTHON_VERSION="0.23.4"
-      COVERAGE=true 
+        - libatlas3gf-base
+        - libatlas-dev
+        - python-scipy
 
 # command to install dependencies
 install:
-  - pip install -r requirements.txt
-  
+    - pip install -U pip wheel
+    - pip install -r requirements.txt
+    - python setup.py develop
+
 # command to run tests
-script: pytest
+script: ./test_script.sh
