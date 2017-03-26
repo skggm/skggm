@@ -20,6 +20,7 @@ addons:
 install:
     - pip install -U pip wheel
     - pip install -r requirements.txt
+    - python setup.py build_ext --inplace
     - python setup.py develop
 
 # command to run tests
