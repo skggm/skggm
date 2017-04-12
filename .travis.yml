@@ -15,12 +15,11 @@ addons:
         - libatlas3gf-base
         - libatlas-dev
         - python-scipy
-        - cython
 
 # command to install dependencies
 install:
-    - pip install -U pip wheel
-    - pip install --upgrade --install-option="--no-cython-compile" cython
+    - pip install -U pip wheel    
+    - pip install --install-option="--no-cython-compile" cython
     - pip install -r requirements.txt
     - python setup.py develop
 
