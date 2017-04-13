@@ -10,13 +10,13 @@ cache:
         - $HOME/.cache/pip
 
 addons:
-    apt: true
-    packages:
-        - libblas-dev 
-        - liblapack-dev
-        - python-scipy
-        - libatlas3gf-base
-        - libatlas-dev
+    apt:
+        packages:
+            - libblas-dev 
+            - liblapack-dev
+            - python-scipy
+            - libatlas3gf-base
+            - libatlas-dev
 
 # command to install dependencies
 install:
