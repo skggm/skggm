@@ -12,9 +12,11 @@ cache:
 addons:
     apt: true
     packages:
+        - libblas-dev 
+        - liblapack-dev
+        - python-scipy
         - libatlas3gf-base
         - libatlas-dev
-        - python-scipy
 
 # command to install dependencies
 install:
