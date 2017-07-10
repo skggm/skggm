@@ -27,9 +27,9 @@ def test_spearman_correlation():
 
 def test_kendalltau_correlation():
     A = np.ones(shape=[2, 2])
-    
-    A2 = kendalltau_correlation(X,weighted=False)
+
+    A2 = kendalltau_correlation(X, weighted=False)
     assert_array_almost_equal(A, A2, decimal=3)
-    
-    A3 = kendalltau_correlation(X,weighted=True)
+
+    A3 = kendalltau_correlation(X, weighted=True)
     assert_array_almost_equal(A, A3, decimal=3)
