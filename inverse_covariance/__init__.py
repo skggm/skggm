@@ -16,6 +16,7 @@ from .metrics import (
 )
 from .rank_correlation import (
     spearman_correlation,
+    kendalltau_correlation,
 )
 from .model_average import ModelAverage
 from .adaptive_graph_lasso import AdaptiveGraphLasso
@@ -32,6 +33,7 @@ __all__ = [
     'quadratic_loss',
     'ebic',
     'spearman_correlation',
+    'kendalltau_correlation',
     'ModelAverage',
     'AdaptiveGraphLasso',
     'RepeatedKFold',
