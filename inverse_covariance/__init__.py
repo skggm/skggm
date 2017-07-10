@@ -2,10 +2,6 @@ from __future__ import absolute_import
 from .inverse_covariance import (
     InverseCovarianceEstimator,
 )
-from .rank_correlation import(
-    compute_ranks,
-    spearman_correlation
-)
 from .quic_graph_lasso import (
     quic,
     QuicGraphLasso,
