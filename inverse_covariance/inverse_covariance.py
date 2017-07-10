@@ -4,8 +4,10 @@ import numpy as np
 from sklearn.base import BaseEstimator
 
 from . import metrics
-from .rank_correlation import spearman_correlation
-
+from .rank_correlation import (
+    spearman_correlation,
+    kendalltau_correlation,
+)
 
 def _init_coefs(X, method='corrcoef'):
     if method == 'corrcoef':
@@ -13,9 +15,10 @@ def _init_coefs(X, method='corrcoef'):
     elif method == 'cov':
         init_cov = np.cov(X, rowvar=False)
         return init_cov, np.max(np.abs(np.triu(init_cov)))
-    elif method == 'spearman':
-        init_cov = spearman_correlation(X)
-        return init_cov, 1.0
+    elif method == 'spearman':        
+        return spearman_correlation(X, rowvar=False), 1.0
+    elif method == 'kendalltau':
+        return kendalltau_correlation(X, rowvar=False), 1.0   
     elif callable(method):
         return method(X)
     else:
