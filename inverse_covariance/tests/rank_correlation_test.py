@@ -2,8 +2,8 @@ import numpy as np
 
 from sklearn.utils.testing import assert_array_almost_equal
 
-from inverse_covariance import (
-    compute_ranks,
+from inverse_covariance.rank_correlation import (
+    _compute_ranks,
     spearman_correlation,
 )
 
@@ -14,7 +14,7 @@ X = np.append(X, X, axis=1)
 
 def test_compute_ranks():
     Y1 = 5.5 * Y
-    Y2 = compute_ranks(Y)
+    Y2 = _compute_ranks(Y)
     assert_array_almost_equal(Y1, Y2)
 
 

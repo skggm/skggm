@@ -4,7 +4,7 @@ import numpy as np
 from scipy.stats import rankdata
 
 
-def compute_ranks(X):
+def _compute_ranks(X):
     """
     Transform each column into ranked data. Tied ranks are averaged.
 
@@ -43,7 +43,7 @@ def spearman_correlation(X):
     -------
     rank_correlation
     """
-    Xrank = compute_ranks(X)
+    Xrank = _compute_ranks(X)
     rank_correlation = np.corrcoef(Xrank, rowvar=False)
 
     return 2 * np.sin(rank_correlation * np.pi / 6)

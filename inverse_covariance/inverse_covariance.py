@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.base import BaseEstimator
 
 from . import metrics
-from rank_correlation import spearman_correlation
+from .rank_correlation import spearman_correlation
 
 
 def _init_coefs(X, method='corrcoef'):
