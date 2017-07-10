@@ -95,7 +95,7 @@ def kendalltau_correlation(X, rowvar=False, weighted=False):
      arXiv:1502.07641
     """
 
-    if(rowvar):
+    if rowvar:
         X = X.T
 
     _, n_features = X.shape
@@ -137,4 +137,5 @@ def trimmean_correlation(X, rowvar=False, weighted=False):
     undirected graphs."
     Journal of Machine Learning Research 10.Oct (2009): 2295-2328.
     """
+
     pass
