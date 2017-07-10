@@ -27,7 +27,7 @@ def _compute_ranks(X):
     return Xrank
 
 
-def spearman_correlation(X):
+def spearman_correlation(X,rowvar=False):
     """
     Computes the spearman correlation estimate.
     This is effectively a bias corrected pearson correlation
