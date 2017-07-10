@@ -102,12 +102,39 @@ def kendalltau_correlation(X, rowvar=False, weighted=False):
     rank_correlation = np.eye(n_features)
     for row in np.arange(n_features):
         for col in np.arange(1+row, n_features):
-            if(weighted):
+            if weighted:
                 rank_correlation[row, col], _ = weightedtau(
-                    X[:, row], X[:, col], rank=False)
+                    X[:, row], X[:, col], rank=False
+                )
             else:
                 rank_correlation[row, col], _ = kendalltau(
-                    X[:, row], X[:, col])
+                    X[:, row], X[:, col]
+                )
     rank_correlation = np.triu(rank_correlation, 1) + rank_correlation.T
 
     return np.sin(rank_correlation * np.pi / 2)
+
+
+def trimmean_correlation(X, rowvar=False, weighted=False):
+    """
+    Computes a winsorized estimate of pairwise correlations
+
+    Parameters
+    ----------
+    X: array-like, shape = [n_samples, n_features]
+        Data matrix using which we compute the empirical
+        correlation
+
+    Returns
+    -------
+    rank_correlation
+
+    References
+    ----------
+
+    Liu, Han, John Lafferty, and Larry Wasserman.
+    "The nonparanormal: Semiparametric estimation of high dimensional
+    undirected graphs."
+    Journal of Machine Learning Research 10.Oct (2009): 2295-2328.
+    """
+    pass
