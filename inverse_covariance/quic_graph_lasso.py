@@ -13,7 +13,7 @@ from sklearn.utils import check_array, as_float_array
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.externals.joblib import Parallel, delayed
 from sklearn.model_selection import cross_val_score  # NOQA >= 0.18
-#from sklearn.cross_validation import cross_val_score  # NOQA < 0.18
+# from sklearn.cross_validation import cross_val_score  # NOQA < 0.18
 
 from . import pyquic
 from .inverse_covariance import (
@@ -664,8 +664,8 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                 lam_1 = results[0][0]
                 lam_0 = results[1][0]
 
-            elif (best_index == last_finite_idx
-                    and not best_index == len(results) - 1):
+            elif (best_index == last_finite_idx and
+                    not best_index == len(results) - 1):
                 # We have non-converged models on the upper bound of the
                 # grid, we need to refine the grid there
                 lam_1 = results[best_index][0]
