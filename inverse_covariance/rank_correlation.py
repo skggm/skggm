@@ -8,25 +8,61 @@ from scipy.stats import (
 )
 
 
-def _compute_ranks(X):
+def _compute_ranks(X, winsorize=False, truncation=None, verbose=True):
     """
     Transform each column into ranked data. Tied ranks are averaged.
+    Ranks can optionally be winsorized as described in Liu 2009 otherwise
+    this returns Tsukahara's scaled rank based Z-estimator.
 
     Parameters
     ----------
     X : array-like, shape = (n_samples, n_features)
         The data matrix where each column is a feature.
          Row observations for each column will be replaced
-         by correponding rank
+         by correponding rank.
+
+    winsorize: bool
+        Choose whether ranks should be winsorized (trimmed) or not. If True,
+        then ranks will be winsorized using the truncation parameter.
+
+    truncation: (float)
+        The default value is given by 1/(4 n^(1/4) * sqrt(pi log n)), where
+        n is the number of samples.
 
     Returns
     -------
     Xrank
+
+    References
+    ----------
+
+    Liu, Han, John Lafferty, and Larry Wasserman.
+    "The nonparanormal: Semiparametric estimation of high dimensional
+    undirected graphs."
+    Journal of Machine Learning Research 10.Oct (2009): 2295-2328.
     """
-    _, n_features = X.shape
+    n_samples, n_features = X.shape
     Xrank = np.zeros(shape=X.shape)
+
+    if winsorize:
+        if truncation is None:
+            truncation = 1 / (4 * np.power(n_samples, 0.25) *
+                np.sqrt(np.pi * np.log(n_samples)))
+        elif (truncation > 1):
+            truncation = np.min(1.0, truncation)
+        print "Winsorizing on. Truncation: {} ".format(truncation)
+
     for col in np.arange(n_features):
         Xrank[:, col] = rankdata(X[:, col], method='average')
+        Xrank[:, col] /= n_samples
+        if winsorize:
+            if n_samples > 100*n_features:
+                Xrank[:, col] = n_samples * Xrank[:, col] / (n_samples + 1)
+            else:
+                lower_truncate = Xrank[:, col] <= truncation
+                upper_truncate = Xrank[:, col] > 1-truncation
+                Xrank[lower_truncate, col] = truncation
+                Xrank[upper_truncate, col] = 1-truncation
 
     return Xrank
 
@@ -115,9 +151,11 @@ def kendalltau_correlation(X, rowvar=False, weighted=False):
     return np.sin(rank_correlation * np.pi / 2)
 
 
-def trimmean_correlation(X, rowvar=False, weighted=False):
+def winsorized_rank_correlation(X, rowvar=False, weighted=False):
     """
-    Computes a winsorized estimate of pairwise correlations
+    Computes rank correlations using a winsorized ranks.
+    Relevant to high dimensional settings where the n_samples < n_features
+    resulting too large variance in the ranks.
 
     Parameters
     ----------
@@ -137,5 +175,4 @@ def trimmean_correlation(X, rowvar=False, weighted=False):
     undirected graphs."
     Journal of Machine Learning Research 10.Oct (2009): 2295-2328.
     """
-
     pass
