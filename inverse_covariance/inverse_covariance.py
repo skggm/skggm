@@ -4,6 +4,10 @@ import numpy as np
 from sklearn.base import BaseEstimator
 
 from . import metrics
+from .rank_correlation import (
+    spearman_correlation,
+    kendalltau_correlation,
+)
 
 
 def _init_coefs(X, method='corrcoef'):
@@ -12,6 +16,10 @@ def _init_coefs(X, method='corrcoef'):
     elif method == 'cov':
         init_cov = np.cov(X, rowvar=False)
         return init_cov, np.max(np.abs(np.triu(init_cov)))
+    elif method == 'spearman':
+        return spearman_correlation(X, rowvar=False), 1.0
+    elif method == 'kendalltau':
+        return kendalltau_correlation(X, rowvar=False), 1.0
     elif callable(method):
         return method(X)
     else:
@@ -95,8 +103,13 @@ class InverseCovarianceEstimator(BaseEstimator):
                   'kl', or 'quadratic'
         Used for computing self.score().
 
-    init_method : one of 'corrcoef', 'cov', or custom function
+    init_method : one of 'corrcoef', 'cov', 'spearman', 'kendalltau',
+        or a custom function.
         Computes initial covariance and scales lambda appropriately.
+        Using the custom function extends graphical model estimation to
+        distributions beyond the multivariate Gaussian.
+        The `spearman` or `kendalltau` options extend inverse covariance
+        estimation to nonparanormal and transelliptic graphical models.
         Custom function must return ((n_features, n_features) ndarray, float)
         where the scalar parameter will be used to scale the penalty lam.
 

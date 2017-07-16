@@ -13,7 +13,7 @@ from sklearn.utils import check_array, as_float_array
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.externals.joblib import Parallel, delayed
 from sklearn.model_selection import cross_val_score  # NOQA >= 0.18
-#from sklearn.cross_validation import cross_val_score  # NOQA < 0.18
+# from sklearn.cross_validation import cross_val_score  # NOQA < 0.18
 
 from . import pyquic
 from .inverse_covariance import (
@@ -201,8 +201,13 @@ class QuicGraphLasso(InverseCovarianceEstimator):
                   'kl', or 'quadratic'
         Used for computing self.score().
 
-    init_method : one of 'corrcoef', 'cov', or custom function
+    init_method : one of 'corrcoef', 'cov', 'spearman', 'kendalltau',
+        or a custom function.
         Computes initial covariance and scales lambda appropriately.
+        Using the custom function extends graphical model estimation to
+        distributions beyond the multivariate Gaussian.
+        The `spearman` or `kendalltau` options extend inverse covariance
+        estimation to nonparanormal and transelliptic graphical models.
         Custom function must return ((n_features, n_features) ndarray, float)
         where the scalar parameter will be used to scale the penalty lam.
 
@@ -465,8 +470,13 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                   'kl', or 'quadratic'
         Used for computing self.score().
 
-    init_method : one of 'corrcoef', 'cov', or custom function
+    init_method : one of 'corrcoef', 'cov', 'spearman', 'kendalltau',
+        or a custom function.
         Computes initial covariance and scales lambda appropriately.
+        Using the custom function extends graphical model estimation to
+        distributions beyond the multivariate Gaussian.
+        The `spearman` or `kendalltau` options extend inverse covariance
+        estimation to nonparanormal and transelliptic graphical models.
         Custom function must return ((n_features, n_features) ndarray, float)
         where the scalar parameter will be used to scale the penalty lam.
 
@@ -638,6 +648,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
             # in case of equality)
             best_score = -np.inf
             last_finite_idx = 0
+            best_index = 0
             for index, (lam, scores, _) in enumerate(results):
                 # sometimes we get -np.inf in the result (in kl-loss)
                 scores = [s for s in scores if not np.isinf(s)]
@@ -664,8 +675,8 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                 lam_1 = results[0][0]
                 lam_0 = results[1][0]
 
-            elif (best_index == last_finite_idx
-                    and not best_index == len(results) - 1):
+            elif (best_index == last_finite_idx and
+                    not best_index == len(results) - 1):
                 # We have non-converged models on the upper bound of the
                 # grid, we need to refine the grid there
                 lam_1 = results[best_index][0]
@@ -772,8 +783,13 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
     verbose : integer
         Used in quic routine.
 
-    init_method : one of 'corrcoef', 'cov', or custom function
+    init_method : one of 'corrcoef', 'cov', 'spearman', 'kendalltau',
+        or a custom function.
         Computes initial covariance and scales lambda appropriately.
+        Using the custom function extends graphical model estimation to
+        distributions beyond the multivariate Gaussian.
+        The `spearman` or `kendalltau` options extend inverse covariance
+        estimation to nonparanormal and transelliptic graphical models.
         Custom function must return ((n_features, n_features) ndarray, float)
         where the scalar parameter will be used to scale the penalty lam.
 

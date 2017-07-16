@@ -44,6 +44,16 @@ class TestQuicGraphLasso(object):
             'max_iter': 100,
             'init_method': custom_init,
         }, [0.0071706976421055616, 1394.564448134179, 50.890448754467911, 7.1054273576010019e-15]),  # NOQA
+        ({
+            'lam': 1.0,
+            'max_iter': 100,
+            'init_method': 'spearman',
+        }, [3.1622776601683795, 3.1622776601683795, 10.0, 1.7763568394002505e-15]),  # NOQA
+        ({
+            'lam': 1.0,
+            'max_iter': 100,
+            'init_method': 'kendalltau',
+        }, [3.1622776601683795, 3.1622776601683795, 10.0, 0.0]),  # NOQA
     ])
     def test_integration_quic_graph_lasso(self, params_in, expected):
         '''
@@ -82,6 +92,16 @@ class TestQuicGraphLasso(object):
             'max_iter': 100,
             'init_method': 'cov',
         }, [0.0071706976421055616, 1394.564448134179, 50.890448754467911, 7.1054273576010019e-15]),  # NOQA
+        ({
+            'lam': 1.0,
+            'max_iter': 100,
+            'init_method': 'spearman',
+        }, [3.1622776601683795, 3.1622776601683795, 10.0, 0.0]),  # NOQA
+        ({
+            'lam': 1.0,
+            'max_iter': 100,
+            'init_method': 'kendalltau',
+        }, [3.1622776601683795, 3.1622776601683795, 10.0, 0.0]),  # NOQA
     ])
     def test_integration_quic_graph_lasso_fun(self, params_in, expected):
         '''
@@ -122,6 +142,12 @@ class TestQuicGraphLasso(object):
         ({'lam': 0.5 * np.ones((10, 10)) - 0.5 * np.diag(np.ones((10,))),
           'n_refinements': 1,
           'init_method': custom_init}, [0.0106, 21634.95296, 57.6289, 0.00039]),  # NOQA
+        ({'lam': 0.5 * np.ones((10, 10)) - 0.5 * np.diag(np.ones((10,))),
+          'n_refinements': 1,
+          'init_method': 'spearman'}, [4.8315707207048622, 38.709631332689789, 2.8265068394116657, 1.5312382906085276e-07]),  # NOQA
+        ({'lam': 0.5 * np.ones((10, 10)) - 0.5 * np.diag(np.ones((10,))),
+          'n_refinements': 1,
+          'init_method': 'kendalltau'}, [4.9007318106601074, 85.081499460930743, 2.0463861650623159, 0.00012530384889419821]),  # NOQA
     ])
     def test_integration_quic_graph_lasso_cv(self, params_in, expected):
         '''
