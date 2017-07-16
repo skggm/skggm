@@ -2,7 +2,9 @@ from __future__ import print_function
 import sys
 from setuptools import setup
 from distutils.extension import Extension
+from Cython.Build import cythonize
 import platform
+
 
 try:
     import numpy  # NOQA
@@ -72,5 +74,5 @@ setup(
     url='https://github.com/skggm/skggm',
     author_email='jlaska@gmail.com',
     ext_package='inverse_covariance',
-    ext_modules=[ext_module],
+    ext_modules=cythonize(ext_module),
 )

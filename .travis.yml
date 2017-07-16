@@ -1,0 +1,32 @@
+language: python
+python:
+    - 2.7
+    - 3.6
+
+sudo: false
+
+# Pre-install packages for the ubuntu distribution
+cache:
+    apt: true
+    directories:
+        - $HOME/.cache/pip
+
+addons:
+    apt:
+        packages:
+            - libblas-dev
+            - liblapack-dev
+            - libatlas3gf-base
+            - libatlas-dev
+
+# command to install dependencies
+install:
+    - pip install -U pip wheel
+    - pip install --install-option="--no-cython-compile" cython
+    - pip install -r requirements.txt
+    - python setup.py develop
+
+# command to run tests
+script:
+    - flake8 inverse_covariance
+    - python -m pytest --showlocals --pyargs
