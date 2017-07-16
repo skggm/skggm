@@ -605,10 +605,14 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                         X[train],
                         path,
                         X_test=X[test],
-                        lam=self.lam, tol=self.tol, max_iter=self.max_iter,
-                        Theta0=self.Theta0, Sigma0=self.Sigma0,
+                        lam=self.lam,
+                        tol=self.tol,
+                        max_iter=self.max_iter,
+                        Theta0=self.Theta0,
+                        Sigma0=self.Sigma0,
                         method=self.method,
-                        verbose=self.verbose, score_metric=self.score_metric,
+                        verbose=self.verbose,
+                        score_metric=self.score_metric,
                         init_method=self.init_method)
                     for train, test in cv)
             else:

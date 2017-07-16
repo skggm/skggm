@@ -231,11 +231,13 @@ class MonteCarloProfile(object):
             print('Getting parameters via model selection...')
 
         if self.sc is not None:
-            ms_results = _spark_map(ms_fit, indexed_param_grid, self.sc,
-                                    self.seed)
+            ms_results = _spark_map(
+                ms_fit, indexed_param_grid, self.sc, self.seed
+            )
         else:
-            ms_results = _cpu_map(ms_fit, indexed_param_grid, self.n_jobs,
-                                  self.verbose)
+            ms_results = _cpu_map(
+                ms_fit, indexed_param_grid, self.n_jobs, self.verbose
+            )
 
         # ensure results are ordered
         ms_results = sorted(ms_results, key=lambda r: r[0])

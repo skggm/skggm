@@ -69,6 +69,8 @@ class TestMonteCarloProfile(object):
         else:
             assert mc.alphas_ == mc.alpha_grid
 
+        assert False
+
     @pytest.mark.parametrize("params_in", [
         ({
             'n_trials': 20,
