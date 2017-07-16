@@ -27,5 +27,6 @@ install:
     - python setup.py develop
 
 # command to run tests
-script: flake8 inverse_covariance
-script: python -m pytest --showlocals --pyargs
+script:
+    - flake8 inverse_covariance
+    - python -m pytest --showlocals --pyargs
