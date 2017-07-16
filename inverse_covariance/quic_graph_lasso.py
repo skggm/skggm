@@ -5,7 +5,6 @@ import time
 import collections
 import operator
 import numpy as np
-import scipy.sparse as sp
 from functools import partial
 
 from sklearn.covariance import EmpiricalCovariance
@@ -568,13 +567,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         elif isinstance(self.cv, tuple):
             cv = self.cv
 
-        if isinstance(cv, tuple):
-            if not sp.issparse(X):
-                n_samples = len(X)
-            else:
-                n_samples = X.shape[0]
-
-            cv = RepeatedKFold(n_samples, n_folds=cv[0], n_trials=cv[1])
+        cv = RepeatedKFold(X.shape[0], n_folds=cv[0], n_trials=cv[1])
 
         self.init_coefs(X)
 

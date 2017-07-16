@@ -26,19 +26,19 @@ class TestModelAverage(object):
             'penalization': 'fully-random',
         }),
         ({
-            'estimator': QuicGraphLassoCV(),
-            'n_trials': 10,
+            'estimator': QuicGraphLassoCV(cv=(2, 1)),
+            'n_trials': 2,
             'normalize': True,
-            'subsample': 0.8,
+            'subsample': 0.9,
             'lam': 0.1,
             'lam_perturb': 0.1,
             'penalization': 'random',
         }),
         ({
-            'estimator': GraphLassoCV(),
-            'n_trials': 10,
+            'estimator': GraphLassoCV(cv=2),
+            'n_trials': 2,
             'normalize': True,
-            'subsample': 0.8,
+            'subsample': 0.9,
             'penalization': 'subsampling',
             'penalty_name': 'alpha',
         }),
@@ -57,8 +57,8 @@ class TestModelAverage(object):
         '''
         Just tests inputs/outputs (not validity of result).
         '''
-        n_features = 10
-        n_samples = 10
+        n_features = 30
+        n_samples = 30
         cov, prec, adj = ClusterGraph(
             n_blocks=1,
             chain_blocks=False,
