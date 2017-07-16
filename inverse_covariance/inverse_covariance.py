@@ -341,8 +341,5 @@ class InverseCovarianceEstimator(BaseEstimator):
             return
 
         ebic_scores = self.ebic(gamma=gamma)
-        print(ebic_scores)
-        print(ebic_scores.min())
-        print(np.abs(ebic_scores - ebic_scores.min()))
         min_indices = np.where(np.abs(ebic_scores - ebic_scores.min()) < 1e-10)
         return np.max(min_indices)
