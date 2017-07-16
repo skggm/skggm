@@ -1,5 +1,7 @@
 language: python
-python: 2.7
+python:
+    - 2.7
+    - 3.6
 
 sudo: false
 
@@ -16,10 +18,6 @@ addons:
             - liblapack-dev
             - libatlas3gf-base
             - libatlas-dev
-
-python:
-    - 2.7
-    - 3.6
 
 # command to install dependencies
 install:
