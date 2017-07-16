@@ -486,6 +486,10 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         If false, then self.lam_scale_ = 1.
         lam_scale_ is used to scale user-supplied self.lam during fit.
 
+    backend : string, optional (default=threading)
+        Joblib parallelization backend.
+        Not used when using the sparkContext (sc).
+
     Attributes
     ----------
     covariance_ : 2D ndarray, shape (n_features, n_features)
@@ -509,7 +513,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
     def __init__(self, lam=1.0, lams=4, n_refinements=4, cv=None, tol=1e-6,
                  max_iter=1000, Theta0=None, Sigma0=None, method='quic',
                  verbose=0, n_jobs=1, sc=None, score_metric='log_likelihood',
-                 init_method='corrcoef', auto_scale=True):
+                 init_method='corrcoef', auto_scale=True, backend='threading'):
         # GridCV params
         self.n_jobs = n_jobs
         self.sc = sc
@@ -525,6 +529,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         self.Sigma0 = Sigma0
         self.method = method
         self.verbose = verbose
+        self.backend = backend
 
         # quic-specific outputs
         self.opt_ = None
@@ -594,6 +599,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                 this_result = Parallel(
                     n_jobs=self.n_jobs,
                     verbose=self.verbose,
+                    backend=self.backend,
                 )(
                     delayed(_quic_path)(
                         X[train],
