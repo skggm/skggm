@@ -1,12 +1,15 @@
-[![Build Status](https://travis-ci.org/skggm/skggm.svg?branch=develop)](https://travis-ci.org/skggm/skggm)
+[![Build Status](https://travis-ci.org/skggm/skggm.svg?branch=develop)](https://travis-ci.org/skggm/skggm) 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.830033.svg)](https://doi.org/10.5281/zenodo.830033)
 
-# skggm : Gaussian graphical models in scikit-learn
-In the last decade, learning networks that encode conditional indepedence relationships has become an  important problem in machine learning and statistics. For many important probability distributions, such as multivariate Gaussians, this amounts to estimation of inverse covariance matrices. Inverse covariance estimation is now used widely in infer gene regulatory networks in cellular biology and neural interactions in the neuroscience.
+
+# skggm : Gaussian graphical models using the scikit-learn API
+In the last decade, learning networks that encode conditional independence relationships has become an  important problem in machine learning and statistics. For many important probability distributions, such as multivariate Gaussians, this amounts to estimation of inverse covariance matrices. Inverse covariance estimation is now used widely in infer gene regulatory networks in cellular biology and neural interactions in the neuroscience.
 
 However, many statistical advances and best practices in fitting such models to data are not yet widely adopted and not available in common python packages for machine learning. Furthermore, inverse covariance estimation is an active area of research where researchers continue to improve algorithms and estimators.
 With `skggm` we seek to provide these new developments to a wider audience, and also enable researchers to effectively benchmark their methods in regimes relevant to their applications of interest.
 
-While `skggm` is currently geared toward _Gaussian graphical models_, we hope to eventually evolve it to support _Generalized graphical models_.  Read more [here](https://skggm.github.io/skggm/tour).
+While `skggm` is currently geared toward _Gaussian graphical models_, we hope to eventually evolve it to support _General graphical models_.  Read more [here](https://skggm.github.io/skggm/tour).
+
 
 ## Inverse Covariance Estimation
 
@@ -121,6 +124,7 @@ Since these are naive implementations, it is not possible to enable parallel wor
 
 only one of `ModelAverage` or `QuicGraphLassoCV` can make use of the spark context. The problem size and number of trials will determine the resolution that gives the fastest performance.
 
+
 ## Installation
 
 Clone this repo and run
@@ -172,6 +176,26 @@ For slightly higher dimensions of `n_examples=600` and `n_features=120` we obtai
 We've provided a utility function `inverse_covariance.plot_util.trace_plot` that can be used to display the coefficients as a function of `lam_`.  This can be used with any estimator that returns a path.  The example in `examples/trace_plot_example.py` yields:
 
 <p align="center"><img src="images/trace_plot.png" alt="Trace plot" width="400"></p>
+
+# Citation
+
+If you use *skggm* or reference our blog post in a presentation or publication, we would appreciate citations of our package. 
+
+>Jason Laska, Manjari Narayan, 2017. _skggm 0.2.7: A scikit-learn compatible package for Gaussian and related Graphical Models._ doi:10.5281/zenodo.830033
+
+Here is the corresponding Bibtex entry
+```
+@misc{laska_narayan_2017_830033,
+  author       = {Jason Laska and
+                  Manjari Narayan},
+  title        = {{skggm 0.2.7: A scikit-learn compatible package for 
+                   Gaussian and related Graphical Models}},
+  month        = jul,
+  year         = 2017,
+  doi          = {10.5281/zenodo.830033},
+  url          = {https://doi.org/10.5281/zenodo.830033}
+}
+```
 
 # References
 
