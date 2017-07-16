@@ -113,9 +113,15 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     l_theta = -np.sum(covariance * precision) + fast_logdet(precision)
     l_theta *= n_features / 2.
 
+    # is something goes wrong with fast_logdet, return large value
+    if np.isinf(l_theta) or np.isnan(l_theta):
+        return 1e10
+
     mask = np.abs(precision.flat) > np.finfo(precision.dtype).eps
     precision_nnz = (np.sum(mask) - n_features) / 2.0  # lower off diagonal tri
 
-    return -2.0 * l_theta +\
-        precision_nnz * np.log(n_samples) +\
+    return (
+        -2.0 * l_theta +
+        precision_nnz * np.log(n_samples) +
         4.0 * precision_nnz * np.log(n_features) * gamma
+    )

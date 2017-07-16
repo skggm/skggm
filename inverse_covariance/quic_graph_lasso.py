@@ -648,6 +648,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
             # in case of equality)
             best_score = -np.inf
             last_finite_idx = 0
+            best_index = 0
             for index, (lam, scores, _) in enumerate(results):
                 # sometimes we get -np.inf in the result (in kl-loss)
                 scores = [s for s in scores if not np.isinf(s)]
