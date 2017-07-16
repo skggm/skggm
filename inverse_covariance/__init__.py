@@ -14,6 +14,10 @@ from .metrics import (
     quadratic_loss,
     ebic,
 )
+from .rank_correlation import (
+    spearman_correlation,
+    kendalltau_correlation,
+)
 from .model_average import ModelAverage
 from .adaptive_graph_lasso import AdaptiveGraphLasso
 from .cross_validation import RepeatedKFold
@@ -28,6 +32,8 @@ __all__ = [
     'kl_loss',
     'quadratic_loss',
     'ebic',
+    'spearman_correlation',
+    'kendalltau_correlation',
     'ModelAverage',
     'AdaptiveGraphLasso',
     'RepeatedKFold',

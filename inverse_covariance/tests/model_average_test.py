@@ -8,6 +8,7 @@ from inverse_covariance.profiling import (
     ClusterGraph,
 )
 
+
 class TestModelAverage(object):
     @pytest.mark.parametrize("params_in", [
         ({
@@ -82,10 +83,10 @@ class TestModelAverage(object):
 
         for eidx, e in enumerate(ma.estimators_):
             assert isinstance(e, params_in['estimator'].__class__)
-            
+
             # sklearn doesnt have this but ours do
             if hasattr(e, 'is_fitted'):
-                assert e.is_fitted == True
+                assert e.is_fitted is True
 
             # check that all lambdas used where different
             if not ma.penalization == 'subsampling' and eidx > 0:
@@ -93,10 +94,10 @@ class TestModelAverage(object):
                     prev_e = ma.estimators_[eidx - 1]
                     assert np.linalg.norm((prev_e.lam - e.lam).flat) > 0
 
-        if ma.normalize == True:
+        if ma.normalize is True:
             assert np.max(ma.proportion_) <= 1.0
-        else:        
+        else:
             assert np.max(ma.proportion_) <= ma.n_trials
-                
+
         assert np.min(ma.proportion_) >= 0.0
         assert np.max(ma.proportion_) > 0.0

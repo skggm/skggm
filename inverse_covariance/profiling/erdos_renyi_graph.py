@@ -1,15 +1,15 @@
 from __future__ import absolute_import
 
-import numpy as np 
+import numpy as np
 from sklearn.datasets import make_sparse_spd_matrix
-from .graphs import Graph 
+from .graphs import Graph
 
 
 class ErdosRenyiGraph(Graph):
     """Returns the adjacency matrix for Erdos-Renyi network via .create().
 
     Parameters
-    ----------- 
+    -----------
     spd_low : float (0, 1)
         Equivalent to make_sparse_spd_matrix `smallest_coef`
 
@@ -17,7 +17,7 @@ class ErdosRenyiGraph(Graph):
         Equivalent to make_sparse_spd_matrix `largest_coef`
 
     n_blocks : int (default=2)
-        Number of blocks.  Returned matrix will be square with 
+        Number of blocks.  Returned matrix will be square with
         shape n_block_features * n_blocks.
 
     chain_blocks : bool (default=True)
@@ -37,20 +37,20 @@ class ErdosRenyiGraph(Graph):
         Doc for ".create(n_features, alpha)"
 
         Parameters
-        -----------        
-        n_features : int 
+        -----------
+        n_features : int
 
-        alpha : float (0,1) 
+        alpha : float (0,1)
             The complexity / sparsity factor.
-            This is (1 - alpha_0) in sklearn.datasets.make_sparse_spd_matrix 
+            This is (1 - alpha_0) in sklearn.datasets.make_sparse_spd_matrix
             where alpha_0 is the probability that a coefficient is zero.
-        
+
         Returns
-        -----------  
+        -----------
         (n_features, n_features) matrices: covariance, precision, adjacency
         """
         return make_sparse_spd_matrix(n_block_features,
-                                      alpha=np.abs(1.0 - alpha), 
+                                      alpha=np.abs(1.0 - alpha),
                                       smallest_coef=self.spd_low,
                                       largest_coef=self.spd_high,
                                       random_state=self.prng)

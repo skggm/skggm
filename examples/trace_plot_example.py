@@ -4,7 +4,7 @@ from sklearn.datasets import make_sparse_spd_matrix
 
 sys.path.append('..')
 from inverse_covariance import QuicGraphLasso
-from inverse_covariance.plot_util import trace_plot 
+from inverse_covariance.plot_util import trace_plot
 from inverse_covariance.profiling import (
     LatticeGraph,
 )
@@ -12,10 +12,13 @@ from inverse_covariance.profiling import (
 
 def make_data(n_samples, n_features):
     prng = np.random.RandomState(1)
-    prec = make_sparse_spd_matrix(n_features, alpha=.98,
-                              smallest_coef=.4,
-                              largest_coef=.7,
-                              random_state=prng)
+    prec = make_sparse_spd_matrix(
+        n_features,
+        alpha=.98,
+        smallest_coef=.4,
+        largest_coef=.7,
+        random_state=prng
+    )
     cov = np.linalg.inv(prec)
     d = np.sqrt(np.diag(cov))
     cov /= d
@@ -73,18 +76,18 @@ if __name__ == "__main__":
     n_features = 5
     X, cov, prec = make_data(n_samples, n_features)
 
-    print 'Showing basic Erdos-Renyi example with '
-    print '   n_samples=10'
-    print '   n_features=5'
-    print '   n_edges=20'
+    print('Showing basic Erdos-Renyi example with ')
+    print('   n_samples=10')
+    print('   n_features=5')
+    print('   n_edges=20')
     show_quic_coefficient_trace(X)
 
     # use ground truth for display
-    print 'Showing basic Erdos-Renyi example with '
-    print '   n_samples=100'
-    print '   n_features=5'
-    print '   n_edges=6'
-    print '   ground_truth (shows only false pos and negatives)'
+    print('Showing basic Erdos-Renyi example with ')
+    print('   n_samples=100')
+    print('   n_features=5')
+    print('   n_edges=6')
+    print('   ground_truth (shows only false pos and negatives)')
     show_quic_coefficient_trace_truth(X, prec)
 
     # example 2
@@ -92,20 +95,20 @@ if __name__ == "__main__":
     n_features = 100
     X, cov, prec = make_data_banded(n_samples, n_features)
 
-    print 'Showing basic Lattice example with '
-    print '   n_samples=110'
-    print '   n_features=100'
-    print '   n_blocks=2'
-    print '   random_sign=True'
-    print '   n_edges=20'
+    print('Showing basic Lattice example with ')
+    print('   n_samples=110')
+    print('   n_features=100')
+    print('   n_blocks=2')
+    print('   random_sign=True')
+    print('   n_edges=20')
     show_quic_coefficient_trace(X)
 
     # use ground truth for display
-    print 'Showing basic Lattice example with '
-    print '   n_samples=110'
-    print '   n_features=100'
-    print '   n_blocks=2'
-    print '   random_sign=True'
-    print '   n_edges=6'
-    print '   ground_truth (shows only false pos and negatives)'
+    print('Showing basic Lattice example with ')
+    print('   n_samples=110')
+    print('   n_features=100')
+    print('   n_blocks=2')
+    print('   random_sign=True')
+    print('   n_edges=6')
+    print('   ground_truth (shows only false pos and negatives)')
     show_quic_coefficient_trace_truth(X, prec)

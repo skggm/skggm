@@ -4,17 +4,17 @@ from sklearn.utils.extmath import fast_logdet
 
 
 def log_likelihood(covariance, precision):
-    """Computes the log-likelihood between the covariance and precision 
+    """Computes the log-likelihood between the covariance and precision
     estimate.
-    
+
     Parameters
     ----------
     covariance : 2D ndarray (n_features, n_features)
         Maximum Likelihood Estimator of covariance
-    
+
     precision : 2D ndarray (n_features, n_features)
         The precision matrix of the covariance model to be tested
-    
+
     Returns
     -------
     log-likelihood
@@ -22,15 +22,15 @@ def log_likelihood(covariance, precision):
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
     log_likelihood_ = -np.sum(covariance * precision) +\
-                      fast_logdet(precision) - dim * np.log(2 * np.pi)
+        fast_logdet(precision) - dim * np.log(2 * np.pi)
     log_likelihood_ /= 2.
     return log_likelihood_
 
 
 def kl_loss(covariance, precision):
-    """Computes the KL divergence between precision estimate and 
+    """Computes the KL divergence between precision estimate and
     reference covariance.
-    
+
     The loss is computed as:
 
         Trace(Theta_1 * Sigma_0) - log(Theta_0 * Sigma_1) - dim(Sigma)
@@ -39,31 +39,31 @@ def kl_loss(covariance, precision):
     ----------
     covariance : 2D ndarray (n_features, n_features)
         Maximum Likelihood Estimator of covariance
-    
+
     precision : 2D ndarray (n_features, n_features)
         The precision matrix of the covariance model to be tested
-    
+
     Returns
     -------
-    KL-divergence 
+    KL-divergence
     """
     assert covariance.shape == precision.shape
-    dim, _ = precision.shape 
+    dim, _ = precision.shape
     logdet_p_dot_c = fast_logdet(np.dot(precision, covariance))
     return 0.5 * (np.sum(precision * covariance) - logdet_p_dot_c - dim)
 
 
 def quadratic_loss(covariance, precision):
     """Computes ...
-    
+
     Parameters
     ----------
     covariance : 2D ndarray (n_features, n_features)
         Maximum Likelihood Estimator of covariance
-    
+
     precision : 2D ndarray (n_features, n_features)
         The precision matrix of the model to be tested
-    
+
     Returns
     -------
     Quadratic loss
@@ -88,7 +88,7 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     ----------
     covariance : 2D ndarray (n_features, n_features)
         Maximum Likelihood Estimator of covariance (sample covariance)
-    
+
     precision : 2D ndarray (n_features, n_features)
         The precision matrix of the model to be tested
 
@@ -109,13 +109,19 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     Returns
     -------
     ebic score (float).  Caller should minimized this score.
-    '''    
+    '''
     l_theta = -np.sum(covariance * precision) + fast_logdet(precision)
     l_theta *= n_features / 2.
 
-    mask = np.abs(precision.flat) > np.finfo(precision.dtype).eps
-    precision_nnz = (np.sum(mask) - n_features) / 2.0  # lower off diagonal triangle
+    # is something goes wrong with fast_logdet, return large value
+    if np.isinf(l_theta) or np.isnan(l_theta):
+        return 1e10
 
-    return -2.0 * l_theta +\
-            precision_nnz * np.log(n_samples) +\
-            4.0 * precision_nnz * np.log(n_features) * gamma
+    mask = np.abs(precision.flat) > np.finfo(precision.dtype).eps
+    precision_nnz = (np.sum(mask) - n_features) / 2.0  # lower off diagonal tri
+
+    return (
+        -2.0 * l_theta +
+        precision_nnz * np.log(n_samples) +
+        4.0 * precision_nnz * np.log(n_features) * gamma
+    )
