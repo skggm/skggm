@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/skggm/skggm.svg?branch=master)](https://travis-ci.org/skggm/skggm)
+[![Build Status](https://travis-ci.org/skggm/skggm.svg?branch=develop)](https://travis-ci.org/skggm/skggm)
 
 # skggm : Gaussian graphical models in scikit-learn
 In the last decade, learning networks that encode conditional indepedence relationships has become an  important problem in machine learning and statistics. For many important probability distributions, such as multivariate Gaussians, this amounts to estimation of inverse covariance matrices. Inverse covariance estimation is now used widely in infer gene regulatory networks in cellular biology and neural interactions in the neuroscience.
