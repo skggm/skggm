@@ -125,20 +125,19 @@ only one of `ModelAverage` or `QuicGraphLassoCV` can make use of the spark conte
 
 Clone this repo and run
 
-    python setup.py install (python3 setup.py install)
+    python setup.py install
+    python3 setup.py install  (for python3)
 
 or via PyPI
 
     pip install skggm
+    pip3 install skggm  (for python3)
 
 or from a cloned repo
 
     cd inverse_covariance/pyquic
     make
-
-or to build pyquic for python3:
-
-    make python3
+    make python3  (for python3)
 
 **The package requires that `numpy`, `scipy`, and `cython` are installed independently into your environment first.**
 
