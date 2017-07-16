@@ -46,11 +46,15 @@ def _compute_ranks(X, winsorize=False, truncation=None, verbose=True):
 
     if winsorize:
         if truncation is None:
-            truncation = 1 / (4 * np.power(n_samples, 0.25) *
-                np.sqrt(np.pi * np.log(n_samples)))
+            truncation = (
+                1 / (
+                    4 * np.power(n_samples, 0.25) *
+                    np.sqrt(np.pi * np.log(n_samples))
+                )
+            )
+
         elif (truncation > 1):
             truncation = np.min(1.0, truncation)
-        print "Winsorizing on. Truncation: {} ".format(truncation)
 
     for col in np.arange(n_features):
         Xrank[:, col] = rankdata(X[:, col], method='average')

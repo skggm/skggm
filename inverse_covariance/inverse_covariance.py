@@ -107,8 +107,9 @@ class InverseCovarianceEstimator(BaseEstimator):
         or a custom function.
         Computes initial covariance and scales lambda appropriately.
         Using the custom function extends graphical model estimation to
-        distributions beyond the multivariate Gaussian. 
-        The `spearman` or `kendalltau` options extend inverse covariance                estimation to nonparanormal and transelliptic graphical models.
+        distributions beyond the multivariate Gaussian.
+        The `spearman` or `kendalltau` options extend inverse covariance
+        estimation to nonparanormal and transelliptic graphical models.
         Custom function must return ((n_features, n_features) ndarray, float)
         where the scalar parameter will be used to scale the penalty lam.
 
