@@ -1,5 +1,3 @@
-// $Id: QUIC.C,v 1.53 2012-05-17 02:46:53 sustik Exp $
-
 // Solves the regularized inverse covariance matrix selection using a
 // combination of Newton's method, quadratic approximation and
 // coordinate descent.  The original algorithm was coded by Cho-Jui
@@ -7,9 +5,9 @@
 // This code is released under the GPL version 3.
 
 // See the README file and QUIC.m for more information.
-// Send questions, comments and license inquiries to: sustik@cs.utexas.edu
+// Send questions, comments and license inquiries to: msustik@gmail.com
 
-#define VERSION "1.1"
+#define VERSION "1.2"
 
 #include <math.h>
 #include <stddef.h>
@@ -78,15 +76,14 @@ static inline void CoordinateDescentUpdate(
     double a = W[ij]*W[ij];
     if (i != j)
         a += W[ip+i]*W[jp+j];
-    double ainv = 1.0/a;  // multiplication is cheaper than division
 
     double b = S[ij] - W[ij];
     for (unsigned long k = 0; k < p ; k++)
         b += W[ip+k]*U[k*p+j];
 
-    double l = Lambda[ij]*ainv;
+    double l = Lambda[ij]/a;
     double c = X[ij] + D[ij];
-    double f = b*ainv;
+    double f = b/a;
     double mu;
     normD -= fabs(D[ij]);
     if (c > f) {
@@ -127,15 +124,12 @@ static inline double DiagNewton(unsigned long p, const double* S,
 	for (unsigned long jp = 0, j = 0; j < i; j++, jp += p) {
 	    unsigned long ij = ip + j;
 	    double a = W[ip + i]*W[jp + j];
-	    double ainv = 1.0/a;  // multiplication is cheaper than division
 	    double b = S[ij];
-	    double l = Lambda[ij]*ainv;
-	    double f = b*ainv;
+	    double l = Lambda[ij]/a;
+	    double f = b/a;
 	    double mu;
-	    double x = -b*ainv;
 	    if (0 > f) {
 		mu = -f - l;
-		x -= l;
 		if (mu < 0.0) {
 		    mu = 0.0;
 		    D[ij] = -X[ij];
@@ -161,11 +155,10 @@ static inline double DiagNewton(unsigned long p, const double* S,
 	l1normX += fabs(X[k])*Lambda[k];
 	trSX += X[k]*S[k];
 	double a = W[k]*W[k];
-	double ainv = 1.0/a;  // multiplication is cheaper than division
 	double b = S[k] - W[k];
-	double l = Lambda[k]*ainv;
+	double l = Lambda[k]/a;
 	double c = X[k];
-	double f = b*ainv;
+	double f = b/a;
 	double mu;
 	if (c > f) {
 	    mu = -f - l;
@@ -232,17 +225,19 @@ void QUIC(char mode, uint32_t& p, const double* S, double* Lambda0,
 #endif
     if (mode >= 'a')
 	mode -= ('a' - 'A');
-    char m[] = "Running QUIC version";
     if (msg >= QUIC_MSG_MIN) {
+	const char* modes[] = { ".", " in path mode.", " in trace mode." };
+	const char* mode_str = modes[0];
 	if (mode == 'P')
-	    MSG("%s %s in 'path' mode.\n", m, VERSION);
+	    mode_str = modes[1];
 	else if (mode == 'T')
-	    MSG("%s %s in 'trace' mode.\n", m, VERSION);
-	else
-	    MSG("%s %s in 'default' mode.\n", m, VERSION);
+	    mode_str = modes[2];;
+	MSG("Running QUIC v%s%s\n", VERSION, mode_str);
     }
+
+
     double timeBegin = clock();
-    srand(1);
+//    srand(1);
     unsigned long maxNewtonIter = maxIter;
     double cdSweepTol = 0.05;
     unsigned long max_lineiter = 20;
@@ -509,6 +504,7 @@ void QUIC(char mode, uint32_t& p, const double* S, double* Lambda0,
 	    W += p2;
 	    for (unsigned long i = 0; i < p*p; i++)
 		Lambda[i] = Lambda0[i]*path[pathIdx];
+	    l1normX = l1normX/path[pathIdx-1]*path[pathIdx];
 	    continue;
 	}
 	break;
@@ -523,8 +519,7 @@ void QUIC(char mode, uint32_t& p, const double* S, double* Lambda0,
 	}
 	if (iter != NULL)
 	    iter[0] = NewtonIter;
-    }
-
+    }    
     if (mode == 'T' && iter != NULL)
 	iter[0] = NewtonIter - 1;
     free(activeSet);
@@ -542,14 +537,14 @@ void QUIC(char mode, uint32_t& p, const double* S, double* Lambda0,
 	MSG("QUIC CPU time: %.3f seconds\n", elapsedTime);
 }
 
-//extern "C"
-//void QUICR(char** modePtr, uint32_t& p, const double* S, double* Lambda0,
-//	   uint32_t& pathLen, const double* path, double& tol,
-//	   int32_t& msg, uint32_t& maxIter,
-//	   double* X, double* W, double* opt, double* cputime,
-//	   uint32_t* iter, double* dGap)
-//{
-//    char mode = **modePtr;
-//    QUIC(mode, p, S, Lambda0, pathLen, path, tol, msg, maxIter, X, W,
-//	 opt, cputime, iter, dGap);
-//}
+// extern "C"
+// void QUICR(char** modePtr, uint32_t& p, const double* S, double* Lambda0,
+// 	   uint32_t& pathLen, const double* path, double& tol,
+// 	   int32_t& msg, uint32_t& maxIter,
+// 	   double* X, double* W, double* opt, double* cputime,
+// 	   uint32_t* iter, double* dGap)
+// {
+//     char mode = **modePtr;
+//     QUIC(mode, p, S, Lambda0, pathLen, path, tol, msg, maxIter, X, W,
+// 	 opt, cputime, iter, dGap);
+// }
