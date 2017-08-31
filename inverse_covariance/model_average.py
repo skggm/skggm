@@ -314,7 +314,7 @@ class ModelAverage(BaseEstimator):
 
         # default to QuicGraphLasso
         if self.estimator is None:
-            self.estimator = QuicGraphLasso(init_method=init_method)
+            self.estimator = QuicGraphLasso(init_method=self.init_method)
 
         if self.penalization != 'subsampling' and\
                 not hasattr(self.estimator, self.penalty_name):
