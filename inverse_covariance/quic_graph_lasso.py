@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 import sys
 import time
-import collections
 import operator
 import numpy as np
 from functools import partial
@@ -355,6 +354,7 @@ def _quic_path(X, path, X_test=None, lam=0.5, tol=1e-6,
             method=init_method)
 
     path = path.copy(order='C')
+
     if method == 'quic':
         (precisions_, covariances_, opt_, cputime_,
          iters_, duality_gap_) = quic(
@@ -572,16 +572,16 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         self.init_coefs(X)
 
         # get path
-        if isinstance(self.lams, collections.Sequence):
-            path = self.lams
-            n_refinements = 1
-        else:
+        if isinstance(self.lams, int):
             n_refinements = self.n_refinements
             lam_1 = self.lam_scale_
             lam_0 = 1e-2 * lam_1
             path = np.logspace(
                 np.log10(lam_0), np.log10(lam_1), self.lams
             )[::-1]
+        else:
+            path = self.lams
+            n_refinements = 1
 
         # run this thing a bunch
         results = list()
@@ -693,7 +693,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                 lam_1 = results[best_index - 1][0]
                 lam_0 = results[best_index + 1][0]
 
-            if not isinstance(self.lams, collections.Sequence):
+            if isinstance(self.lams, int):
                 path = np.logspace(np.log10(lam_1), np.log10(lam_0),
                                    self.lams + 2)
                 path = path[1:-1]

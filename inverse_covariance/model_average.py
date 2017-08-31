@@ -203,6 +203,9 @@ class ModelAverage(BaseEstimator):
         Scalar perturbation parameter used in penalization='random'.  Will be
         ignored in all other modes.
 
+    init_method : one of 'corrcoef', 'cov', 'spearman', 'kendalltau',
+        or a custom function. See InverseCovarianceEstimator
+
     penalization : one of 'subsampling', 'random' (default), 'fully-random'
         Strategy for generating new random penalization in each trial.
 
@@ -282,7 +285,8 @@ class ModelAverage(BaseEstimator):
     """
     def __init__(self, estimator=None, n_trials=100, subsample=0.3,
                  normalize=True, lam=0.5, lam_perturb=0.5,
-                 penalization='random', penalty_name='lam', support_thresh=0.5,
+                 init_method='corrcoef', penalization='random',
+                 penalty_name='lam', support_thresh=0.5,
                  bootstrap=_default_bootstrap, n_jobs=1, sc=None, seed=1):
         self.estimator = estimator
         self.n_trials = n_trials
@@ -290,6 +294,7 @@ class ModelAverage(BaseEstimator):
         self.normalize = normalize
         self.lam = lam
         self.lam_perturb = lam_perturb
+        self.init_method = init_method
         self.penalization = penalization
         self.penalty_name = penalty_name
         self.support_thresh = support_thresh
@@ -309,7 +314,7 @@ class ModelAverage(BaseEstimator):
 
         # default to QuicGraphLasso
         if self.estimator is None:
-            self.estimator = QuicGraphLasso()
+            self.estimator = QuicGraphLasso(init_method=self.init_method)
 
         if self.penalization != 'subsampling' and\
                 not hasattr(self.estimator, self.penalty_name):
@@ -327,7 +332,7 @@ class ModelAverage(BaseEstimator):
         X = as_float_array(X, copy=False, force_all_finite=False)
 
         n_samples, n_features = X.shape
-        _, self.lam_scale_ = _init_coefs(X, method='cov')
+        _, self.lam_scale_ = _init_coefs(X, method=self.init_method)
 
         fit_fun = partial(
             _fit,

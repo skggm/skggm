@@ -1,12 +1,5 @@
 [![Build Status](https://travis-ci.org/skggm/skggm.svg?branch=develop)](https://travis-ci.org/skggm/skggm)
-[![GitHub stars](https://img.shields.io/github/stars/skggm/skggm.svg)](https://github.com/skggm/skggm/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/skggm/skggm.svg)](https://github.com/skggm/skggm/network)
-[![GitHub forks](https://img.shields.io/github/issues/skggm/skggm.svg)](https://github.com/skggm/skggm/network)
-[![GitHub closed pull requests](https://img.shields.io/github/issues-pr/skggm/skggm.svg)]()
-[![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed/skggm/skggm.svg)]()
-
 [![GitHub version](https://badge.fury.io/gh/skggm%2Fskggm.svg)](https://badge.fury.io/gh/skggm%2Fskggm)
-[![PyPI](https://img.shields.io/pypi/v/Skggm.svg)]()
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.830033.svg)](https://doi.org/10.5281/zenodo.830033)
 
 
