@@ -61,7 +61,10 @@ sphinx_gallery_conf = {
     # path to your examples scripts
     'examples_dirs' : '../examples',
     # Suggested by readthedocs to prevent build failure
-    'backreferences_dir' : False, 
+    'backreferences_dir' : False,
+    'filename_pattern' : '../examples/plot_',
+    'expected_failing_examples': ['../examples/estimator_suite.py',
+                                  '../examples/estimator_suite_spark.py'],
     # path where to save gallery generated examples
     'gallery_dirs'  : 'auto_examples'}
 
