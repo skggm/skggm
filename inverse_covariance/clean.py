@@ -157,6 +157,21 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
         self.with_std = with_std
         self.copy = copy
 
+    def _reset(self):
+        """Reset internal data-dependent state of the scaler, if necessary.
+        __init__ parameters are not touched.
+        """
+
+        # Checking one attribute is enough, becase they are all set together
+        # in partial_fit
+        if hasattr(self, 'col_scale_'):
+            del self.row_scale_
+            del self.row_mean_
+            del self.row_var_
+            del self.col_scale_
+            del self.col_mean_
+            del self.col_var_
+
     def fit(self, X, y=None):
         """Compute the mean and std for both row and column dimensions.
         Parameters
