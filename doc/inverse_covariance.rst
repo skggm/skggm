@@ -1,7 +1,7 @@
 Inverse Covariance
 ========
 
-The documentation of the inverse_covariance module.
+The documentation of the quic_graph_lasso module.
 
-.. automodule:: inverse_covariance.inverse_covariance
+.. automodule:: inverse_covariance.quic_graph_lasso
    :members:
