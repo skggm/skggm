@@ -62,9 +62,8 @@ sphinx_gallery_conf = {
     'examples_dirs' : '../examples',
     # Suggested by readthedocs to prevent build failure
     'backreferences_dir' : False,
-    'filename_pattern' : 'plot_functional_brain_networks.py',
-    'expected_failing_examples': ['../examples/estimator_suite.py',
-                                  '../examples/estimator_suite_spark.py'],
+    'filename_pattern' : '../examples/estimator_',
+    'expected_failing_examples': ['../examples/plot_functional_brain_networks.py'],
     # path where to save gallery generated examples
     'gallery_dirs'  : 'auto_examples'}
 
