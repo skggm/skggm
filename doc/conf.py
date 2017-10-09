@@ -69,6 +69,18 @@ sphinx_gallery_conf = {
     # path where to save gallery generated examples
     'gallery_dirs'  : 'auto_examples'}
 
+# After python 3.3
+# from unittest.mock import MagicMock
+from mock import Mock as MagicMock
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+            return MagicMock()
+
+MOCK_MODULES = ['inverse_covariance']
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+
 # Add any paths that contain templates here, relative to this directory.
 # templates_path = ['_templates']
 
