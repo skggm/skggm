@@ -59,7 +59,9 @@ else:
 
 sphinx_gallery_conf = {
     # path to your examples scripts
-    'examples_dirs' : '../inverse_covariance/examples',
+    'examples_dirs' : '../examples',
+    # Suggested by readthedocs to prevent build failure
+    'backreferences_dir' : False, 
     # path where to save gallery generated examples
     'gallery_dirs'  : 'auto_examples'}
 
@@ -128,9 +130,6 @@ pygments_style = 'sphinx'
 
 # If true, keep warnings as "system message" paragraphs in the built documents.
 #keep_warnings = False
-
-# Suggested by readthedocs to prevent build failure
-backreferences_dir = False
 
 # -- Options for HTML output ----------------------------------------------
 
