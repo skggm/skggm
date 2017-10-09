@@ -1,7 +1,9 @@
-Inverse Covariance
+Inverse Covariance API Reference
 ========
 
-The documentation of the quic_graph_lasso module.
+The documentation of the inverse_covariance module
 
-.. automodule:: inverse_covariance.quic_graph_lasso
+.. currentmodule:: inverse_covariance
+
+.. automodule:: inverse_covariance
    :members:
