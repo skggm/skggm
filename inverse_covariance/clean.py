@@ -88,8 +88,8 @@ def twoway_standardize(X, axis=0, with_mean=True, with_std=True, copy=True, max_
 
 class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
     """Standardize features by removing the mean and scaling to unit variance 
-    in both row and column dimensions.
-    This is modeled after StandardScaler in scikit-learn.
+    in both row and column dimensions. 
+    This class is modeled after StandardScaler in scikit-learn.
     Read more in the :ref:`User Guide <preprocessing_scaler>`.
     Parameters
     ----------
@@ -123,24 +123,22 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
         new calls to fit, but increments across ``partial_fit`` calls.
     Examples
     --------
-    >>> from sklearn.preprocessing import StandardScaler
+    >>> from inverse_covariance.clean import TwoWayStandardScaler
     >>>
-    >>> data = [[0, 0], [0, 0], [1, 1], [1, 1]]
+    >>> data = [[1, 0], [1, 0], [2, 1], [2, 1]]
     >>> scaler = StandardScaler()
     >>> print(scaler.fit(data))
     StandardScaler(copy=True, with_mean=True, with_std=True)
     >>> print(scaler.mean_)
-    [ 0.5  0.5]
+    [ 3.0  0.5]
     >>> print(scaler.transform(data))
     [[-1. -1.]
      [-1. -1.]
      [ 1.  1.]
      [ 1.  1.]]
-    >>> print(scaler.transform([[2, 2]]))
-    [[ 3.  3.]]
     See also
     --------
-    scale: Equivalent function without the estimator API.
+    twoway_standardize: Equivalent function without the estimator API.
     :class:`sklearn.preprocessing.StandardScaler`
     :class:`sklearn.decomposition.PCA`
         Further removes the linear correlation across features with 'whiten=True'.
@@ -151,42 +149,31 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
     """  # noqa
 
     def __init__(self, copy=True, with_mean=True, with_std=True):
-        self.with_mean = with_mean
+        """Unlike StandardScaler, with_mean is always set to True, to ensure
+        that two-way standardization is always performed with centering. The 
+        argument `with_mean` is retained for the sake of model API compatibility.
+        """
+        self.with_mean = True
         self.with_std = with_std
         self.copy = copy
 
-    def _reset(self):
-        """Reset internal data-dependent state of the scaler, if necessary.
-        __init__ parameters are not touched.
-        """
-
-        # Checking one attribute is enough, becase they are all set together
-        # in partial_fit
-        if hasattr(self, 'scale_'):
-            del self.scale_
-            del self.n_samples_seen_
-            del self.mean_
-            del self.var_
-
     def fit(self, X, y=None):
-        """Compute the mean and std to be used for later scaling.
+        """Compute the mean and std for both row and column dimensions.
         Parameters
         ----------
-        X : {array-like, sparse matrix}, shape [n_samples, n_features]
+        X : {array-like}, shape [n_rows, n_cols]
             The data used to compute the mean and standard deviation
-            used for later scaling along the features axis.
-        y : Passthrough for ``Pipeline`` compatibility.
+            along both row and column axes
+        y : Passthrough for ``Pipeline`` compatibility. Input is ignored.
         """
 
-        # Reset internal state before fitting
-        self._reset()
         return self.partial_fit(X, y)
 
     def transform(self, X, y='deprecated', copy=None):
         """Perform standardization by centering and scaling
         Parameters
         ----------
-        X : array-like, shape [n_samples, n_features]
+        X : array-like, shape [n_rows, n_cols]
             The data used to scale along the features axis.
         y : (ignored)
             .. deprecated:: 0.19
