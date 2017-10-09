@@ -1,3 +1,12 @@
+"""
+Visualize Regularization Path
+=============================
+
+Plot the edge level coefficients (inverse covariance entries)
+as a function of the regularization parameter.
+
+"""
+
 import sys
 import numpy as np
 from sklearn.datasets import make_sparse_spd_matrix
