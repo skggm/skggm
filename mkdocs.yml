@@ -1,0 +1,30 @@
+site_name: Skggm Documentation
+site_author: M. Narayan and J. Laska
+repo_url: https://github.com/skggm/skggm/
+
+docs_dir: 'doc/docs'
+site_dir: 'doc/site'
+
+theme_dir: 'doc/cinder-mkdocs-theme'
+theme: readthedocs
+
+python:
+   version: 2 # for unicode
+   setup_py_install: True
+
+markdown_extensions:
+    - wikilinks
+    - toc:
+        title: Table of Contents
+    - attr_list
+    - fenced_code
+    - mdx_math:
+        enable_dollar_delimiter: True
+
+extra_javascript: ['https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML','mathjaxhelper.js']
+
+pages:
+ - Skggm:
+    - Overview: index.md
+    - FAQ: skggm_FAQ.md
+ - Citing Skggm: citing_skggm.md
