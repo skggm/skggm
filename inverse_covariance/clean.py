@@ -184,6 +184,42 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
 
         return self.partial_fit(X, y)
 
+    def partial_fit(self, X, y=None):
+        """Compute the mean and std for both row and column dimensions. 
+        Equivalent to fit. Online algorithm not supported at this time.
+        Parameters
+        ----------
+        X : {array-like}, shape [n_rows, n_cols]
+            The data used to compute the mean and standard deviation
+            used for later scaling along the features axis.
+        y : Passthrough for ``Pipeline`` compatibility.
+        """
+        X = check_array(X, accept_sparse=('csr', 'csc'), copy=self.copy,
+                        warn_on_dtype=True, estimator=self, dtype=FLOAT_DTYPES)
+
+        if sparse.issparse(X):
+
+        else:
+            # First pass
+            if not hasattr(self, 'n_samples_seen_'):
+                self.mean_ = .0
+                self.n_samples_seen_ = 0
+                if self.with_std:
+                    self.var_ = .0
+                else:
+                    self.var_ = None
+
+            self.mean_, self.var_, self.n_samples_seen_ = \
+                            _incremental_mean_and_var(X, self.mean_, self.var_,
+                                                      self.n_samples_seen_)
+
+        if self.with_std:
+            self.scale_ = _handle_zeros_in_scale(np.sqrt(self.var_))
+        else:
+            self.scale_ = None
+
+        return self
+
     def transform(self, X, y='deprecated', copy=None):
         """Perform standardization by centering and scaling
         Parameters
