@@ -23,12 +23,16 @@ To test on other Apache Spark systems:
     1) Define the variable `spark` to be your spark session.
 """
 
+import sys
+
 import numpy as np
 import tabulate
 import time
 import matplotlib.pyplot as plt
 from sklearn.covariance import ledoit_wolf
 
+sys.path.append('..')
+sys.path.append('../inverse_covariance')
 from inverse_covariance import (
     QuicGraphLasso,
     QuicGraphLassoCV,
