@@ -1,3 +1,14 @@
+"""
+Convergence Failure of Glasso
+=============================
+
+Demonstration of cases where GraphLasso fails to converge and quic succeeds.
+
+"The graphical lasso: New Insights and alternatives", by Mazumder & Hastie 2012.
+https://web.stanford.edu/~hastie/Papers/glassoinsights.pdf
+
+"""
+
 import sys
 sys.path.append('..')
 
@@ -5,16 +16,6 @@ from sklearn.covariance import graph_lasso
 from inverse_covariance import quic
 import numpy as np
 
-'''
-Demonstration of cases where GraphLasso fails to converge and quic succeeds.
-
-"The graphical lasso: New Insights and alternatives", by Mazumder & Hastie 2012.
-https://web.stanford.edu/~hastie/Papers/glassoinsights.pdf
-
-TODO:
-    - shall we use the sklearn objects instead of functions?
-    - what do we want to output here?
-'''
 
 #############################################################################
 # Example 1
