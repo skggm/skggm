@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 
 
 sys.path.append('..')
+sys.path.append('../inverse_covariance')
 from inverse_covariance import (
     QuicGraphLasso,
     QuicGraphLassoCV,
