@@ -268,24 +268,18 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
                           "deprecated since 0.19 and will be removed in 0.21",
                           DeprecationWarning)
 
-        check_is_fitted(self, 'scale_')
+        check_is_fitted(self, 'row_scale_')
 
         copy = copy if copy is not None else self.copy
-        X = check_array(X, accept_sparse='csr', copy=copy, warn_on_dtype=True,
+        X = check_array(X, accept_sparse=None, copy=copy, warn_on_dtype=True,
                         estimator=self, dtype=FLOAT_DTYPES)
 
         if sparse.issparse(X):
-            if self.with_mean:
-                raise ValueError(
-                    "Cannot center sparse matrices: pass `with_mean=False` "
-                    "instead. See docstring for motivation and alternatives.")
-            if self.scale_ is not None:
-                inplace_column_scale(X, 1 / self.scale_)
+            print('Input is sparse')
+            raise NotImplemented(
+                "Algorithm for sparse matrices currently not supported.")
         else:
-            if self.with_mean:
-                X -= self.mean_
-            if self.with_std:
-                X /= self.scale_
+            X = twoway_standardize(X)
         return X
 
     def inverse_transform(self, X, copy=None):
