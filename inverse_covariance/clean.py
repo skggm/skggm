@@ -17,7 +17,8 @@ from sklearn.utils.validation import (check_is_fitted, check_random_state,
                                 FLOAT_DTYPES)
 
 
-def twoway_standardize(X, axis=0, with_mean=True, with_std=True, copy=True, max_iter=10):
+def twoway_standardize(X, axis=0, with_mean=True, with_std=True, copy=True, 
+                       max_iter=50, tol=1e-6, verbose=False):
     """Standardize a two-dimensional data matrix along both axes.
     Center to the mean and component wise scale to unit variance.
     Read more in the :ref:`User Guide <preprocessing_scaler>`.
@@ -38,6 +39,10 @@ def twoway_standardize(X, axis=0, with_mean=True, with_std=True, copy=True, max_
         set to False to perform inplace row normalization and avoid a
         copy (if the input is already a numpy array or a scipy.sparse
         CSC matrix and if axis is 1).
+    max_iter : int, optional (50 by default)
+        Set the maximum number of iterations of successive normalization algorithm
+    tol : float, optional (1e-6 by default)
+        Set the convergence threshold for successive normalization
     Notes
     -----
     This function invokes sklearn's scale function. Thus, the same restrictions
@@ -58,11 +63,11 @@ def twoway_standardize(X, axis=0, with_mean=True, with_std=True, copy=True, max_
         (e.g. as part of a preprocessing :class:`sklearn.pipeline.Pipeline`).
     """  # noqa
 
-    X = check_array(X, accept_sparse=None, warn_on_dtype=True,
-                        dtype=FLOAT_DTYPES
-                       )
-    Xrow_polish = np.copy(X)
+    X = check_array(X, accept_sparse=None, copy=copy, warn_on_dtype=True,
+                        dtype=FLOAT_DTYPES)
+    Xrow_polish = np.copy(X.T)
     Xcol_polish = np.copy(X)
+    [n_rows,n_cols] = np.shape(X)
     
     if sparse.issparse(X):
         print('Input is sparse')
@@ -71,18 +76,28 @@ def twoway_standardize(X, axis=0, with_mean=True, with_std=True, copy=True, max_
         
     else:
         n_iter = 0
-        while n_iter <= max_iter:
-            Xcol_polish = scale(Xrow_polish, axis=0,
+        err_norm = np.inf
+        oldXrow = np.copy(Xrow_polish)
+        oldXcol = np.copy(Xcol_polish)
+        while n_iter <= max_iter and err_norm > tol :
+            Xcol_polish = scale(Xrow_polish.T, axis=1,
                                     with_mean=True,
                                     with_std=with_std
                                    )
-            Xrow_polish = scale(Xcol_polish, axis=1,
+            Xrow_polish = scale(Xcol_polish.T, axis=1,
                                     with_mean=True,
                                     with_std=with_std
                                    )
             n_iter += 1
-            X = Xrow_polisy
-            
+            err_norm_row = np.linalg.norm(oldXrow-Xrow_polish,'fro')
+            err_norm_col = np.linalg.norm(oldXcol-Xcol_polish,'fro')
+            err_norm = .5 * err_norm_row/(n_rows*n_cols) + .5 * err_norm_col/(n_rows*n_cols)
+            if verbose:
+                print('Iteration: {}, Convergence Err: {}'.format(n_iter,err_norm))
+            oldXrow = np.copy(Xrow_polish)
+            oldXcol = np.copy(Xcol_polish)
+
+        X = Xrow_polish
     return X
 
 
