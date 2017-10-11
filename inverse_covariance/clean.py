@@ -300,27 +300,27 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
         X_tr : array-like, shape [n_samples, n_features]
             Transformed array.
         """
-        check_is_fitted(self, 'scale_')
+        check_is_fitted(self, 'row_scale_')
 
         copy = copy if copy is not None else self.copy
         if sparse.issparse(X):
-            if self.with_mean:
-                raise ValueError(
-                    "Cannot uncenter sparse matrices: pass `with_mean=False` "
-                    "instead See docstring for motivation and alternatives.")
-            if not sparse.isspmatrix_csr(X):
-                X = X.tocsr()
-                copy = False
-            if copy:
-                X = X.copy()
-            if self.scale_ is not None:
-                inplace_column_scale(X, self.scale_)
+            print('Input is sparse')
+            raise NotImplementedError(
+                'Algorithm for sparse matrices currently not supported.')
         else:
+            raise NotImplementedError(
+                'Two Way standardization cannot currently be reversed with accuracy')
             X = np.asarray(X)
             if copy:
                 X = X.copy()
+            X = X.T
             if self.with_std:
-                X *= self.scale_
+                X *= self.row_scale_
             if self.with_mean:
-                X += self.mean_
+                X += self.row_mean_
+            X = X.T
+            if self.with_std:
+                X *= self.col_scale_
+            if self.with_mean:
+                X += self.col_mean_
         return X
