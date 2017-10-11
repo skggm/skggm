@@ -171,6 +171,8 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
             del self.col_scale_
             del self.col_mean_
             del self.col_var_
+            del self.n_rows_seen_
+            del self.n_cols_seen_
 
     def fit(self, X, y=None):
         """Compute the mean and std for both row and column dimensions.
@@ -194,29 +196,43 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
             used for later scaling along the features axis.
         y : Passthrough for ``Pipeline`` compatibility.
         """
-        X = check_array(X, accept_sparse=('csr', 'csc'), copy=self.copy,
-                        warn_on_dtype=True, estimator=self, dtype=FLOAT_DTYPES)
+        X = check_array(X, accept_sparse=None, copy=self.copy, 
+                        warn_on_dtype=True, dtype=FLOAT_DTYPES)
 
         if sparse.issparse(X):
-
+            print('Input is sparse')
+            raise NotImplemented(
+                "Algorithm for sparse matrices currently not supported.")
         else:
             # First pass
-            if not hasattr(self, 'n_samples_seen_'):
-                self.mean_ = .0
-                self.n_samples_seen_ = 0
+            if not hasattr(self, 'n_rows_seen_'):
+                self.col_mean_ = .0
+                self.n_rows_seen_ = 0
                 if self.with_std:
-                    self.var_ = .0
+                    self.col_var_ = .0
                 else:
-                    self.var_ = None
+                    self.col_var_ = None
 
-            self.mean_, self.var_, self.n_samples_seen_ = \
-                            _incremental_mean_and_var(X, self.mean_, self.var_,
-                                                      self.n_samples_seen_)
+            self.col_mean_, self.col_var_, self.n_rows_seen_ = \
+                            _incremental_mean_and_var(X, self.col_mean_, self.col_var_,
+                                                      self.n_rows_seen_)
+            if not hasattr(self, 'n_cols_seen_'):
+                self.row_mean_ = .0
+                self.n_cols_seen_ = 0
+                if self.with_std:
+                    self.row_var_ = .0
+                else:
+                    self.row_var_ = None
+            self.row_mean_, self.row_var_, self.n_cols_seen_ = \
+                                        _incremental_mean_and_var(X, self.row_mean_, self.row_var_,
+                                                                  self.n_cols_seen_)
 
         if self.with_std:
-            self.scale_ = _handle_zeros_in_scale(np.sqrt(self.var_))
+            self.row_scale_ = _handle_zeros_in_scale(np.sqrt(self.row_var_))
+            self.col_scale_ = _handle_zeros_in_scale(np.sqrt(self.col_var_))
         else:
-            self.scale_ = None
+            self.row_scale_ = None
+            self.col_scale_ = None
 
         return self
 
