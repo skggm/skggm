@@ -2,10 +2,15 @@ import numpy as np
 from scipy import sparse
 from scipy import stats
 
-from sklearn.preprocessing.data import scale
+from sklearn.preprocessing.data import (
+    scale,
+    _handle_zeros_in_scale
+    )
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from sklearn.utils import check_array
+from sklearn.externals import six
+from sklearn.externals.six import string_types
 from sklearn.utils.extmath import row_norms
 from sklearn.utils.extmath import _incremental_mean_and_var
 from sklearn.utils.sparsefuncs_fast import (inplace_csr_row_normalize_l1,
@@ -68,12 +73,12 @@ def twoway_standardize(X, axis=0, with_mean=True, with_std=True, copy=True,
     Xrow_polish = np.copy(X.T)
     Xcol_polish = np.copy(X)
     [n_rows,n_cols] = np.shape(X)
-    
+
     if sparse.issparse(X):
         print('Input is sparse')
         raise NotImplemented(
                 "Algorithm for sparse matrices currently not supported.")
-        
+
     else:
         n_iter = 0
         err_norm = np.inf
@@ -102,7 +107,7 @@ def twoway_standardize(X, axis=0, with_mean=True, with_std=True, copy=True,
 
 
 class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
-    """Standardize features by removing the mean and scaling to unit variance 
+    """Standardize features by removing the mean and scaling to unit variance
     in both row and column dimensions. 
     This class is modeled after StandardScaler in scikit-learn.
     Read more in the :ref:`User Guide <preprocessing_scaler>`.
@@ -165,7 +170,7 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
 
     def __init__(self, copy=True, with_mean=True, with_std=True):
         """Unlike StandardScaler, with_mean is always set to True, to ensure
-        that two-way standardization is always performed with centering. The 
+        that two-way standardization is always performed with centering. The
         argument `with_mean` is retained for the sake of model API compatibility.
         """
         self.with_mean = True
@@ -202,7 +207,7 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
         return self.partial_fit(X, y)
 
     def partial_fit(self, X, y=None):
-        """Compute the mean and std for both row and column dimensions. 
+        """Compute the mean and std for both row and column dimensions.
         Equivalent to fit. Online algorithm not supported at this time.
         Parameters
         ----------
@@ -211,7 +216,7 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
             used for later scaling along the features axis.
         y : Passthrough for ``Pipeline`` compatibility.
         """
-        X = check_array(X, accept_sparse=None, copy=self.copy, 
+        X = check_array(X, accept_sparse=None, copy=self.copy,
                         warn_on_dtype=True, dtype=FLOAT_DTYPES)
 
         if sparse.issparse(X):
@@ -239,7 +244,7 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
                 else:
                     self.row_var_ = None
             self.row_mean_, self.row_var_, self.n_cols_seen_ = \
-                                        _incremental_mean_and_var(X, self.row_mean_, self.row_var_,
+                                        _incremental_mean_and_var(X.T, self.row_mean_, self.row_var_,
                                                                   self.n_cols_seen_)
 
         if self.with_std:
