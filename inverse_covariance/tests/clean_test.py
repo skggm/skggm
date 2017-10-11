@@ -30,7 +30,7 @@ def test_invalid_argument():
     '''
     X = np.zeros(shape=(10,10))
     X_csc = sparse.csc_matrix(X)
-    assert_raises(TypeError, twoway_standardize(X_csc))
+    assert_raises(TypeError, twoway_standardize, X_csc)
     
     X_csr = sparse.csr_matrix(X)
-    assert_raises(TypeError, twoway_standardize(X_csr))
+    assert_raises(TypeError, twoway_standardize, X_csr)
