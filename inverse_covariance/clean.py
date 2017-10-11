@@ -102,7 +102,7 @@ def twoway_standardize(X, axis=0, with_mean=True, with_std=True, copy=True,
             oldXrow = np.copy(Xrow_polish)
             oldXcol = np.copy(Xcol_polish)
 
-        X = Xrow_polish
+        X = Xrow_polish.T
     return X
 
 
