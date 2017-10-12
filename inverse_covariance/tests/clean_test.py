@@ -3,7 +3,7 @@ from scipy import sparse
 
 from sklearn.utils.testing import assert_raises
 
-from clean import (
+from inverse_covariance.clean import (
    twoway_standardize
 )
 
