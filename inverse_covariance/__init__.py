@@ -8,6 +8,10 @@ from .quic_graph_lasso import (
     QuicGraphLassoCV,
     QuicGraphLassoEBIC,
 )
+from .clean import (
+    twoway_standardize,
+    TwoWayStandardScaler,
+)
 from .metrics import (
     log_likelihood,
     kl_loss,
@@ -22,12 +26,15 @@ from .model_average import ModelAverage
 from .adaptive_graph_lasso import AdaptiveGraphLasso
 from .cross_validation import RepeatedKFold
 
+
 __all__ = [
     'InverseCovarianceEstimator',
     'quic',
     'QuicGraphLasso',
     'QuicGraphLassoCV',
     'QuicGraphLassoEBIC',
+    'twoway_standardize',
+    'TwoWayStandardScaler',
     'log_likelihood',
     'kl_loss',
     'quadratic_loss',
