@@ -1,3 +1,4 @@
 mock
 sphinx-gallery
 numpydoc
+scikit-learn
