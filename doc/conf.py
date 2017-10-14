@@ -79,7 +79,7 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
             return MagicMock()
 
-MOCK_MODULES = ['pyquic']
+MOCK_MODULES = ['pyquic', 'quic_graph_lasso']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # Add any paths that contain templates here, relative to this directory.
