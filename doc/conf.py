@@ -39,6 +39,7 @@ except:
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
@@ -77,11 +78,11 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
             return MagicMock()
 
-MOCK_MODULES = ['inverse_covariance']
+MOCK_MODULES = ['pyquic']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # Add any paths that contain templates here, relative to this directory.
-# templates_path = ['_templates']
+templates_path = ['_templates']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -297,18 +298,19 @@ texinfo_documents = [
    'Miscellaneous'),
 ]
 
-def generate_example_rst(app, what, name, obj, options, lines):
-    # generate empty examples files, so that we don't get
-    # inclusion errors if there are no examples for a class / module
-    examples_path = os.path.join(app.srcdir, "modules", "generated",
-                                 "%s.examples" % name)
-    if not os.path.exists(examples_path):
-        # touch file
-        open(examples_path, 'w').close()
+# Commenting out generate_example_rst, setup
+# def generate_example_rst(app, what, name, obj, options, lines):
+#     # generate empty examples files, so that we don't get
+#     # inclusion errors if there are no examples for a class / module
+#     examples_path = os.path.join(app.srcdir, "modules", "generated",
+#                                  "%s.examples" % name)
+#     if not os.path.exists(examples_path):
+#         # touch file
+#         open(examples_path, 'w').close()
 
 
-def setup(app):
-    app.connect('autodoc-process-docstring', generate_example_rst)
+# def setup(app):
+#     app.connect('autodoc-process-docstring', generate_example_rst)
 
 # Documents to append as an appendix to all manuals.
 #texinfo_appendices = []
