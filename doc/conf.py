@@ -66,7 +66,7 @@ sphinx_gallery_conf = {
     'backreferences_dir' : False,
     'filename_pattern' : '../examples/convergence_',
     # Uncomment below if examples fail
-    #'expected_failing_examples': ['../examples/plot_functional_brain_networks.py',], 
+    expected_failing_examples': ['../examples/convergence_comparison.py'], 
     # path where to save gallery generated examples
     'gallery_dirs'  : 'auto_examples'}
 
