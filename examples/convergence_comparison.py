@@ -1,20 +1,22 @@
-import sys
-sys.path.append('..')
+"""
+Convergence Failure of Glasso
+=============================
 
-from sklearn.covariance import graph_lasso
-from inverse_covariance import quic
-import numpy as np
-
-'''
 Demonstration of cases where GraphLasso fails to converge and quic succeeds.
 
 "The graphical lasso: New Insights and alternatives", by Mazumder & Hastie 2012.
 https://web.stanford.edu/~hastie/Papers/glassoinsights.pdf
 
-TODO:
-    - shall we use the sklearn objects instead of functions?
-    - what do we want to output here?
-'''
+"""
+
+import sys
+sys.path.append('..')
+sys.path.append('../inverse_covariance')
+
+from sklearn.covariance import graph_lasso
+from inverse_covariance import quic
+import numpy as np
+
 
 #############################################################################
 # Example 1

@@ -1,21 +1,7 @@
-import numpy as np
-import tabulate
-import time
-import matplotlib.pyplot as plt
-from sklearn.covariance import ledoit_wolf
+"""
+Example using Spark
+====================
 
-from inverse_covariance import (
-    QuicGraphLasso,
-    QuicGraphLassoCV,
-    QuicGraphLassoEBIC,
-    AdaptiveGraphLasso,
-    ModelAverage,
-)
-from inverse_covariance.profiling import (
-    LatticeGraph,
-)
-
-'''
 This script reproduces parts of skggm/examples/estimator_suite.py using the
 built-in inverse_covariance.profiling tools and spark support.
 
@@ -35,7 +21,28 @@ To test on databricks:
 
 To test on other Apache Spark systems:
     1) Define the variable `spark` to be your spark session.
-'''
+"""
+
+import sys
+
+import numpy as np
+import tabulate
+import time
+import matplotlib.pyplot as plt
+from sklearn.covariance import ledoit_wolf
+
+sys.path.append('..')
+sys.path.append('../inverse_covariance')
+from inverse_covariance import (
+    QuicGraphLasso,
+    QuicGraphLassoCV,
+    QuicGraphLassoEBIC,
+    AdaptiveGraphLasso,
+    ModelAverage,
+)
+from inverse_covariance.profiling import (
+    LatticeGraph,
+)
 
 
 def make_data(n_samples, n_features):

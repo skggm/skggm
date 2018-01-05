@@ -1,3 +1,13 @@
+"""
+Suite of estimator comparisons
+==============================
+
+Compare inverse covariance estimators and model selection methods.
+
+Derived from example in:
+http://scikit-learn.org/stable/auto_examples/covariance/plot_sparse_cov.html
+"""
+
 import sys
 import numpy as np
 import tabulate
@@ -10,6 +20,7 @@ import matplotlib.pyplot as plt
 
 
 sys.path.append('..')
+sys.path.append('../inverse_covariance')
 from inverse_covariance import (
     QuicGraphLasso,
     QuicGraphLassoCV,
@@ -18,13 +29,6 @@ from inverse_covariance import (
     ModelAverage,
 )
 
-
-'''
-Compare inverse covariance estimators and model selection methods.
-
-Derived from example in:
-http://scikit-learn.org/stable/auto_examples/covariance/plot_sparse_cov.html
-'''
 plt.ion()
 
 

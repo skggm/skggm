@@ -21,6 +21,7 @@ from nilearn import datasets, plotting, input_data
 
 import sys
 sys.path.append('..')
+sys.path.append('../inverse_covariance')
 from inverse_covariance import (
     QuicGraphLasso,
     QuicGraphLassoCV,

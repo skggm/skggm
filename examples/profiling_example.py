@@ -1,3 +1,13 @@
+"""
+Example of Montecarlo Benchmarking
+=============================
+
+Run a MonteCarlo simulation on synthetic network structure and compare
+estimation and model selection errors
+
+"""
+
+
 import sys
 import matplotlib.pyplot as plt
 
