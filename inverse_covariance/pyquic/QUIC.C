@@ -45,8 +45,18 @@
 // It would be preferable to use an include such as lapack.h.  Except
 // lapack.h is not available from the octave or liblapack-dev packages...
 
-#if defined(HAVE_MKL)
-  #include "lapacke.h"
+#if defined(HAVE_OPENBLAS) || defined(HAVE_ATLAS)
+extern "C" {
+    void dpotrf_(char* uplo, ptrdiff_t* n, double* A, ptrdiff_t* lda,
+                 ptrdiff_t* info);
+    void dpotri_(char* uplo, ptrdiff_t* n, double* A, ptrdiff_t* lda,
+                 ptrdiff_t* info);
+}
+#elif defined(HAVE_MKL) || defined(MKLROOT)
+extern "C" {
+  #include <mkl.h>    
+  #include <lapacke.h>
+}
   #define dpotrf_ dpotrf
   #define dpotrf_ dpotri
 #else
@@ -57,6 +67,7 @@ extern "C" {
                  ptrdiff_t* info);
 }
 #endif
+    
 
 typedef struct {
     unsigned short i;
