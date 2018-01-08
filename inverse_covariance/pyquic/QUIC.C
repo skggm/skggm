@@ -48,11 +48,12 @@
 #ifdef HAVE_MKL
 extern "C" {
   #include <mkl.h>
-  #include <mkl_cblas.h>    
+  #include <mkl_cblas.h>
   #include <mkl_lapack.h>
 }
-#define dpotrf_ dpotrf
-#define dpotri_ dpotri
+  #define dpotrf_ dpotrf
+  #define dpotri_ dpotri
+
 #else
 extern "C" {
     void dpotrf_(char* uplo, ptrdiff_t* n, double* A, ptrdiff_t* lda,
