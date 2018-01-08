@@ -41,14 +41,22 @@
   #define dpotri_ dpotri
 #endif
 
+
 // It would be preferable to use an include such as lapack.h.  Except
 // lapack.h is not available from the octave or liblapack-dev packages...
+
+#if defined(HAVE_MKL)
+  #include "lapacke.h"
+  #define dpotrf_ dpotrf
+  #define dpotrf_ dpotri
+#else
 extern "C" {
     void dpotrf_(char* uplo, ptrdiff_t* n, double* A, ptrdiff_t* lda,
-		 ptrdiff_t* info);
+                 ptrdiff_t* info);
     void dpotri_(char* uplo, ptrdiff_t* n, double* A, ptrdiff_t* lda,
-		 ptrdiff_t* info);
+                 ptrdiff_t* info);
 }
+#endif
 
 typedef struct {
     unsigned short i;
@@ -212,7 +220,7 @@ static double projLogDet(unsigned long p, const double* S,
 #define QUIC_MSG_CD      3
 #define QUIC_MSG_LINE    4
 
-// mode = {'D', 'P', 'T'} for 'default', 'path' or 'trace'. 
+// mode = {'D', 'P', 'T'} for 'default', 'path' or 'trace'.
 //extern "C"
 void QUIC(char mode, uint32_t& p, const double* S, double* Lambda0,
 	  uint32_t& pathLen, const double* path, double& tol,
@@ -255,7 +263,7 @@ void QUIC(char mode, uint32_t& p, const double* S, double* Lambda0,
     } else {
 	Lambda = Lambda0;
     }
-    ushort_pair_t* activeSet = (ushort_pair_t*) 
+    ushort_pair_t* activeSet = (ushort_pair_t*)
 	malloc(p*(p+1)/2*sizeof(ushort_pair_t));
     double l1normX = 0.0;
     double trSX = 0.0;
@@ -277,7 +285,7 @@ void QUIC(char mode, uint32_t& p, const double* S, double* Lambda0,
     for (; NewtonIter <= maxNewtonIter; NewtonIter++) {
 	double normD = 0.0;
 	double diffD = 0.0;
-	double subgrad = 1e+15;	
+	double subgrad = 1e+15;
 	if (NewtonIter == 1 && IsDiag(p, X)) {
 	    if (msg >= QUIC_MSG_NEWTON) {
 		MSG("Newton iteration 1.\n");
@@ -298,11 +306,11 @@ void QUIC(char mode, uint32_t& p, const double* S, double* Lambda0,
 			activeSet[numActive].i = (unsigned short) i;
 			activeSet[numActive].j = (unsigned short) j;
 			numActive++;
-			if (X[k+j] > 0) 
+			if (X[k+j] > 0)
 			    g += Lambda[k+j];
-			else if (X[k+j] < 0) 
+			else if (X[k+j] < 0)
 			    g -= Lambda[k+j];
-			else 
+			else
 			    g = fabs(g) - Lambda[k+j];
 			subgrad += fabs(g);
 		    }
@@ -498,8 +506,8 @@ void QUIC(char mode, uint32_t& p, const double* S, double* Lambda0,
 	    if (msg > QUIC_MSG_NO)
 		MSG("  New scaling value: %e\n", path[pathIdx]);
 	    unsigned long p2 = p*p;
-	    memcpy(X + p2, X, p2*sizeof(double)); 
-	    memcpy(W + p2, W, p2*sizeof(double)); 
+	    memcpy(X + p2, X, p2*sizeof(double));
+	    memcpy(W + p2, W, p2*sizeof(double));
 	    X += p2;
 	    W += p2;
 	    for (unsigned long i = 0; i < p*p; i++)
@@ -519,7 +527,7 @@ void QUIC(char mode, uint32_t& p, const double* S, double* Lambda0,
 	}
 	if (iter != NULL)
 	    iter[0] = NewtonIter;
-    }    
+    }
     if (mode == 'T' && iter != NULL)
 	iter[0] = NewtonIter - 1;
     free(activeSet);
