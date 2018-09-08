@@ -128,15 +128,15 @@ only one of `ModelAverage` or `QuicGraphLassoCV` can make use of the spark conte
 
 ## Installation
 
+Both python2.7 and python3.6.x are supported. We use the [black autoformatter](https://github.com/ambv/black) to format our code. If contributing, please run this formatter checks will fail.
+
 Clone this repo and run
 
     python setup.py install
-    python3 setup.py install  (for python3)
 
 or via PyPI
 
     pip install skggm
-    pip3 install skggm  (for python3)
 
 or from a cloned repo
 
@@ -154,7 +154,8 @@ This package requires the `lapack` libraries to by installed on your system. A c
 To run the tests, execute the following lines.
 
     python -m pytest inverse_covariance (python3 -m pytest inverse_covariance)
-    flake8 inverse_covariance
+    black --check inverse_covariance
+    black --check examples
 
 # Examples
 
@@ -180,7 +181,7 @@ We've provided a utility function `inverse_covariance.plot_util.trace_plot` that
 
 # Citation
 
-If you use *skggm* or reference our blog post in a presentation or publication, we would appreciate citations of our package. 
+If you use *skggm* or reference our blog post in a presentation or publication, we would appreciate citations of our package.
 
 >Jason Laska, Manjari Narayan, 2017. _skggm 0.2.7: A scikit-learn compatible package for Gaussian and related Graphical Models._ doi:10.5281/zenodo.830033
 
@@ -189,7 +190,7 @@ Here is the corresponding Bibtex entry
 @misc{laska_narayan_2017_830033,
   author       = {Jason Laska and
                   Manjari Narayan},
-  title        = {{skggm 0.2.7: A scikit-learn compatible package for 
+  title        = {{skggm 0.2.7: A scikit-learn compatible package for
                    Gaussian and related Graphical Models}},
   month        = jul,
   year         = 2017,
