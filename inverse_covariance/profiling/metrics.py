@@ -2,7 +2,7 @@ import numpy as np
 
 
 def _nonzero_intersection(m, m_hat):
-    '''Count the number of nonzeros in and between m and m_hat.
+    """Count the number of nonzeros in and between m and m_hat.
 
     Returns
     ----------
@@ -12,7 +12,7 @@ def _nonzero_intersection(m, m_hat):
 
     intersection_nnz : number of nonzeros in intersection of m/m_hat
                       (w/o diagonal)
-    '''
+    """
     n_features, _ = m.shape
 
     m_no_diag = m.copy()
@@ -23,41 +23,40 @@ def _nonzero_intersection(m, m_hat):
     m_hat_nnz = len(np.nonzero(m_hat_no_diag.flat)[0])
     m_nnz = len(np.nonzero(m_no_diag.flat)[0])
 
-    intersection_nnz = len(np.intersect1d(
-        np.nonzero(m_no_diag.flat)[0],
-        np.nonzero(m_hat_no_diag.flat)[0]
-    ))
+    intersection_nnz = len(
+        np.intersect1d(np.nonzero(m_no_diag.flat)[0], np.nonzero(m_hat_no_diag.flat)[0])
+    )
 
     return m_nnz, m_hat_nnz, intersection_nnz
 
 
 def support_false_positive_count(m, m_hat):
-    '''Count the number of false positive support elements in
+    """Count the number of false positive support elements in
     m_hat in one triangle, not including the diagonal.
-    '''
+    """
     m_nnz, m_hat_nnz, intersection_nnz = _nonzero_intersection(m, m_hat)
     return int((m_hat_nnz - intersection_nnz) / 2.0)
 
 
 def support_false_negative_count(m, m_hat):
-    '''Count the number of false negative support elements in
+    """Count the number of false negative support elements in
     m_hat in one triangle, not including the diagonal.
-    '''
+    """
     m_nnz, m_hat_nnz, intersection_nnz = _nonzero_intersection(m, m_hat)
     return int((m_nnz - intersection_nnz) / 2.0)
 
 
 def support_difference_count(m, m_hat):
-    '''Count the number of different elements in the support in one triangle,
+    """Count the number of different elements in the support in one triangle,
     not including the diagonal.
-    '''
+    """
     m_nnz, m_hat_nnz, intersection_nnz = _nonzero_intersection(m, m_hat)
     return int((m_nnz + m_hat_nnz - (2 * intersection_nnz)) / 2.0)
 
 
 def has_exact_support(m, m_hat):
-    '''Returns 1 if support_difference_count is zero, 0 else.
-    '''
+    """Returns 1 if support_difference_count is zero, 0 else.
+    """
     m_nnz, m_hat_nnz, intersection_nnz = _nonzero_intersection(m, m_hat)
     return int((m_nnz + m_hat_nnz - (2 * intersection_nnz)) == 0)
 
@@ -90,4 +89,4 @@ def has_approx_support(m, m_hat, prob=0.01):
 
 
 def error_fro(m, m_hat):
-    return np.linalg.norm(np.triu(m - m_hat, 1), ord='fro')
+    return np.linalg.norm(np.triu(m - m_hat, 1), ord="fro")

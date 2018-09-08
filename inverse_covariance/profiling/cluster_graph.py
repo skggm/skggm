@@ -28,6 +28,7 @@ class ClusterGraph(Graph):
     seed : int
         Seed for np.random.RandomState seed. (default=1)
     """
+
     def __init__(self, low=0.7, high=0.7, **kwargs):
         self.low = low
         self.high = high
@@ -55,6 +56,6 @@ class ClusterGraph(Graph):
         -----------
         (n_features, n_features) matrices: covariance, precision, adjacency
         """
-        return (-np.ones((n_block_features, n_block_features)) * 0.5 +
-                self.prng.uniform(low=self.low, high=self.high,
-                                  size=(n_block_features, n_block_features)))
+        return -np.ones((n_block_features, n_block_features)) * 0.5 + self.prng.uniform(
+            low=self.low, high=self.high, size=(n_block_features, n_block_features)
+        )

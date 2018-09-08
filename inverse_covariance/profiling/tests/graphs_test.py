@@ -23,8 +23,9 @@ class TestGraphs(object):
         assert np.sum(adjacency[np.where(np.eye(n_features))]) == 0
 
         # all non-zeros are negative (random_sign=False)
-        assert (np.sum(adjacency[adjacency != 0] < 0) ==
-                np.sum(adjacency[adjacency != 0] != 0))
+        assert np.sum(adjacency[adjacency != 0] < 0) == np.sum(
+            adjacency[adjacency != 0] != 0
+        )
 
         # banded structure
         for nn in range(n_features):
@@ -51,8 +52,9 @@ class TestGraphs(object):
         assert np.sum(adjacency[np.where(np.eye(n_features))]) == 0
 
         # some non-zeros are negative (random_sign=True)
-        assert (np.sum(adjacency[adjacency != 0] < 0) !=
-                np.sum(adjacency[adjacency != 0] != 0))
+        assert np.sum(adjacency[adjacency != 0] < 0) != np.sum(
+            adjacency[adjacency != 0] != 0
+        )
 
         # banded structure
         for nn in range(n_features):
@@ -86,14 +88,14 @@ class TestGraphs(object):
         for nn in range(n_blocks):
             brange = slice(nn * n_block_features, (nn + 1) * n_block_features)
             assert (
-                np.sum(adjacency[brange, brange]) ==
-                n_block_features**2 - n_block_features
+                np.sum(adjacency[brange, brange])
+                == n_block_features ** 2 - n_block_features
             )
 
         # assert that all nonzeros equal sum of all blocks above
         assert (
-            np.sum(adjacency.flat) ==
-            (n_block_features**2 - n_block_features) * n_blocks
+            np.sum(adjacency.flat)
+            == (n_block_features ** 2 - n_block_features) * n_blocks
         )
 
     def test_blocks_chain_blocks_true(self):
@@ -115,26 +117,29 @@ class TestGraphs(object):
         for nn in range(n_blocks):
             brange = slice(nn * n_block_features, (nn + 1) * n_block_features)
             assert (
-                np.sum(adjacency[brange, brange]) ==
-                n_block_features**2 - n_block_features
+                np.sum(adjacency[brange, brange])
+                == n_block_features ** 2 - n_block_features
             )
 
         # assert that all nonzeros DO NOT equal sum of all blocks above
         assert (
-            np.sum(adjacency.flat) !=
-            (n_block_features**2 - n_block_features) * n_blocks
+            np.sum(adjacency.flat)
+            != (n_block_features ** 2 - n_block_features) * n_blocks
         )
 
-    @pytest.mark.parametrize("graph,seed", [
-        (ClusterGraph(), None),
-        (ErdosRenyiGraph(), None),
-        (LatticeGraph(), None),
-        (LatticeGraph(random_sign=True, chain_blocks=False, seed=3), 3),
-        (ClusterGraph(n_blocks=5, seed=3), 3),
-        (ErdosRenyiGraph(seed=3), 3),
-    ])
+    @pytest.mark.parametrize(
+        "graph,seed",
+        [
+            (ClusterGraph(), None),
+            (ErdosRenyiGraph(), None),
+            (LatticeGraph(), None),
+            (LatticeGraph(random_sign=True, chain_blocks=False, seed=3), 3),
+            (ClusterGraph(n_blocks=5, seed=3), 3),
+            (ErdosRenyiGraph(seed=3), 3),
+        ],
+    )
     def test_graph_classes(self, graph, seed):
-        '''Simple smell test on inidivudal graph classes'''
+        """Simple smell test on inidivudal graph classes"""
         n_features = 50
         alpha = 0.1
         covariance, precision, adjacency = graph.create(n_features, alpha)

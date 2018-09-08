@@ -1,6 +1,5 @@
 language: python
 python:
-    - 2.7
     - 3.6
 
 sudo: false
@@ -28,5 +27,6 @@ install:
 
 # command to run tests
 script:
-    - flake8 inverse_covariance
+    - black --check inverse_covariance
+    - black --check examples
     - python -m pytest --showlocals --pyargs
