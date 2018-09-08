@@ -3,11 +3,7 @@
 from __future__ import absolute_import
 
 import numpy as np
-from scipy.stats import (
-    rankdata,
-    kendalltau,
-    weightedtau
-)
+from scipy.stats import rankdata, kendalltau, weightedtau
 
 
 def _compute_ranks(X, winsorize=False, truncation=None, verbose=True):
@@ -48,27 +44,24 @@ def _compute_ranks(X, winsorize=False, truncation=None, verbose=True):
 
     if winsorize:
         if truncation is None:
-            truncation = (
-                1 / (
-                    4 * np.power(n_samples, 0.25) *
-                    np.sqrt(np.pi * np.log(n_samples))
-                )
+            truncation = 1 / (
+                4 * np.power(n_samples, 0.25) * np.sqrt(np.pi * np.log(n_samples))
             )
 
-        elif (truncation > 1):
+        elif truncation > 1:
             truncation = np.min(1.0, truncation)
 
     for col in np.arange(n_features):
-        Xrank[:, col] = rankdata(X[:, col], method='average')
+        Xrank[:, col] = rankdata(X[:, col], method="average")
         Xrank[:, col] /= n_samples
         if winsorize:
-            if n_samples > 100*n_features:
+            if n_samples > 100 * n_features:
                 Xrank[:, col] = n_samples * Xrank[:, col] / (n_samples + 1)
             else:
                 lower_truncate = Xrank[:, col] <= truncation
-                upper_truncate = Xrank[:, col] > 1-truncation
+                upper_truncate = Xrank[:, col] > 1 - truncation
                 Xrank[lower_truncate, col] = truncation
-                Xrank[upper_truncate, col] = 1-truncation
+                Xrank[upper_truncate, col] = 1 - truncation
 
     return Xrank
 
@@ -143,15 +136,13 @@ def kendalltau_correlation(X, rowvar=False, weighted=False):
     _, n_features = X.shape
     rank_correlation = np.eye(n_features)
     for row in np.arange(n_features):
-        for col in np.arange(1+row, n_features):
+        for col in np.arange(1 + row, n_features):
             if weighted:
                 rank_correlation[row, col], _ = weightedtau(
                     X[:, row], X[:, col], rank=False
                 )
             else:
-                rank_correlation[row, col], _ = kendalltau(
-                    X[:, row], X[:, col]
-                )
+                rank_correlation[row, col], _ = kendalltau(X[:, row], X[:, col])
     rank_correlation = np.triu(rank_correlation, 1) + rank_correlation.T
 
     return np.sin(rank_correlation * np.pi / 2)

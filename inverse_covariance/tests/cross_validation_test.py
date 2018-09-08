@@ -8,15 +8,13 @@ def test_repeated_kfold_coverage():
     n_folds = 3
     n_trials = 3
     kf = RepeatedKFold(n_samples, n_folds, n_trials)
-    check_cv_coverage(kf, expected_n_iter=n_folds * n_trials,
-                      n_samples=n_samples)
+    check_cv_coverage(kf, expected_n_iter=n_folds * n_trials, n_samples=n_samples)
 
     n_samples = 17
     n_folds = 3
     n_trials = 5
     kf = RepeatedKFold(n_samples, n_folds, n_trials)
-    check_cv_coverage(kf, expected_n_iter=n_folds * n_trials,
-                      n_samples=n_samples)
+    check_cv_coverage(kf, expected_n_iter=n_folds * n_trials, n_samples=n_samples)
 
 
 def test_repeated_kfold_values():

@@ -4,33 +4,31 @@ import numpy as np
 from sklearn.base import BaseEstimator
 
 from . import metrics
-from .rank_correlation import (
-    spearman_correlation,
-    kendalltau_correlation,
-)
+from .rank_correlation import spearman_correlation, kendalltau_correlation
 
 
-def _init_coefs(X, method='corrcoef'):
-    if method == 'corrcoef':
+def _init_coefs(X, method="corrcoef"):
+    if method == "corrcoef":
         return np.corrcoef(X, rowvar=False), 1.0
-    elif method == 'cov':
+    elif method == "cov":
         init_cov = np.cov(X, rowvar=False)
         return init_cov, np.max(np.abs(np.triu(init_cov)))
-    elif method == 'spearman':
+    elif method == "spearman":
         return spearman_correlation(X, rowvar=False), 1.0
-    elif method == 'kendalltau':
+    elif method == "kendalltau":
         return kendalltau_correlation(X, rowvar=False), 1.0
     elif callable(method):
         return method(X)
     else:
         raise ValueError(
-            ("initialize_method must be 'corrcoef' or 'cov', "
-             "passed \'{}\' .".format(method))
+            (
+                "initialize_method must be 'corrcoef' or 'cov', "
+                "passed '{}' .".format(method)
+            )
         )
 
 
-def _compute_error(comp_cov, covariance_, precision_,
-                   score_metric='frobenius'):
+def _compute_error(comp_cov, covariance_, precision_, score_metric="frobenius"):
     """Computes the covariance error vs. comp_cov.
 
     Parameters
@@ -60,7 +58,7 @@ def _compute_error(comp_cov, covariance_, precision_,
         If False, the error norm is returned.
     """
     if score_metric == "frobenius":
-        return np.linalg.norm(np.triu(comp_cov - covariance_, 1), ord='fro')
+        return np.linalg.norm(np.triu(comp_cov - covariance_, 1), ord="fro")
     elif score_metric == "spectral":
         error = comp_cov - covariance_
         return np.amax(np.linalg.svdvals(np.dot(error.T, error)))
@@ -71,8 +69,9 @@ def _compute_error(comp_cov, covariance_, precision_,
     elif score_metric == "log_likelihood":
         return -metrics.log_likelihood(comp_cov, precision_)
     else:
-        raise NotImplementedError(("Must be frobenius, spectral, kl, "
-                                   "quadratic, or log_likelihood"))
+        raise NotImplementedError(
+            ("Must be frobenius, spectral, kl, " "quadratic, or log_likelihood")
+        )
 
 
 def _validate_path(path):
@@ -85,7 +84,7 @@ def _validate_path(path):
 
     new_path = np.array(sorted(set(path), reverse=True))
     if new_path[0] != path[0]:
-        print('Warning: Path must be sorted largest to smallest.')
+        print("Warning: Path must be sorted largest to smallest.")
 
     return new_path
 
@@ -142,8 +141,10 @@ class InverseCovarianceEstimator(BaseEstimator):
         Additional scaling factor on lambda (due to magnitude of
         sample_covariance_ values).
     """
-    def __init__(self, score_metric='log_likelihood', init_method='cov',
-                 auto_scale=True):
+
+    def __init__(
+        self, score_metric="log_likelihood", init_method="cov", auto_scale=True
+    ):
         self.score_metric = score_metric
         self.init_method = init_method
         self.auto_scale = auto_scale
@@ -172,8 +173,8 @@ class InverseCovarianceEstimator(BaseEstimator):
         """
         self.n_samples, self.n_features = X.shape
         self.sample_covariance_, self.lam_scale_ = _init_coefs(
-                X,
-                method=self.init_method)
+            X, method=self.init_method
+        )
 
         if not self.auto_scale:
             self.lam_scale_ = 1.0
@@ -201,17 +202,15 @@ class InverseCovarianceEstimator(BaseEstimator):
             the sample covariance of X_test.
         """
         if isinstance(self.precision_, list):
-            print('Warning: returning a list of scores.')
+            print("Warning: returning a list of scores.")
 
-        S_test, lam_scale_test = _init_coefs(
-                X_test,
-                method=self.init_method)
+        S_test, lam_scale_test = _init_coefs(X_test, method=self.init_method)
         error = self.cov_error(S_test, score_metric=self.score_metric)
 
         # maximize score with -error
         return -error
 
-    def cov_error(self, comp_cov, score_metric='frobenius'):
+    def cov_error(self, comp_cov, score_metric="frobenius"):
         """Computes the covariance error vs. comp_cov.
 
         May require self.path_
@@ -251,19 +250,18 @@ class InverseCovarianceEstimator(BaseEstimator):
         """
         if not isinstance(self.precision_, list):
             return _compute_error(
-                comp_cov,
-                self.covariance_,
-                self.precision_,
-                score_metric
+                comp_cov, self.covariance_, self.precision_, score_metric
             )
 
         path_errors = []
         for lidx, lam in enumerate(self.path_):
-            path_errors.append(_compute_error(
-                comp_cov,
-                self.covariance_[lidx],
-                self.precision_[lidx],
-                score_metric)
+            path_errors.append(
+                _compute_error(
+                    comp_cov,
+                    self.covariance_[lidx],
+                    self.precision_[lidx],
+                    score_metric,
+                )
             )
 
         return np.array(path_errors)
@@ -293,20 +291,25 @@ class InverseCovarianceEstimator(BaseEstimator):
             return
 
         if not isinstance(self.precision_, list):
-            return metrics.ebic(self.sample_covariance_,
-                                self.precision_,
-                                self.n_samples,
-                                self.n_features,
-                                gamma=gamma)
+            return metrics.ebic(
+                self.sample_covariance_,
+                self.precision_,
+                self.n_samples,
+                self.n_features,
+                gamma=gamma,
+            )
 
         ebic_scores = []
         for lidx, lam in enumerate(self.path_):
-            ebic_scores.append(metrics.ebic(
+            ebic_scores.append(
+                metrics.ebic(
                     self.sample_covariance_,
                     self.precision_[lidx],
                     self.n_samples,
                     self.n_features,
-                    gamma=gamma))
+                    gamma=gamma,
+                )
+            )
 
         return np.array(ebic_scores)
 
@@ -332,9 +335,7 @@ class InverseCovarianceEstimator(BaseEstimator):
         same, returns the smallest lambda (largest index) with minimum score.
         """
         if not isinstance(self.precision_, list):
-            raise ValueError(
-                "EBIC requires multiple models to select from."
-            )
+            raise ValueError("EBIC requires multiple models to select from.")
             return
 
         if not self.is_fitted:

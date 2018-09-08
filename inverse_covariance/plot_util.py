@@ -63,7 +63,7 @@ def trace_plot(precisions, path, n_edges=20, ground_truth=None, edges=[]):
 
         if ground_truth is None:
             # top n_edges strongest coefficients
-            edges = np.argsort(np.abs(base_precision.flat))[::-1][: n_edges]
+            edges = np.argsort(np.abs(base_precision.flat))[::-1][:n_edges]
         else:
             # top n_edges/2 false positives and negatives compared to truth
             assert ground_truth.shape == precisions[0].shape
@@ -71,23 +71,18 @@ def trace_plot(precisions, path, n_edges=20, ground_truth=None, edges=[]):
             masked_gt[np.triu_indices(ground_truth.shape[0])] = 0
 
             intersection = np.intersect1d(
-                np.nonzero(base_precision.flat)[0],
-                np.nonzero(masked_gt.flat)[0]
+                np.nonzero(base_precision.flat)[0], np.nonzero(masked_gt.flat)[0]
             )
 
             # false positives
             fp_precision = np.copy(base_precision)
             fp_precision.flat[intersection] = 0
-            fp_edges = np.argsort(
-                np.abs(fp_precision.flat)
-            )[::-1][: n_edges/2]
+            fp_edges = np.argsort(np.abs(fp_precision.flat))[::-1][: n_edges / 2]
 
             # false negatives
             fn_precision = np.copy(masked_gt)
             fn_precision.flat[intersection] = 0
-            fn_edges = np.argsort(
-                np.abs(fn_precision.flat)
-            )[::-1][: n_edges/2]
+            fn_edges = np.argsort(np.abs(fn_precision.flat))[::-1][: n_edges / 2]
 
             edges = list(fp_edges) + list(fn_edges)
 
@@ -99,7 +94,7 @@ def trace_plot(precisions, path, n_edges=20, ground_truth=None, edges=[]):
     # flatten each matrix into a column (so that coeffs are examples)
     # compute l1-norm of each column
     l1_norms = []
-    coeffs = np.zeros((dim**2, len(precisions)))
+    coeffs = np.zeros((dim ** 2, len(precisions)))
     for ridx, result in enumerate(precisions):
         coeffs[edges, ridx] = result.flat[edges]
         l1_norms.append(np.linalg.norm(coeffs[:, ridx]))
@@ -115,8 +110,8 @@ def trace_plot(precisions, path, n_edges=20, ground_truth=None, edges=[]):
         plt.plot(l1_norms, coeffs.T, lw=1)
 
     plt.xlim([np.min(l1_norms), np.max(l1_norms)])
-    plt.ylabel('Coefficients')
-    plt.xlabel('l1 Norm')
+    plt.ylabel("Coefficients")
+    plt.xlabel("l1 Norm")
 
     # show coefficients as a function of lambda
     log_path = np.log(path)
@@ -125,8 +120,8 @@ def trace_plot(precisions, path, n_edges=20, ground_truth=None, edges=[]):
         plt.plot(log_path, coeffs.T, lw=1)
 
     plt.xlim([np.min(log_path), np.max(log_path)])
-    plt.ylabel('Coefficients')
-    plt.xlabel('log-Lambda')
+    plt.ylabel("Coefficients")
+    plt.xlabel("log-Lambda")
 
     plt.show()
-    r_input('Press any key to continue.')
+    r_input("Press any key to continue.")

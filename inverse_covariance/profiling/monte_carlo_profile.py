@@ -11,7 +11,7 @@ from .. import QuicGraphLasso, QuicGraphLassoCV
 
 
 def _sample_mvn(n_samples, cov, prng):
-    '''Draw a multivariate normal sample from the graph defined by cov.
+    """Draw a multivariate normal sample from the graph defined by cov.
 
     Parameters
     -----------
@@ -21,7 +21,7 @@ def _sample_mvn(n_samples, cov, prng):
         Covariance matrix of the graph.
 
     prng : np.random.RandomState instance.
-    '''
+    """
     n_features, _ = cov.shape
     return prng.multivariate_normal(np.zeros(n_features), cov, size=n_samples)
 
@@ -60,16 +60,12 @@ def _cpu_map(fun, param_grid, n_jobs, verbose):
     return Parallel(
         n_jobs=n_jobs,
         verbose=verbose,
-        backend='threading',  # any sklearn backend should work here
-    )(
-        delayed(fun)(
-            params
-        )
-        for params in param_grid)
+        backend="threading",  # any sklearn backend should work here
+    )(delayed(fun)(params) for params in param_grid)
 
 
 def _spark_map(fun, indexed_param_grid, sc, seed):
-    '''We cannot pass a RandomState instance to each spark worker since it will
+    """We cannot pass a RandomState instance to each spark worker since it will
     behave identically across partitions.  Instead, we explictly handle the
     partitions with a newly seeded instance.
 
@@ -79,14 +75,16 @@ def _spark_map(fun, indexed_param_grid, sc, seed):
     Following this trick:
         https://wegetsignal.wordpress.com/2015/05/08/
                 generating-random-numbers-for-rdd-in-spark/
-    '''
+    """
+
     def _wrap_random_state(split_index, partition):
         prng = np.random.RandomState(seed + split_index)
         yield map(partial(fun, prng=prng), partition)
 
     par_param_grid = sc.parallelize(indexed_param_grid)
     indexed_results = par_param_grid.mapPartitionsWithIndex(
-        _wrap_random_state).collect()
+        _wrap_random_state
+    ).collect()
     return [item for sublist in indexed_results for item in sublist]
 
 
@@ -163,10 +161,22 @@ class MonteCarloProfile(object):
     results_ : dict of matrices of size (len(alphas_), len(grid_))
         Each key corresponds to a function from metrics.
     """
-    def __init__(self, n_features=50, n_trials=100, ms_estimator=None,
-                 mc_estimator=None, graph=None, n_samples_grid=10,
-                 alpha_grid=5, metrics={'frobenius': error_fro}, verbose=False,
-                 n_jobs=1, sc=None, seed=2):
+
+    def __init__(
+        self,
+        n_features=50,
+        n_trials=100,
+        ms_estimator=None,
+        mc_estimator=None,
+        graph=None,
+        n_samples_grid=10,
+        alpha_grid=5,
+        metrics={"frobenius": error_fro},
+        verbose=False,
+        n_jobs=1,
+        sc=None,
+        seed=2,
+    ):
         self.n_features = n_features
         self.n_trials = n_trials
         self.ms_estimator = ms_estimator
@@ -188,9 +198,9 @@ class MonteCarloProfile(object):
             self.ms_estimator = QuicGraphLassoCV()
 
         if self.mc_estimator is None:
-            self.mc_estimator = QuicGraphLasso(lam=0.5,
-                                               mode='default',
-                                               init_method='corrcoef')
+            self.mc_estimator = QuicGraphLasso(
+                lam=0.5, mode="default", init_method="corrcoef"
+            )
 
         if isinstance(self.n_samples_grid, int):
             self.grid_ = np.linspace(5, 200, self.n_samples_grid)
@@ -198,9 +208,7 @@ class MonteCarloProfile(object):
             self.grid_ = self.n_samples_grid
 
         if isinstance(self.alpha_grid, int):
-            self.alphas_ = np.logspace(
-                np.log(0.15), np.log10(0.4), self.alpha_grid
-            )
+            self.alphas_ = np.logspace(np.log(0.15), np.log10(0.4), self.alpha_grid)
         else:
             self.alphas_ = self.alpha_grid
 
@@ -213,31 +221,27 @@ class MonteCarloProfile(object):
         n_grids = len(self.grid_)
 
         self.precision_nnz_ = []
-        self.results_ = {
-            k: np.zeros((n_alphas, n_grids)) for k in self.metrics
-        }
+        self.results_ = {k: np.zeros((n_alphas, n_grids)) for k in self.metrics}
 
         # build an indexed set (or generator) of grid points
         param_grid = [(a, g) for a in self.alphas_ for g in self.grid_]
         indexed_param_grid = list(zip(range(len(param_grid)), param_grid))
 
-        ms_fit = partial(_ms_fit,
-                         estimator=self.ms_estimator,
-                         n_features=self.n_features,
-                         graph=self.graph,
-                         prng=self.prng)
+        ms_fit = partial(
+            _ms_fit,
+            estimator=self.ms_estimator,
+            n_features=self.n_features,
+            graph=self.graph,
+            prng=self.prng,
+        )
 
         if self.verbose:
-            print('Getting parameters via model selection...')
+            print("Getting parameters via model selection...")
 
         if self.sc is not None:
-            ms_results = _spark_map(
-                ms_fit, indexed_param_grid, self.sc, self.seed
-            )
+            ms_results = _spark_map(ms_fit, indexed_param_grid, self.sc, self.seed)
         else:
-            ms_results = _cpu_map(
-                ms_fit, indexed_param_grid, self.n_jobs, self.verbose
-            )
+            ms_results = _cpu_map(ms_fit, indexed_param_grid, self.n_jobs, self.verbose)
 
         # ensure results are ordered
         ms_results = sorted(ms_results, key=lambda r: r[0])
@@ -260,28 +264,21 @@ class MonteCarloProfile(object):
             zip(range(len(trial_param_grid)), trial_param_grid)
         )
 
-        mc_fit = partial(
-            _mc_fit,
-            estimator=self.mc_estimator,
-            metrics=self.metrics
-        )
+        mc_fit = partial(_mc_fit, estimator=self.mc_estimator, metrics=self.metrics)
 
         if self.verbose:
-            print('Fitting MC trials...')
+            print("Fitting MC trials...")
 
         if self.sc is not None:
             mc_results = _spark_map(
-                mc_fit,
-                indexed_trial_param_grid,
-                self.sc,
-                self.seed + len(param_grid)
+                mc_fit, indexed_trial_param_grid, self.sc, self.seed + len(param_grid)
             )
         else:
             mc_results = _cpu_map(
                 partial(mc_fit, prng=self.prng),
                 indexed_trial_param_grid,
                 self.n_jobs,
-                self.verbose
+                self.verbose,
             )
 
         # ensure results are ordered correctly
@@ -292,24 +289,21 @@ class MonteCarloProfile(object):
 
         # reduce
         param_grid_matrix_index = [
-            (a, g)
-            for a in range(len(self.alphas_))
-            for g in range(len(self.grid_))
+            (a, g) for a in range(len(self.alphas_)) for g in range(len(self.grid_))
         ]
         for param_index in range(len(param_grid)):
             trial_start = param_index * self.n_trials
-            trials = mc_results[trial_start: trial_start + self.n_trials]
+            trials = mc_results[trial_start : trial_start + self.n_trials]
             aidx, gidx = param_grid_matrix_index[param_index]
             for key in self.metrics:
                 results_by_key = np.array([t[key] for t in trials])
-                self.results_[key][aidx, gidx] =\
+                self.results_[key][aidx, gidx] = (
                     1. * np.sum(results_by_key) / self.n_trials
+                )
 
         if self.verbose:
-                for key in self.metrics:
-                    print('Results for {}: {}'.format(
-                        key, self.results_[key][aidx, :]
-                    ))
+            for key in self.metrics:
+                print("Results for {}: {}".format(key, self.results_[key][aidx, :]))
 
         self.is_fitted = True
         return self
