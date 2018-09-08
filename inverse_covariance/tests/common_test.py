@@ -1,10 +1,6 @@
 from sklearn.utils.estimator_checks import check_estimator
 
-from inverse_covariance import (
-    QuicGraphLasso,
-    QuicGraphLassoCV,
-    QuicGraphLassoEBIC,
-)
+from inverse_covariance import QuicGraphLasso, QuicGraphLassoCV, QuicGraphLassoEBIC
 
 
 def test_quic_graph_lasso():

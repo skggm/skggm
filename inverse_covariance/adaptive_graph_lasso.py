@@ -3,11 +3,7 @@ from __future__ import absolute_import
 import numpy as np
 from sklearn.utils import check_array, as_float_array
 
-from . import (
-    QuicGraphLasso,
-    QuicGraphLassoCV,
-    InverseCovarianceEstimator,
-)
+from . import QuicGraphLasso, QuicGraphLassoCV, InverseCovarianceEstimator
 
 
 class AdaptiveGraphLasso(InverseCovarianceEstimator):
@@ -49,7 +45,8 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
     lam_ : 2D ndarray, shape (n_features, n_features)
         Adaptive weight matrix generated.
     """
-    def __init__(self, estimator=None, method='binary'):
+
+    def __init__(self, estimator=None, method="binary"):
         self.estimator = estimator
         self.method = method
 
@@ -102,43 +99,43 @@ class AdaptiveGraphLasso(InverseCovarianceEstimator):
         # perform first estimate
         self.estimator.fit(X)
 
-        if self.method == 'binary':
+        if self.method == "binary":
             # generate weights
             self.lam_ = self._binary_weights(self.estimator)
 
             # perform second step adaptive estimate
             self.estimator_ = QuicGraphLasso(
                 lam=self.lam_ * self.estimator.lam_,
-                mode='default',
-                init_method='cov',
-                auto_scale=False
+                mode="default",
+                init_method="cov",
+                auto_scale=False,
             )
             self.estimator_.fit(X)
 
-        elif self.method == 'inverse_squared':
+        elif self.method == "inverse_squared":
             self.lam_ = self._inverse_squared_weights(self.estimator)
 
             # perform second step adaptive estimate
             self.estimator_ = QuicGraphLassoCV(
-                lam=self.lam_ * self.estimator.lam_,
-                auto_scale=False
+                lam=self.lam_ * self.estimator.lam_, auto_scale=False
             )
             self.estimator_.fit(X)
 
-        elif self.method == 'inverse':
+        elif self.method == "inverse":
             self.lam_ = self._inverse_weights(self.estimator)
 
             # perform second step adaptive estimate
             self.estimator_ = QuicGraphLassoCV(
-                lam=self.lam_ * self.estimator.lam_,
-                auto_scale=False
+                lam=self.lam_ * self.estimator.lam_, auto_scale=False
             )
             self.estimator_.fit(X)
 
         else:
             raise NotImplementedError(
-                ("Only method='binary', 'inverse_squared', or",
-                 "'inverse' have been implemented.")
+                (
+                    "Only method='binary', 'inverse_squared', or",
+                    "'inverse' have been implemented.",
+                )
             )
 
         self.is_fitted = True
