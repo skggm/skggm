@@ -240,7 +240,7 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
         )
 
         if sparse.issparse(X):
-            raise NotImplemented(
+            raise NotImplementedError(
                 "Input is sparse: Algorithm for sparse matrices currently not supported."
             )
 
@@ -265,7 +265,7 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
                 "Input is sparse: Algorithm for sparse matrices currently not supported."
             )
 
-        warnings.warn("Two Way standardization not reversible with accuracy")
+        warnings.warn("Reversing two way transformation is not accurate.")
 
         X = np.asarray(X)
         if copy:
