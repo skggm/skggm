@@ -34,10 +34,10 @@ from sklearn.covariance import ledoit_wolf
 sys.path.append("..")
 sys.path.append("../inverse_covariance")
 from inverse_covariance import (
-    QuicGraphLasso,
-    QuicGraphLassoCV,
-    QuicGraphLassoEBIC,
-    AdaptiveGraphLasso,
+    QuicGraphicalLasso,
+    QuicGraphicalLassoCV,
+    QuicGraphicalLassoEBIC,
+    AdaptiveGraphicalLasso,
     ModelAverage,
 )
 from inverse_covariance.profiling import LatticeGraph
@@ -54,14 +54,14 @@ def make_data(n_samples, n_features):
 
 
 def quic_graph_lasso_cv(X, metric):
-    """Run QuicGraphLassoCV on data with metric of choice.
+    """Run QuicGraphicalLassoCV on data with metric of choice.
 
     Compare results with GridSearchCV + quic_graph_lasso. The number of lambdas
     tested should be much lower with similar final lam_ selected.
     """
-    print("QuicGraphLassoCV with:")
+    print("QuicGraphicalLassoCV with:")
     print("   metric: {}".format(metric))
-    model = QuicGraphLassoCV(
+    model = QuicGraphicalLassoCV(
         cv=2,  # cant deal w more folds at small size
         n_refinements=6,
         sc=spark.sparkContext,  # NOQA
@@ -76,7 +76,7 @@ def quic_graph_lasso_cv(X, metric):
 
 
 def adaptive_graph_lasso(X, model_selector, method):
-    """Run QuicGraphLassoCV or QuicGraphLassoEBIC as a two step adaptive fit
+    """Run QuicGraphicalLassoCV or QuicGraphicalLassoEBIC as a two step adaptive fit
     with method of choice (currently: 'binary', 'inverse', 'inverse_squared').
 
     Compare the support and values to the model-selection estimator.
@@ -84,10 +84,10 @@ def adaptive_graph_lasso(X, model_selector, method):
     metric = "log_likelihood"
     print("Adaptive {} with:".format(model_selector))
     print("   adaptive-method: {}".format(method))
-    if model_selector == "QuicGraphLassoCV":
+    if model_selector == "QuicGraphicalLassoCV":
         print("   metric: {}".format(metric))
-        model = AdaptiveGraphLasso(
-            estimator=QuicGraphLassoCV(
+        model = AdaptiveGraphicalLasso(
+            estimator=QuicGraphicalLassoCV(
                 cv=2,  # cant deal w more folds at small size
                 n_refinements=6,
                 init_method="cov",
@@ -97,8 +97,10 @@ def adaptive_graph_lasso(X, model_selector, method):
             method=method,
         )
 
-    elif model_selector == "QuicGraphLassoEBIC":
-        model = AdaptiveGraphLasso(estimator=QuicGraphLassoEBIC(), method=method)
+    elif model_selector == "QuicGraphicalLassoEBIC":
+        model = AdaptiveGraphicalLasso(
+            estimator=QuicGraphicalLassoEBIC(), method=method
+        )
     model.fit(X)
     lam_norm_ = np.linalg.norm(model.estimator_.lam_)
     print("   ||lam_||_2: {}".format(lam_norm_))
@@ -106,16 +108,16 @@ def adaptive_graph_lasso(X, model_selector, method):
 
 
 def quic_graph_lasso_ebic_manual(X, gamma=0):
-    """Run QuicGraphLasso with mode='path' and gamma; use EBIC criteria for model
+    """Run QuicGraphicalLasso with mode='path' and gamma; use EBIC criteria for model
     selection.
 
     The EBIC criteria is built into InverseCovarianceEstimator base class
     so we demonstrate those utilities here.
     """
-    print("QuicGraphLasso (manual EBIC) with:")
+    print("QuicGraphicalLasso (manual EBIC) with:")
     print("   mode: path")
     print("   gamma: {}".format(gamma))
-    model = QuicGraphLasso(
+    model = QuicGraphicalLasso(
         lam=1.0,
         mode="path",
         init_method="cov",
@@ -134,15 +136,15 @@ def quic_graph_lasso_ebic_manual(X, gamma=0):
 
 
 def quic_graph_lasso_ebic(X, gamma=0):
-    """Run QuicGraphLassoEBIC with gamma.
+    """Run QuicGraphicalLassoEBIC with gamma.
 
-    QuicGraphLassoEBIC is a convenience class.  Results should be identical to
+    QuicGraphicalLassoEBIC is a convenience class.  Results should be identical to
     those obtained via quic_graph_lasso_ebic_manual.
     """
-    print("QuicGraphLassoEBIC with:")
+    print("QuicGraphicalLassoEBIC with:")
     print("   mode: path")
     print("   gamma: {}".format(gamma))
-    model = QuicGraphLassoEBIC(lam=1.0, init_method="cov", gamma=gamma)
+    model = QuicGraphicalLassoEBIC(lam=1.0, init_method="cov", gamma=gamma)
     model.fit(X)
     print("   len(path lams): {}".format(len(model.path_)))
     print("   lam_scale_: {}".format(model.lam_scale_))
@@ -151,7 +153,7 @@ def quic_graph_lasso_ebic(X, gamma=0):
 
 
 def model_average(X, penalization):
-    """Run ModelAverage in default mode (QuicGraphLassoCV) to obtain proportion
+    """Run ModelAverage in default mode (QuicGraphicalLassoCV) to obtain proportion
     matrix.
 
     NOTE:  This returns precision_ proportions, not cov, prec estimates, so we
@@ -160,7 +162,7 @@ def model_average(X, penalization):
     """
     n_trials = 100
     print("ModelAverage with:")
-    print("   estimator: QuicGraphLasso (default)")
+    print("   estimator: QuicGraphicalLasso (default)")
     print("   n_trials: {}".format(n_trials))
     print("   penalization: {}".format(penalization))
 
@@ -168,7 +170,7 @@ def model_average(X, penalization):
     # random perturbation matrix around.  lam doesn't matter for fully-random.
     lam = 0.5
     if penalization == "random":
-        cv_model = QuicGraphLassoCV(
+        cv_model = QuicGraphicalLassoCV(
             cv=2,
             n_refinements=6,
             sc=spark.sparkContext,  # NOQA
@@ -188,14 +190,14 @@ def model_average(X, penalization):
 
 
 def adaptive_model_average(X, penalization, method):
-    """Run ModelAverage in default mode (QuicGraphLassoCV) to obtain proportion
+    """Run ModelAverage in default mode (QuicGraphicalLassoCV) to obtain proportion
     matrix.
 
     NOTE:  Only method = 'binary' really makes sense in this case.
     """
     n_trials = 100
     print("Adaptive ModelAverage with:")
-    print("   estimator: QuicGraphLasso (default)")
+    print("   estimator: QuicGraphicalLasso (default)")
     print("   n_trials: {}".format(n_trials))
     print("   penalization: {}".format(penalization))
     print("   adaptive-method: {}".format(method))
@@ -204,7 +206,7 @@ def adaptive_model_average(X, penalization, method):
     # random perturbation matrix around. lam doesn't matter for fully-random.
     lam = 0.5
     if penalization == "random":
-        cv_model = QuicGraphLassoCV(
+        cv_model = QuicGraphicalLassoCV(
             cv=2,
             n_refinements=6,
             sc=spark.sparkContext,  # NOQA
@@ -215,7 +217,7 @@ def adaptive_model_average(X, penalization, method):
         lam = cv_model.lam_
         print("   lam: {}".format(lam))
 
-    model = AdaptiveGraphLasso(
+    model = AdaptiveGraphicalLasso(
         estimator=ModelAverage(
             n_trials=n_trials, penalization=penalization, lam=lam, sc=spark.sparkContext
         ),  # NOQA
@@ -305,11 +307,11 @@ if __name__ == "__main__":
     print("   frobenius error: {}".format(error))
     print("")
 
-    # QuicGraphLassoCV
+    # QuicGraphicalLassoCV
     params = [
-        ("QuicGraphLassoCV : ll", "log_likelihood"),
-        ("QuicGraphLassoCV : kl", "kl"),
-        ("QuicGraphLassoCV : fro", "frobenius"),
+        ("QuicGraphicalLassoCV : ll", "log_likelihood"),
+        ("QuicGraphicalLassoCV : kl", "kl"),
+        ("QuicGraphicalLassoCV : fro", "frobenius"),
     ]
     for name, metric in params:
         start_time = time.time()
@@ -324,11 +326,11 @@ if __name__ == "__main__":
         print("   frobenius error: {}".format(error))
         print("")
 
-    # QuicGraphLassoEBIC
+    # QuicGraphicalLassoEBIC
     params = [
-        ("QuicGraphLassoEBIC : BIC", 0),
-        ("QuicGraphLassoEBIC : g=0.01", 0.01),
-        ("QuicGraphLassoEBIC : g=0.1", 0.1),
+        ("QuicGraphicalLassoEBIC : BIC", 0),
+        ("QuicGraphicalLassoEBIC : g=0.01", 0.01),
+        ("QuicGraphicalLassoEBIC : g=0.1", 0.1),
     ]
     for name, gamma in params:
         start_time = time.time()
@@ -360,14 +362,14 @@ if __name__ == "__main__":
         results.append([name, "", supp_diff, ctime, lam])
         print("")
 
-    # Adaptive QuicGraphLassoCV and QuicGraphLassoEBIC
+    # Adaptive QuicGraphicalLassoCV and QuicGraphicalLassoEBIC
     params = [
-        ("Adaptive CV : binary", "QuicGraphLassoCV", "binary"),
-        ("Adaptive CV : inv", "QuicGraphLassoCV", "inverse"),
-        ("Adaptive CV : inv**2", "QuicGraphLassoCV", "inverse_squared"),
-        ("Adaptive BIC : binary", "QuicGraphLassoEBIC", "binary"),
-        ("Adaptive BIC : inv", "QuicGraphLassoEBIC", "inverse"),
-        ("Adaptive BIC : inv**2", "QuicGraphLassoEBIC", "inverse_squared"),
+        ("Adaptive CV : binary", "QuicGraphicalLassoCV", "binary"),
+        ("Adaptive CV : inv", "QuicGraphicalLassoCV", "inverse"),
+        ("Adaptive CV : inv**2", "QuicGraphicalLassoCV", "inverse_squared"),
+        ("Adaptive BIC : binary", "QuicGraphicalLassoEBIC", "binary"),
+        ("Adaptive BIC : inv", "QuicGraphicalLassoEBIC", "inverse"),
+        ("Adaptive BIC : inv**2", "QuicGraphicalLassoEBIC", "inverse_squared"),
     ]
     for name, model_selector, method in params:
         start_time = time.time()

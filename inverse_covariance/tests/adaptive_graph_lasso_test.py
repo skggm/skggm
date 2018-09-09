@@ -1,17 +1,21 @@
 import numpy as np
 import pytest
 
-from inverse_covariance import QuicGraphLassoEBIC, AdaptiveGraphLasso, QuicGraphLassoCV
+from inverse_covariance import (
+    QuicGraphicalLassoEBIC,
+    AdaptiveGraphicalLasso,
+    QuicGraphicalLassoCV,
+)
 from inverse_covariance.profiling import ClusterGraph
 
 
-class TestAdaptiveGraphLasso(object):
+class TestAdaptiveGraphicalLasso(object):
     @pytest.mark.parametrize(
         "params_in",
         [
             (
                 {
-                    "estimator": QuicGraphLassoCV(
+                    "estimator": QuicGraphicalLassoCV(
                         cv=2,
                         n_refinements=6,
                         init_method="cov",
@@ -22,7 +26,7 @@ class TestAdaptiveGraphLasso(object):
             ),
             (
                 {
-                    "estimator": QuicGraphLassoCV(
+                    "estimator": QuicGraphicalLassoCV(
                         cv=2,
                         n_refinements=6,
                         init_method="cov",
@@ -33,7 +37,7 @@ class TestAdaptiveGraphLasso(object):
             ),
             (
                 {
-                    "estimator": QuicGraphLassoCV(
+                    "estimator": QuicGraphicalLassoCV(
                         cv=2,
                         n_refinements=6,
                         init_method="cov",
@@ -42,12 +46,12 @@ class TestAdaptiveGraphLasso(object):
                     "method": "inverse_squared",
                 }
             ),
-            ({"estimator": QuicGraphLassoEBIC(), "method": "binary"}),
-            ({"estimator": QuicGraphLassoEBIC(), "method": "inverse"}),
-            ({"estimator": QuicGraphLassoEBIC(), "method": "inverse_squared"}),
+            ({"estimator": QuicGraphicalLassoEBIC(), "method": "binary"}),
+            ({"estimator": QuicGraphicalLassoEBIC(), "method": "inverse"}),
+            ({"estimator": QuicGraphicalLassoEBIC(), "method": "inverse_squared"}),
         ],
     )
-    def test_integration_adaptive_graph_lasso(self, params_in):
+    def test_integration_adaptive_graphical_lasso(self, params_in):
         """
         Just tests inputs/outputs (not validity of result).
         """
@@ -59,7 +63,7 @@ class TestAdaptiveGraphLasso(object):
         prng = np.random.RandomState(2)
         X = prng.multivariate_normal(np.zeros(n_features), cov, size=n_samples)
 
-        model = AdaptiveGraphLasso(**params_in)
+        model = AdaptiveGraphicalLasso(**params_in)
         model.fit(X)
         assert model.estimator_ is not None
         assert model.lam_ is not None

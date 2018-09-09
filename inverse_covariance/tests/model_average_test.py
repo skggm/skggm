@@ -3,7 +3,7 @@ import pytest
 
 from sklearn.covariance import GraphLassoCV
 
-from inverse_covariance import QuicGraphLassoCV, QuicGraphLasso, ModelAverage
+from inverse_covariance import QuicGraphicalLassoCV, QuicGraphicalLasso, ModelAverage
 from inverse_covariance.profiling import ClusterGraph
 
 
@@ -13,7 +13,7 @@ class TestModelAverage(object):
         [
             (
                 {
-                    "estimator": QuicGraphLasso(),
+                    "estimator": QuicGraphicalLasso(),
                     "n_trials": 10,
                     "normalize": True,
                     "subsample": 0.3,
@@ -22,7 +22,7 @@ class TestModelAverage(object):
             ),
             (
                 {
-                    "estimator": QuicGraphLasso(lam=0.5, mode="trace"),
+                    "estimator": QuicGraphicalLasso(lam=0.5, mode="trace"),
                     "n_trials": 10,
                     "normalize": False,
                     "subsample": 0.6,
@@ -31,7 +31,7 @@ class TestModelAverage(object):
             ),
             (
                 {
-                    "estimator": QuicGraphLassoCV(cv=(2, 1)),
+                    "estimator": QuicGraphicalLassoCV(cv=(2, 1)),
                     "n_trials": 2,
                     "normalize": True,
                     "subsample": 0.9,
@@ -52,7 +52,7 @@ class TestModelAverage(object):
             ),
             (
                 {
-                    "estimator": QuicGraphLasso(),
+                    "estimator": QuicGraphicalLasso(),
                     "n_trials": 10,
                     "normalize": True,
                     "subsample": 0.3,

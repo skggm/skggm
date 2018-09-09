@@ -24,10 +24,10 @@ import sys
 sys.path.append("..")
 sys.path.append("../inverse_covariance")
 from inverse_covariance import (
-    QuicGraphLasso,
-    QuicGraphLassoCV,
-    QuicGraphLassoEBIC,
-    AdaptiveGraphLasso,
+    QuicGraphicalLasso,
+    QuicGraphicalLassoCV,
+    QuicGraphicalLassoEBIC,
+    AdaptiveGraphicalLasso,
 )
 
 plt.ion()
@@ -64,27 +64,30 @@ timeseries = masker.fit_transform(abide.func[0])
 ###############################################################################
 # Extract and plot sparse inverse covariance
 
-estimator_type = "QuicGraphLasso"
+estimator_type = "QuicGraphicalLasso"
 
-if estimator_type == "QuicGraphLasso":
-    # Compute the sparse inverse covariance via QuicGraphLasso
-    estimator = QuicGraphLasso(init_method="cov", lam=0.5, mode="default", verbose=1)
-
-elif estimator_type == "QuicGraphLassoCV":
-    # Compute the sparse inverse covariance via QuicGraphLassoCV
-    estimator = QuicGraphLassoCV(init_method="cov", verbose=1)
+if estimator_type == "QuicGraphicalLasso":
+    # Compute the sparse inverse covariance via QuicGraphicalLasso
+    estimator = QuicGraphicalLasso(
+        init_method="cov", lam=0.5, mode="default", verbose=1
+    )
     estimator.fit(timeseries)
 
-elif estimator_type == "QuicGraphLassoEBIC":
-    # Compute the sparse inverse covariance via QuicGraphLassoEBIC
-    estimator = QuicGraphLassoEBIC(init_method="cov", verbose=1)
+elif estimator_type == "QuicGraphicalLassoCV":
+    # Compute the sparse inverse covariance via QuicGraphicalLassoCV
+    estimator = QuicGraphicalLassoCV(init_method="cov", verbose=1)
     estimator.fit(timeseries)
 
-elif estimator_type == "AdaptiveQuicGraphLasso":
+elif estimator_type == "QuicGraphicalLassoEBIC":
+    # Compute the sparse inverse covariance via QuicGraphicalLassoEBIC
+    estimator = QuicGraphicalLassoEBIC(init_method="cov", verbose=1)
+    estimator.fit(timeseries)
+
+elif estimator_type == "AdaptiveQuicGraphicalLasso":
     # Compute the sparse inverse covariance via
-    # AdaptiveGraphLasso + QuicGraphLassoEBIC + method='binary'
-    model = AdaptiveGraphLasso(
-        estimator=QuicGraphLassoEBIC(init_method="cov"), method="binary"
+    # AdaptiveGraphicalLasso + QuicGraphicalLassoEBIC + method='binary'
+    model = AdaptiveGraphicalLasso(
+        estimator=QuicGraphicalLassoEBIC(init_method="cov"), method="binary"
     )
     model.fit(timeseries)
     estimator = model.estimator_
@@ -106,4 +109,5 @@ plotting.plot_connectome(
     node_size=20,
 )
 plotting.show()
-raw_input()
+
+eval(input("Press any key to exit.."))

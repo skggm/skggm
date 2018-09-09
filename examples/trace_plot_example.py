@@ -12,7 +12,7 @@ import numpy as np
 from sklearn.datasets import make_sparse_spd_matrix
 
 sys.path.append("..")
-from inverse_covariance import QuicGraphLasso
+from inverse_covariance import QuicGraphicalLasso
 from inverse_covariance.plot_util import trace_plot
 from inverse_covariance.profiling import LatticeGraph
 
@@ -46,14 +46,14 @@ def make_data_banded(n_samples, n_features):
 
 def show_quic_coefficient_trace(X):
     path = np.logspace(np.log10(0.01), np.log10(1.0), num=50, endpoint=True)[::-1]
-    estimator = QuicGraphLasso(lam=1.0, path=path, mode="path")
+    estimator = QuicGraphicalLasso(lam=1.0, path=path, mode="path")
     estimator.fit(X)
     trace_plot(estimator.precision_, estimator.path_, n_edges=20)
 
 
 def show_quic_coefficient_trace_truth(X, truth):
     path = np.logspace(np.log10(0.01), np.log10(1.0), num=50, endpoint=True)[::-1]
-    estimator = QuicGraphLasso(lam=1.0, path=path, mode="path")
+    estimator = QuicGraphicalLasso(lam=1.0, path=path, mode="path")
     estimator.fit(X)
     trace_plot(estimator.precision_, estimator.path_, n_edges=6, ground_truth=truth)
 

@@ -6,9 +6,9 @@ from sklearn.utils.testing import assert_allclose
 from sklearn import datasets
 
 from inverse_covariance import (
-    QuicGraphLasso,
-    QuicGraphLassoCV,
-    QuicGraphLassoEBIC,
+    QuicGraphicalLasso,
+    QuicGraphicalLassoCV,
+    QuicGraphicalLassoEBIC,
     quic,
 )
 
@@ -18,7 +18,7 @@ def custom_init(X):
     return init_cov, np.max(np.abs(np.triu(init_cov)))
 
 
-class TestQuicGraphLasso(object):
+class TestQuicGraphicalLasso(object):
     @pytest.mark.parametrize(
         "params_in, expected",
         [
@@ -85,12 +85,12 @@ class TestQuicGraphLasso(object):
             ),  # NOQA
         ],
     )
-    def test_integration_quic_graph_lasso(self, params_in, expected):
+    def test_integration_quic_graphical_lasso(self, params_in, expected):
         """
         Just tests inputs/outputs (not validity of result).
         """
         X = datasets.load_diabetes().data
-        ic = QuicGraphLasso(**params_in)
+        ic = QuicGraphicalLasso(**params_in)
         ic.fit(X)
 
         result_vec = [
@@ -159,7 +159,7 @@ class TestQuicGraphLasso(object):
             ),  # NOQA
         ],
     )
-    def test_integration_quic_graph_lasso_fun(self, params_in, expected):
+    def test_integration_quic_graphical_lasso_fun(self, params_in, expected):
         """
         Just tests inputs/outputs (not validity of result).
         """
@@ -247,12 +247,12 @@ class TestQuicGraphLasso(object):
             ),  # NOQA
         ],
     )
-    def test_integration_quic_graph_lasso_cv(self, params_in, expected):
+    def test_integration_quic_graphical_lasso_cv(self, params_in, expected):
         """
         Just tests inputs/outputs (not validity of result).
         """
         X = datasets.load_diabetes().data
-        ic = QuicGraphLassoCV(**params_in)
+        ic = QuicGraphicalLassoCV(**params_in)
         ic.fit(X)
 
         result_vec = [
@@ -282,12 +282,12 @@ class TestQuicGraphLasso(object):
             ),  # NOQA
         ],
     )
-    def test_integration_quic_graph_lasso_ebic(self, params_in, expected):
+    def test_integration_quic_graphical_lasso_ebic(self, params_in, expected):
         """
         Just tests inputs/outputs (not validity of result).
         """
         X = datasets.load_diabetes().data
-        ic = QuicGraphLassoEBIC(**params_in)
+        ic = QuicGraphicalLassoEBIC(**params_in)
         ic.fit(X)
 
         result_vec = [np.linalg.norm(ic.covariance_), np.linalg.norm(ic.precision_)]
@@ -304,5 +304,5 @@ class TestQuicGraphLasso(object):
         Test behavior of invalid inputs.
         """
         X = datasets.load_diabetes().data
-        ic = QuicGraphLasso(method="unknownmethod")
+        ic = QuicGraphicalLasso(method="unknownmethod")
         assert_raises(NotImplementedError, ic.fit, X)

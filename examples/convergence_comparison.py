@@ -2,7 +2,7 @@
 Convergence Failure of Glasso
 =============================
 
-Demonstration of cases where GraphLasso fails to converge and quic succeeds.
+Demonstration of cases where graph_lasso fails to converge and quic succeeds.
 
 "The graphical lasso: New Insights and alternatives", by Mazumder & Hastie 2012.
 https://web.stanford.edu/~hastie/Papers/glassoinsights.pdf

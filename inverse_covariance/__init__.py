@@ -1,10 +1,18 @@
 from __future__ import absolute_import
 from .inverse_covariance import InverseCovarianceEstimator
-from .quic_graph_lasso import quic, QuicGraphLasso, QuicGraphLassoCV, QuicGraphLassoEBIC
+from .quic_graph_lasso import (
+    quic,
+    QuicGraphLasso,
+    QuicGraphLassoCV,
+    QuicGraphLassoEBIC,
+    QuicGraphicalLasso,
+    QuicGraphicalLassoCV,
+    QuicGraphicalLassoEBIC,
+)
 from .metrics import log_likelihood, kl_loss, quadratic_loss, ebic
 from .rank_correlation import spearman_correlation, kendalltau_correlation
 from .model_average import ModelAverage
-from .adaptive_graph_lasso import AdaptiveGraphLasso
+from .adaptive_graph_lasso import AdaptiveGraphLasso, AdaptiveGraphicalLasso
 from .cross_validation import RepeatedKFold
 
 __all__ = [
@@ -13,6 +21,9 @@ __all__ = [
     "QuicGraphLasso",
     "QuicGraphLassoCV",
     "QuicGraphLassoEBIC",
+    "QuicGraphicalLasso",
+    "QuicGraphicalLassoCV",
+    "QuicGraphicalLassoEBIC",
     "log_likelihood",
     "kl_loss",
     "quadratic_loss",
@@ -21,5 +32,6 @@ __all__ = [
     "kendalltau_correlation",
     "ModelAverage",
     "AdaptiveGraphLasso",
+    "AdaptiveGraphicalLasso",
     "RepeatedKFold",
 ]
