@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 from scipy import sparse
 
@@ -60,7 +61,7 @@ def two_way_standardize(X, axis=0, with_mean=True, with_std=True, copy=True,
     --------
     StandardScaler: Performs scaling to unit variance using the``Transformer`` API
         (e.g. as part of a preprocessing :class:`sklearn.pipeline.Pipeline`).
-    """  # noqa
+    """
 
     X = check_array(X, accept_sparse=None, copy=copy,
                     warn_on_dtype=True, dtype=FLOAT_DTYPES)
@@ -86,16 +87,16 @@ def two_way_standardize(X, axis=0, with_mean=True, with_std=True, copy=True,
             n_iter += 1
             err_norm_row = np.linalg.norm(oldXrow-Xrow_polish, 'fro')
             err_norm_col = np.linalg.norm(oldXcol-Xcol_polish, 'fro')
-            err_norm = .5 * err_norm_row/(n_rows*n_cols) + \
-                .5 * err_norm_col/(n_rows*n_cols)
+            err_norm = .5 * err_norm_row/(n_rows*n_cols) + .5 * err_norm_col/(n_rows*n_cols)
+
             if verbose:
                 print('Iteration: {}, Convergence Err: {}'.format(
                         n_iter, err_norm))
+
             oldXrow = np.copy(Xrow_polish)
             oldXcol = np.copy(Xcol_polish)
 
-        X = Xrow_polish.T
-    return X
+    return Xrow_polish.T
 
 
 class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
@@ -132,7 +133,7 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
         `scale_`
     n_samples_seen_ : int
         The number of samples processed by the estimator. Will be reset on
-        new calls to fit, but increments across ``partial_fit`` calls.
+        new calls to fit, but increments across ``fit`` calls.
     Examples
     --------
     >>> from inverse_covariance.clean import TwoWayStandardScaler
@@ -158,7 +159,7 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
     -----
     See the implications of one-way vs. two-way standardization in here. TBD
 
-    """  # noqa
+    """
 
     def __init__(self, copy=True, with_mean=True, with_std=True):
         """Unlike StandardScaler, with_mean is always set to True, to ensure
@@ -166,26 +167,9 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
         argument `with_mean` is retained for the sake of sklearn
         API compatibility.
         """
-        self.with_mean = True
+        self.with_mean = with_mean
         self.with_std = with_std
         self.copy = copy
-
-    def _reset(self):
-        """Reset internal data-dependent state of the scaler, if necessary.
-        __init__ parameters are not touched.
-        """
-
-        # Checking one attribute is enough, becase they are all set together
-        # in partial_fit
-        if hasattr(self, 'col_scale_'):
-            del self.row_scale_
-            del self.row_mean_
-            del self.row_var_
-            del self.col_scale_
-            del self.col_mean_
-            del self.col_var_
-            del self.n_rows_seen_
-            del self.n_cols_seen_
 
     def fit(self, X, y=None):
         """Compute the mean and std for both row and column dimensions.
@@ -196,19 +180,6 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
             along both row and column axes
         y : Passthrough for ``Pipeline`` compatibility. Input is ignored.
         """
-
-        return self.partial_fit(X, y)
-
-    def partial_fit(self, X, y=None):
-        """Compute the mean and std for both row and column dimensions.
-        Equivalent to fit. Online algorithm not supported at this time.
-        Parameters
-        ----------
-        X : {array-like}, shape [n_rows, n_cols]
-            The data used to compute the mean and standard deviation
-            used for later scaling along the features axis.
-        y : Passthrough for ``Pipeline`` compatibility.
-        """
         X = check_array(X, accept_sparse=None, copy=self.copy,
                         warn_on_dtype=True, dtype=FLOAT_DTYPES)
 
@@ -217,80 +188,59 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
             raise NotImplemented(
                 "Algorithm for sparse matrices currently not supported.")
         else:
-            # First pass
-            if not hasattr(self, 'n_rows_seen_'):
-                self.col_mean_ = .0
-                self.n_rows_seen_ = 0
-                if self.with_std:
-                    self.col_var_ = .0
-                else:
-                    self.col_var_ = None
+            self.col_mean_ = 0.
+            self.n_rows_seen_ = 0
 
-            self.col_mean_, self.col_var_, self.n_rows_seen_ = \
-                _incremental_mean_and_var(X, self.col_mean_,
-                                          self.col_var_,
-                                          self.n_rows_seen_
-                                          )
-            if not hasattr(self, 'n_cols_seen_'):
-                self.row_mean_ = .0
-                self.n_cols_seen_ = 0
-                if self.with_std:
-                    self.row_var_ = .0
-                else:
-                    self.row_var_ = None
-            self.row_mean_, self.row_var_, self.n_cols_seen_ = \
-                _incremental_mean_and_var(X.T, self.row_mean_,
-                                          self.row_var_,
-                                          self.n_cols_seen_
-                                          )
+            self.col_var_ = None
+            if self.with_std:
+                self.col_var_ = 0.
 
+            self.col_mean_, self.col_var_, self.n_rows_seen_ = _incremental_mean_and_var(X, self.col_mean_, self.col_var_, self.n_rows_seen_)
+
+            self.row_mean_ = 0.
+            self.n_cols_seen_ = 0
+
+            self.row_var_ = None
+            if self.with_std:
+                self.row_var_ = 0.
+
+            self.row_mean_, self.row_var_, self.n_cols_seen_ = _incremental_mean_and_var(X.T, self.row_mean_, self.row_var_, self.n_cols_seen_)
+
+        self.row_scale_ = None
+        self.col_scale_ = None
         if self.with_std:
             self.row_scale_ = _handle_zeros_in_scale(np.sqrt(self.row_var_))
             self.col_scale_ = _handle_zeros_in_scale(np.sqrt(self.col_var_))
-        else:
-            self.row_scale_ = None
-            self.col_scale_ = None
 
         return self
 
-    def transform(self, X, y='deprecated', copy=None):
+    def transform(self, X, copy=None):
         """Perform standardization by centering and scaling
         Parameters
         ----------
         X : array-like, shape [n_rows, n_cols]
             The data used to scale along the features axis.
-        y : (ignored)
-            .. deprecated:: 0.19
-               This parameter will be removed in 0.21.
         copy : bool, optional (default: None)
             Copy the input X or not.
         """
-        if not isinstance(y, string_types) or y != 'deprecated':
-            warnings.warn("The parameter y on transform() is " # noqa
-                          "deprecated since 0.19 and will be removed in 0.21",
-                          DeprecationWarning)
-
         check_is_fitted(self, 'row_scale_')
-
         copy = copy if copy is not None else self.copy
         X = check_array(X, accept_sparse=None, copy=copy, warn_on_dtype=True,
                         estimator=self, dtype=FLOAT_DTYPES)
 
         if sparse.issparse(X):
-            print('Input is sparse')
             raise NotImplemented(
-                "Algorithm for sparse matrices currently not supported.")
-        else:
-            X = two_way_standardize(X)
-        return X
+                "Input is sparse: Algorithm for sparse matrices currently not supported.")
 
-    def inverse_transform(self, X, copy=None):
+        return two_way_standardize(X)
+
+    def inverse_transform(self, X, copy=False):
         """Scale back the data to the original representation
         Parameters
         ----------
         X : array-like, shape [n_samples, n_features]
             The data used to scale along the features axis.
-        copy : bool, optional (default: None)
+        copy : bool, optional (default: False)
             Copy the input X or not.
         Returns
         -------
@@ -298,26 +248,30 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
             Transformed array.
         """
         check_is_fitted(self, 'row_scale_')
-
-        copy = copy if copy is not None else self.copy
         if sparse.issparse(X):
-            print('Input is sparse')
             raise NotImplementedError(
-                'Algorithm for sparse matrices currently not supported.')
-        else:
-            raise NotImplementedError(
-                'Two Way standardization not reversible with accuracy')
-            X = np.asarray(X)
-            if copy:
-                X = X.copy()
-            X = X.T
-            if self.with_std:
-                X *= self.row_scale_
-            if self.with_mean:
-                X += self.row_mean_
-            X = X.T
-            if self.with_std:
-                X *= self.col_scale_
-            if self.with_mean:
-                X += self.col_mean_
+                'Input is sparse: Algorithm for sparse matrices currently not supported.')
+
+        warnings.warn('Two Way standardization not reversible with accuracy')
+
+        X = np.asarray(X)
+        if copy:
+            X = X.copy()
+
+        X = X.T
+
+        if self.with_std:
+            X *= self.row_scale_
+
+        if self.with_mean:
+            X += self.row_mean_
+
+        X = X.T
+
+        if self.with_std:
+            X *= self.col_scale_
+
+        if self.with_mean:
+            X += self.col_mean_
+
         return X
