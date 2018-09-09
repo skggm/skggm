@@ -7,7 +7,7 @@ import numpy as np
 from functools import partial
 
 from sklearn.covariance import EmpiricalCovariance
-from sklearn.utils import check_array, as_float_array
+from sklearn.utils import check_array, as_float_array, deprecated
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.externals.joblib import Parallel, delayed
 from sklearn.model_selection import cross_val_score  # NOQA >= 0.18
@@ -165,7 +165,7 @@ def quic(
     return Theta_out, Sigma_out, opt, cputime, iters, dGap
 
 
-class QuicGraphLasso(InverseCovarianceEstimator):
+class QuicGraphicalLasso(InverseCovarianceEstimator):
     """
     Computes a sparse inverse covariance matrix estimation using quadratic
     approximation.
@@ -304,7 +304,7 @@ class QuicGraphLasso(InverseCovarianceEstimator):
             raise ValueError("path required in path mode.")
             return
 
-        super(QuicGraphLasso, self).__init__(
+        super(QuicGraphicalLasso, self).__init__(
             score_metric=score_metric, init_method=init_method, auto_scale=auto_scale
         )
 
@@ -376,6 +376,13 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         return self.lam_at_index(0)
 
 
+@deprecated(
+    "The class QuicGraphLasso is deprecated " "Use class QuicGraphicalLasso instead."
+)
+class QuicGraphLasso(QuicGraphicalLasso):
+    pass
+
+
 def _quic_path(
     X,
     path,
@@ -437,11 +444,11 @@ def _quic_path_spark(indexed_params, quic_path, X_bc):
     return index, result
 
 
-class QuicGraphLassoCV(InverseCovarianceEstimator):
+class QuicGraphicalLassoCV(InverseCovarianceEstimator):
     """Sparse inverse covariance w/ cross-validated choice of the l1 penalty
     via quadratic approximation.
 
-    This takes advantage of "path" mode in QuicGraphLasso.
+    This takes advantage of "path" mode in QuicGraphicalLasso.
     See sklearn.covariance.graph_lasso.GraphLassoCV.
 
     Parameters
@@ -582,7 +589,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         self.verbose = verbose
         self.backend = backend
 
-        super(QuicGraphLassoCV, self).__init__(
+        super(QuicGraphicalLassoCV, self).__init__(
             score_metric=score_metric, init_method=init_method, auto_scale=auto_scale
         )
 
@@ -794,12 +801,20 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         return self
 
 
-class QuicGraphLassoEBIC(InverseCovarianceEstimator):
+@deprecated(
+    "The class QuicGraphLassoCV is deprecated "
+    "Use class QuicGraphicalLassoCV instead."
+)
+class QuicGraphLassoCV(QuicGraphicalLassoCV):
+    pass
+
+
+class QuicGraphicalLassoEBIC(InverseCovarianceEstimator):
     """
     Computes a sparse inverse covariance matrix estimation using quadratic
     approximation and EBIC model selection. (Convenience Class)
 
-    Note: This estimate can be obtained using the more general QuicGraphLasso
+    Note: This estimate can be obtained using the more general QuicGraphicalLasso
           estimator and taking advantage of `ebic_select()` and
           `lambda_at_index()` methods.
 
@@ -901,7 +916,7 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
         self.path = path
         self.gamma = gamma
 
-        super(QuicGraphLassoEBIC, self).__init__(
+        super(QuicGraphicalLassoEBIC, self).__init__(
             init_method=init_method, score_metric=score_metric, auto_scale=auto_scale
         )
 
@@ -974,3 +989,11 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
 
         self.is_fitted_ = True
         return self
+
+
+@deprecated(
+    "The class QuicGraphLassoEBIC is deprecated "
+    "Use class QuicGraphicalLassoEBIC instead."
+)
+class QuicGraphLassoEBIC(QuicGraphicalLassoEBIC):
+    pass

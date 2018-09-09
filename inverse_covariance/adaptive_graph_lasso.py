@@ -1,13 +1,13 @@
 from __future__ import absolute_import
 
 import numpy as np
-from sklearn.utils import check_array, as_float_array
+from sklearn.utils import check_array, as_float_array, deprecated
 from sklearn.base import BaseEstimator
 
-from . import QuicGraphLasso, QuicGraphLassoCV, InverseCovarianceEstimator
+from . import QuicGraphicalLasso, QuicGraphicalLassoCV, InverseCovarianceEstimator
 
 
-class AdaptiveGraphLasso(BaseEstimator):
+class AdaptiveGraphicalLasso(BaseEstimator):
     """
     Two-stage adaptive estimator.
 
@@ -16,7 +16,7 @@ class AdaptiveGraphLasso(BaseEstimator):
        output.
 
     b) The resulting coefficients are used to generate adaptive weights and
-       the QuicGraphLasso is refit with these weights.
+       the QuicGraphicalLasso is refit with these weights.
 
     See:
         "High dimensional covariance estimation based on Gaussian graphical
@@ -28,8 +28,8 @@ class AdaptiveGraphLasso(BaseEstimator):
 
     Parameters
     -----------
-    estimator : GraphLasso instance with model selection
-                (default=QuicGraphLassoCV())
+    estimator : GraphicalLasso instance with model selection
+                (default=QuicGraphicalLassoCV())
         After being fit, estimator.precision_ must either be a matrix.
 
     method : one of 'binary', 'inverse_squared', 'inverse' (default='binary')
@@ -40,7 +40,7 @@ class AdaptiveGraphLasso(BaseEstimator):
 
     Attributes
     ----------
-    estimator_ : QuicGraphLasso instance
+    estimator_ : QuicGraphicalLasso instance
         The final estimator refit with adaptive weights.
 
     lam_ : 2D ndarray, shape (n_features, n_features)
@@ -85,8 +85,8 @@ class AdaptiveGraphLasso(BaseEstimator):
         X : ndarray, shape (n_samples, n_features)
             Data from which to compute the proportion matrix.
         """
-        # default to QuicGraphLassoCV
-        estimator = self.estimator or QuicGraphLassoCV()
+        # default to QuicGraphicalLassoCV
+        estimator = self.estimator or QuicGraphicalLassoCV()
 
         self.lam_ = None
         self.estimator_ = None
@@ -104,7 +104,7 @@ class AdaptiveGraphLasso(BaseEstimator):
             self.lam_ = self._binary_weights(estimator)
 
             # perform second step adaptive estimate
-            self.estimator_ = QuicGraphLasso(
+            self.estimator_ = QuicGraphicalLasso(
                 lam=self.lam_ * estimator.lam_,
                 mode="default",
                 init_method="cov",
@@ -116,7 +116,7 @@ class AdaptiveGraphLasso(BaseEstimator):
             self.lam_ = self._inverse_squared_weights(estimator)
 
             # perform second step adaptive estimate
-            self.estimator_ = QuicGraphLassoCV(
+            self.estimator_ = QuicGraphicalLassoCV(
                 lam=self.lam_ * self.estimator.lam_, auto_scale=False
             )
             self.estimator_.fit(X)
@@ -125,7 +125,7 @@ class AdaptiveGraphLasso(BaseEstimator):
             self.lam_ = self._inverse_weights(estimator)
 
             # perform second step adaptive estimate
-            self.estimator_ = QuicGraphLassoCV(
+            self.estimator_ = QuicGraphicalLassoCV(
                 lam=self.lam_ * estimator.lam_, auto_scale=False
             )
             self.estimator_.fit(X)
@@ -140,3 +140,11 @@ class AdaptiveGraphLasso(BaseEstimator):
 
         self.is_fitted_ = True
         return self
+
+
+@deprecated(
+    "The class AdaptiveGraphLasso is deprecated "
+    "Use class AdaptiveGraphicalLasso instead."
+)
+class AdaptiveGraphLasso(AdaptiveGraphicalLasso):
+    pass

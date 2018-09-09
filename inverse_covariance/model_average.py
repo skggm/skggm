@@ -7,7 +7,7 @@ from sklearn.externals.joblib import Parallel, delayed
 from functools import partial
 
 from .inverse_covariance import _init_coefs
-from . import QuicGraphLasso
+from . import QuicGraphicalLasso
 
 
 def _check_psd(m):
@@ -216,7 +216,7 @@ class ModelAverage(BaseEstimator):
         subsampling: Only the observations will be subsampled, the original
                      penalty supplied in the estimator instance will be used.
                      Use this technique when the estimator does not support
-                     matrix penalization (e.g., sklearn GraphLasso).
+                     matrix penalization (e.g., sklearn GraphicalLasso).
 
         random: In addition to randomly subsampling the observations, 'random'
                 applies a randomly-perturbed 'lam' weight matrix.  The entries
@@ -328,8 +328,8 @@ class ModelAverage(BaseEstimator):
         X : ndarray, shape (n_samples, n_features)
             Data from which to compute the proportion matrix.
         """
-        # default to QuicGraphLasso
-        estimator = self.estimator or QuicGraphLasso()
+        # default to QuicGraphicalLasso
+        estimator = self.estimator or QuicGraphicalLasso()
 
         if self.penalization != "subsampling" and not hasattr(
             estimator, self.penalty_name
@@ -415,14 +415,14 @@ class ModelAverage(BaseEstimator):
 
     @property
     def precision_(self):
-        """Convenience property to make compatible with AdaptiveGraphLasso.
+        """Convenience property to make compatible with AdaptiveGraphicalLasso.
         This is not a very good precision estimate.
         """
         return self.support_
 
     @property
     def covariance_(self):
-        """Convenience property to make compatible with AdaptiveGraphLasso.
+        """Convenience property to make compatible with AdaptiveGraphicalLasso.
         This is not a very good covariance estimate.
         """
         return np.linalg.inv(self.support_)
