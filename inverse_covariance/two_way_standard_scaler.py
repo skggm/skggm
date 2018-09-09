@@ -11,7 +11,6 @@ from sklearn.utils.extmath import _incremental_mean_and_var
 from sklearn.utils.validation import check_is_fitted, FLOAT_DTYPES
 
 
-
 def two_way_standardize(
     X,
     axis=0,
