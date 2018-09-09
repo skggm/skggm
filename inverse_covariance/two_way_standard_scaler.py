@@ -11,6 +11,7 @@ from sklearn.utils.extmath import _incremental_mean_and_var
 from sklearn.utils.validation import check_is_fitted, FLOAT_DTYPES
 
 
+
 def two_way_standardize(
     X,
     axis=0,
@@ -64,31 +65,30 @@ def two_way_standardize(
     StandardScaler: Performs scaling to unit variance using the``Transformer`` API
         (e.g. as part of a preprocessing :class:`sklearn.pipeline.Pipeline`).
     """
-    Xrow_polish = np.copy(X.T)
-    Xcol_polish = np.copy(X)
     n_rows, n_cols = np.shape(X)
 
-    n_iter = 0
     err_norm = np.inf
-    oldXrow = np.copy(Xrow_polish)
-    oldXcol = np.copy(Xcol_polish)
+    rows_X = np.copy(X.T)
+    cols_X = np.copy(X)
+    n_iter = 0
     while n_iter <= max_iter and err_norm > tol:
-        Xcol_polish = scale(Xrow_polish.T, axis=1, with_mean=True, with_std=with_std)
-        Xrow_polish = scale(Xcol_polish.T, axis=1, with_mean=True, with_std=with_std)
-        n_iter += 1
-        err_norm_row = np.linalg.norm(oldXrow - Xrow_polish, "fro")
-        err_norm_col = np.linalg.norm(oldXcol - Xcol_polish, "fro")
+        col_polish = scale(row_polish.T, axis=1, with_mean=True, with_std=with_std)
+        row_polish = scale(col_polish.T, axis=1, with_mean=True, with_std=with_std)
+
+        err_norm_row = np.linalg.norm(rows_X - row_polish, "fro")
+        err_norm_col = np.linalg.norm(cols_X - col_polish, "fro")
         err_norm = .5 * err_norm_row / (n_rows * n_cols) + .5 * err_norm_col / (
             n_rows * n_cols
         )
 
+        n_iter += 1
         if verbose:
             print("Iteration: {}, Convergence Err: {}".format(n_iter, err_norm))
 
-        oldXrow = np.copy(Xrow_polish)
-        oldXcol = np.copy(Xcol_polish)
+        rows_X = np.copy(row_polish)
+        cols_X = np.copy(col_polish)
 
-    return Xrow_polish.T
+    return row_polish.T
 
 
 class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
@@ -188,26 +188,14 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
 
         self.n_rows_, self.n_cols_ = np.shape(X)
 
-        self.col_mean_ = 0.
-        self.n_rows_seen_ = 0
-
-        self.col_var_ = None
-        if self.with_std:
-            self.col_var_ = 0.
-
+        self.col_var_ = 0. if self.with_std else None
         self.col_mean_, self.col_var_, self.n_rows_seen_ = _incremental_mean_and_var(
-            X, self.col_mean_, self.col_var_, self.n_rows_seen_
+            X, 0.0, self.col_var_, 0
         )
 
-        self.row_mean_ = 0.
-        self.n_cols_seen_ = 0
-
-        self.row_var_ = None
-        if self.with_std:
-            self.row_var_ = 0.
-
+        self.row_var_ = 0. if self.with_std else None
         self.row_mean_, self.row_var_, self.n_cols_seen_ = _incremental_mean_and_var(
-            X.T, self.row_mean_, self.row_var_, self.n_cols_seen_
+            X.T, 0.0, self.row_var_, 0
         )
 
         self.row_scale_ = None
@@ -266,7 +254,6 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
 
         warnings.warn("Reversing two way transformation is not accurate.")
 
-        X = np.asarray(X)
         if copy:
             X = X.copy()
 
