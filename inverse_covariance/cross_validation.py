@@ -5,6 +5,10 @@ from sklearn.cross_validation import _PartitionIterator
 from sklearn.utils import check_random_state
 
 
+# TODO: This may be easily deprecated in favor of
+# https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/model_selection/_split.py#L1091
+
+
 class _BaseRepeatedKFold(with_metaclass(ABCMeta, _PartitionIterator)):
     """Base class to validate KFoldRepeated approaches"""
 
