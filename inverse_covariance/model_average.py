@@ -7,7 +7,7 @@ from sklearn.externals.joblib import Parallel, delayed
 from functools import partial
 
 from .inverse_covariance import _init_coefs
-from . import QuicGraphLasso
+from . import QuicGraphicalLasso
 
 
 def _check_psd(m):
@@ -18,8 +18,9 @@ def _fully_random_weights(n_features, lam_scale, prng):
     """Generate a symmetric random matrix with zeros along the diagonal."""
     weights = np.zeros((n_features, n_features))
     n_off_diag = int((n_features ** 2 - n_features) / 2)
-    weights[np.triu_indices(n_features, k=1)] =\
-        0.1 * lam_scale * prng.randn(n_off_diag) + (0.25 * lam_scale)
+    weights[np.triu_indices(n_features, k=1)] = 0.1 * lam_scale * prng.randn(
+        n_off_diag
+    ) + (0.25 * lam_scale)
     weights[weights < 0] = 0
     weights = weights + weights.T
     return weights
@@ -70,8 +71,19 @@ def _default_bootstrap(n_samples, num_subsamples, prng):
     return prng.permutation(n_samples)[:num_subsamples]
 
 
-def _fit(indexed_params, penalization, lam, lam_perturb, lam_scale_, estimator,
-         penalty_name, subsample, bootstrap, prng, X=None):
+def _fit(
+    indexed_params,
+    penalization,
+    lam,
+    lam_perturb,
+    lam_scale_,
+    estimator,
+    penalty_name,
+    subsample,
+    bootstrap,
+    prng,
+    X=None,
+):
     """Wrapper function outside of instance for fitting a single model average
     trial.
 
@@ -90,31 +102,25 @@ def _fit(indexed_params, penalization, lam, lam_perturb, lam_scale_, estimator,
     prec_is_real = False
     while not prec_is_real:
         boot_lam = None
-        if penalization == 'subsampling':
+        if penalization == "subsampling":
             pass
-        elif penalization == 'random':
-            boot_lam = _fix_weights(_random_weights,
-                                    n_features,
-                                    lam,
-                                    lam_perturb,
-                                    prng)
-        elif penalization == 'fully-random':
-            boot_lam = _fix_weights(_fully_random_weights,
-                                    n_features,
-                                    lam_scale_,
-                                    prng)
+        elif penalization == "random":
+            boot_lam = _fix_weights(_random_weights, n_features, lam, lam_perturb, prng)
+        elif penalization == "fully-random":
+            boot_lam = _fix_weights(_fully_random_weights, n_features, lam_scale_, prng)
         else:
             raise NotImplementedError(
-                    ("Only penalization = 'subsampling', "
-                     "'random', and 'fully-random' have "
-                     "been implemented. Found {}.".format(penalization)))
+                (
+                    "Only penalization = 'subsampling', "
+                    "'random', and 'fully-random' have "
+                    "been implemented. Found {}.".format(penalization)
+                )
+            )
 
         # new instance of estimator
         new_estimator = clone(estimator)
         if boot_lam is not None:
-            new_estimator.set_params(**{
-                penalty_name: boot_lam,
-            })
+            new_estimator.set_params(**{penalty_name: boot_lam})
 
         # fit estimator
         num_subsamples = int(subsample * n_samples)
@@ -143,16 +149,12 @@ def _cpu_map(fun, param_grid, n_jobs, verbose=True):
     return Parallel(
         n_jobs=n_jobs,
         verbose=verbose,
-        backend='threading',  # any sklearn backend should work here
-    )(
-        delayed(fun)(
-            params
-        )
-        for params in param_grid)
+        backend="threading",  # any sklearn backend should work here
+    )(delayed(fun)(params) for params in param_grid)
 
 
 def _spark_map(fun, indexed_param_grid, sc, seed, X_bc):
-    '''We cannot pass a RandomState instance to each spark worker since it will
+    """We cannot pass a RandomState instance to each spark worker since it will
     behave identically across partitions.  Instead, we explictly handle the
     partitions with a newly seeded instance.
 
@@ -162,14 +164,16 @@ def _spark_map(fun, indexed_param_grid, sc, seed, X_bc):
     Following this trick:
         https://wegetsignal.wordpress.com/2015/05/08/
                 generating-random-numbers-for-rdd-in-spark/
-    '''
+    """
+
     def _wrap_random_state(split_index, partition):
         prng = np.random.RandomState(seed + split_index)
         yield map(partial(fun, prng=prng, X=X_bc), partition)
 
     par_param_grid = sc.parallelize(indexed_param_grid)
     indexed_results = par_param_grid.mapPartitionsWithIndex(
-        _wrap_random_state).collect()
+        _wrap_random_state
+    ).collect()
     return [item for sublist in indexed_results for item in sublist]
 
 
@@ -212,7 +216,7 @@ class ModelAverage(BaseEstimator):
         subsampling: Only the observations will be subsampled, the original
                      penalty supplied in the estimator instance will be used.
                      Use this technique when the estimator does not support
-                     matrix penalization (e.g., sklearn GraphLasso).
+                     matrix penalization (e.g., sklearn GraphicalLasso).
 
         random: In addition to randomly subsampling the observations, 'random'
                 applies a randomly-perturbed 'lam' weight matrix.  The entries
@@ -283,11 +287,24 @@ class ModelAverage(BaseEstimator):
     lam_ : float
         Average matrix value used among lam_ for all estimators.
     """
-    def __init__(self, estimator=None, n_trials=100, subsample=0.3,
-                 normalize=True, lam=0.5, lam_perturb=0.5,
-                 init_method='corrcoef', penalization='random',
-                 penalty_name='lam', support_thresh=0.5,
-                 bootstrap=_default_bootstrap, n_jobs=1, sc=None, seed=1):
+
+    def __init__(
+        self,
+        estimator=None,
+        n_trials=100,
+        subsample=0.3,
+        normalize=True,
+        lam=0.5,
+        lam_perturb=0.5,
+        init_method="corrcoef",
+        penalization="random",
+        penalty_name="lam",
+        support_thresh=0.5,
+        bootstrap=_default_bootstrap,
+        n_jobs=1,
+        sc=None,
+        seed=1,
+    ):
         self.estimator = estimator
         self.n_trials = n_trials
         self.subsample = subsample
@@ -304,6 +321,26 @@ class ModelAverage(BaseEstimator):
         self.seed = seed
         self.prng = np.random.RandomState(seed)
 
+    def fit(self, X, y=None):
+        """Learn a model averaged proportion matrix for X.
+        Parameters
+        ----------
+        X : ndarray, shape (n_samples, n_features)
+            Data from which to compute the proportion matrix.
+        """
+        # default to QuicGraphicalLasso
+        estimator = self.estimator or QuicGraphicalLasso()
+
+        if self.penalization != "subsampling" and not hasattr(
+            estimator, self.penalty_name
+        ):
+            raise ValueError(
+                (
+                    "Must specify valid penalty for "
+                    "estimator: {}.".format(self.penalty_name)
+                )
+            )
+
         self.proportion_ = None
         self.support_ = None
         self.lam_ = None
@@ -312,34 +349,22 @@ class ModelAverage(BaseEstimator):
         self.lams_ = []
         self.subsets_ = []
 
-        # default to QuicGraphLasso
-        if self.estimator is None:
-            self.estimator = QuicGraphLasso(init_method=self.init_method)
-
-        if self.penalization != 'subsampling' and\
-                not hasattr(self.estimator, self.penalty_name):
-            raise ValueError(("Must specify valid penalty for "
-                              "estimator: {}.".format(self.penalty_name)))
-
-    def fit(self, X, y=None):
-        """Learn a model averaged proportion matrix for X.
-        Parameters
-        ----------
-        X : ndarray, shape (n_samples, n_features)
-            Data from which to compute the proportion matrix.
-        """
         X = check_array(X, ensure_min_features=2, estimator=self)
         X = as_float_array(X, copy=False, force_all_finite=False)
 
-        n_samples, n_features = X.shape
+        n_samples_, n_features_ = X.shape
         _, self.lam_scale_ = _init_coefs(X, method=self.init_method)
 
         fit_fun = partial(
             _fit,
-            penalization=self.penalization, lam=self.lam,
-            lam_perturb=self.lam_perturb, lam_scale_=self.lam_scale_,
-            estimator=self.estimator, penalty_name=self.penalty_name,
-            subsample=self.subsample, bootstrap=self.bootstrap
+            penalization=self.penalization,
+            lam=self.lam,
+            lam_perturb=self.lam_perturb,
+            lam_scale_=self.lam_scale_,
+            estimator=estimator,
+            penalty_name=self.penalty_name,
+            subsample=self.subsample,
+            bootstrap=self.bootstrap,
         )
         indexed_param_grid = [(nn,) for nn in range(self.n_trials)]
 
@@ -347,17 +372,11 @@ class ModelAverage(BaseEstimator):
             results = _cpu_map(
                 partial(fit_fun, X=X, prng=self.prng),
                 indexed_param_grid,
-                n_jobs=self.n_jobs
+                n_jobs=self.n_jobs,
             )
         else:
             X_bc = self.sc.broadcast(X)
-            results = _spark_map(
-                fit_fun,
-                indexed_param_grid,
-                self.sc,
-                self.seed,
-                X_bc
-            )
+            results = _spark_map(fit_fun, indexed_param_grid, self.sc, self.seed, X_bc)
             X_bc.unpersist()
 
         self.estimators_ = [e for r, (l, s, e) in results]
@@ -366,7 +385,7 @@ class ModelAverage(BaseEstimator):
 
         # reduce
         self.lam_ = 0.0
-        self.proportion_ = np.zeros((n_features, n_features))
+        self.proportion_ = np.zeros((n_features_, n_features_))
         for new_estimator in self.estimators_:
             # update proportions
             if isinstance(new_estimator.precision_, list):
@@ -380,7 +399,7 @@ class ModelAverage(BaseEstimator):
                 raise ValueError("Estimator returned invalid precision_.")
 
             # currently, dont estimate self.lam_ if penalty_name is different
-            if self.penalty_name == 'lam':
+            if self.penalty_name == "lam":
                 self.lam_ += np.mean(new_estimator.lam_.flat)
 
         # estimate support locations
@@ -392,16 +411,18 @@ class ModelAverage(BaseEstimator):
         if self.normalize:
             self.proportion_ /= self.n_trials
 
+        return self
+
     @property
     def precision_(self):
-        '''Convenience property to make compatible with AdaptiveGraphLasso.
+        """Convenience property to make compatible with AdaptiveGraphicalLasso.
         This is not a very good precision estimate.
-        '''
+        """
         return self.support_
 
     @property
     def covariance_(self):
-        '''Convenience property to make compatible with AdaptiveGraphLasso.
+        """Convenience property to make compatible with AdaptiveGraphicalLasso.
         This is not a very good covariance estimate.
-        '''
+        """
         return np.linalg.inv(self.support_)

@@ -5,6 +5,10 @@ from sklearn.cross_validation import _PartitionIterator
 from sklearn.utils import check_random_state
 
 
+# TODO: This may be easily deprecated in favor of
+# https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/model_selection/_split.py#L1091
+
+
 class _BaseRepeatedKFold(with_metaclass(ABCMeta, _PartitionIterator)):
     """Base class to validate KFoldRepeated approaches"""
 
@@ -12,7 +16,7 @@ class _BaseRepeatedKFold(with_metaclass(ABCMeta, _PartitionIterator)):
     def __init__(self, n, n_folds, n_trials, random_state):
         super(_BaseRepeatedKFold, self).__init__(n)
 
-        if abs(n_folds - int(n_folds)) >= np.finfo('f').eps:
+        if abs(n_folds - int(n_folds)) >= np.finfo("f").eps:
             raise ValueError("n_folds must be an integer")
         self.n_folds = n_folds = int(n_folds)
 
@@ -20,15 +24,20 @@ class _BaseRepeatedKFold(with_metaclass(ABCMeta, _PartitionIterator)):
             raise ValueError(
                 "repeated k-fold cross validation requires at least one"
                 " train / test split by setting n_folds=2 or more,"
-                " got n_folds={0}.".format(n_folds))
+                " got n_folds={0}.".format(n_folds)
+            )
         if n_folds > self.n:
             raise ValueError(
-                ("Cannot have number of folds n_folds={0} greater"
-                 " than the number of samples: {1}.").format(n_folds, n))
+                (
+                    "Cannot have number of folds n_folds={0} greater"
+                    " than the number of samples: {1}."
+                ).format(n_folds, n)
+            )
 
         if not isinstance(n_trials, int) or n_trials <= 0:
-            raise ValueError("n_trials must be int and greater than 0;"
-                             " got {0}".format(n_trials))
+            raise ValueError(
+                "n_trials must be int and greater than 0;" " got {0}".format(n_trials)
+            )
 
         self.n_trials = n_trials
         self.random_state = random_state
@@ -72,6 +81,7 @@ class RepeatedKFold(_BaseRepeatedKFold):
     sklearn.cross_validation.KFold
     sklearn.cross_validation.ShuffleSplit
     """
+
     def __init__(self, n, n_folds=3, n_trials=3, random_state=None):
         super(RepeatedKFold, self).__init__(n, n_folds, n_trials, random_state)
         rng = check_random_state(self.random_state)
@@ -86,7 +96,7 @@ class RepeatedKFold(_BaseRepeatedKFold):
         n = self.n
         n_folds = self.n_folds
         fold_sizes = (n // n_folds) * np.ones(n_folds, dtype=np.int)
-        fold_sizes[:n % n_folds] += 1
+        fold_sizes[: n % n_folds] += 1
 
         for idxs in self.idxs:
             current = 0
@@ -96,7 +106,7 @@ class RepeatedKFold(_BaseRepeatedKFold):
                 current = stop
 
     def __repr__(self):
-        return '%s.%s(n=%i, n_folds=%i, n_trials=%s, random_state=%s)' % (
+        return "%s.%s(n=%i, n_folds=%i, n_trials=%s, random_state=%s)" % (
             self.__class__.__module__,
             self.__class__.__name__,
             self.n,

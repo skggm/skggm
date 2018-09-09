@@ -26,6 +26,7 @@ class ErdosRenyiGraph(Graph):
     seed : int
         Seed for np.random.RandomState seed. (default=1)
     """
+
     def __init__(self, spd_low=0.7, spd_high=0.7, **kwargs):
         self.spd_low = spd_low
         self.spd_high = spd_high
@@ -49,8 +50,10 @@ class ErdosRenyiGraph(Graph):
         -----------
         (n_features, n_features) matrices: covariance, precision, adjacency
         """
-        return make_sparse_spd_matrix(n_block_features,
-                                      alpha=np.abs(1.0 - alpha),
-                                      smallest_coef=self.spd_low,
-                                      largest_coef=self.spd_high,
-                                      random_state=self.prng)
+        return make_sparse_spd_matrix(
+            n_block_features,
+            alpha=np.abs(1.0 - alpha),
+            smallest_coef=self.spd_low,
+            largest_coef=self.spd_high,
+            random_state=self.prng,
+        )

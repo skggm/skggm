@@ -30,6 +30,7 @@ class LatticeGraph(Graph):
     seed : int
         Seed for np.random.RandomState seed. (default=1)
     """
+
     def __init__(self, random_sign=False, low=0.7, high=0.7, **kwargs):
         self.random_sign = random_sign
         self.low = low
@@ -62,7 +63,11 @@ class LatticeGraph(Graph):
         -----------
         (n_features, n_features) matrices: covariance, precision, adjacency
         """
-        return lattice(self.prng, n_block_features, alpha,
-                       random_sign=self.random_sign,
-                       low=self.low,
-                       high=self.high)
+        return lattice(
+            self.prng,
+            n_block_features,
+            alpha,
+            random_sign=self.random_sign,
+            low=self.low,
+            high=self.high,
+        )

@@ -33,8 +33,9 @@ def lattice(prng, n_features, alpha, random_sign=False, low=0.3, high=0.7):
     degree = int(1 + np.round(alpha * n_features / 2.))
 
     if random_sign:
-        sign_row = (-1.0 * np.ones(degree) +
-                    2 * (prng.uniform(low=0, high=1, size=degree) > .5))
+        sign_row = -1.0 * np.ones(degree) + 2 * (
+            prng.uniform(low=0, high=1, size=degree) > .5
+        )
     else:
         sign_row = -1.0 * np.ones(degree)
 
@@ -47,13 +48,11 @@ def lattice(prng, n_features, alpha, random_sign=False, low=0.3, high=0.7):
     row = np.zeros((n_features,))
     while np.sum(row) == 0 and attempt < MAX_ATTEMPTS:
         row = np.zeros((n_features,))
-        row[1: 1 + degree] = sign_row * prng.uniform(low=low,
-                                                     high=high,
-                                                     size=degree)
+        row[1 : 1 + degree] = sign_row * prng.uniform(low=low, high=high, size=degree)
         attempt += 1
 
     if np.sum(row) == 0:
-        raise Exception('InvalidLattice', 'Rows sum to 0.')
+        raise Exception("InvalidLattice", "Rows sum to 0.")
         return
 
     # sum-normalize and keep signs
@@ -140,6 +139,7 @@ class Graph(object):
     seed : int
         Seed for np.random.RandomState seed. (default=1)
     """
+
     def __init__(self, n_blocks=2, chain_blocks=True, seed=1):
         self.n_blocks = n_blocks
         self.chain_blocks = chain_blocks
@@ -190,18 +190,17 @@ class Graph(object):
         n_block_features = int(np.floor(1. * n_features / self.n_blocks))
         if n_block_features * self.n_blocks != n_features:
             raise ValueError(
-                ('Error: n_features {} not divisible by n_blocks {}.'
-                 'Use n_features = n_blocks * int').format(
-                    n_features,
-                    self.n_blocks)
-                )
+                (
+                    "Error: n_features {} not divisible by n_blocks {}."
+                    "Use n_features = n_blocks * int"
+                ).format(n_features, self.n_blocks)
+            )
             return
 
         block_adj = self.prototype_adjacency(n_block_features, alpha)
-        adjacency = blocks(self.prng,
-                           block_adj,
-                           n_blocks=self.n_blocks,
-                           chain_blocks=self.chain_blocks)
+        adjacency = blocks(
+            self.prng, block_adj, n_blocks=self.n_blocks, chain_blocks=self.chain_blocks
+        )
 
         precision = self.to_precision(adjacency)
         covariance = self.to_covariance(precision)

@@ -21,8 +21,11 @@ def log_likelihood(covariance, precision):
     """
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
-    log_likelihood_ = -np.sum(covariance * precision) +\
-        fast_logdet(precision) - dim * np.log(2 * np.pi)
+    log_likelihood_ = (
+        -np.sum(covariance * precision)
+        + fast_logdet(precision)
+        - dim * np.log(2 * np.pi)
+    )
     log_likelihood_ /= 2.
     return log_likelihood_
 
@@ -70,11 +73,11 @@ def quadratic_loss(covariance, precision):
     """
     assert covariance.shape == precision.shape
     dim, _ = precision.shape
-    return np.trace((np.dot(covariance, precision) - np.eye(dim))**2)
+    return np.trace((np.dot(covariance, precision) - np.eye(dim)) ** 2)
 
 
 def ebic(covariance, precision, n_samples, n_features, gamma=0):
-    '''
+    """
     Extended Bayesian Information Criteria for model selection.
 
     When using path mode, use this as an alternative to cross-validation for
@@ -109,7 +112,7 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     Returns
     -------
     ebic score (float).  Caller should minimized this score.
-    '''
+    """
     l_theta = -np.sum(covariance * precision) + fast_logdet(precision)
     l_theta *= n_features / 2.
 
@@ -121,7 +124,7 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     precision_nnz = (np.sum(mask) - n_features) / 2.0  # lower off diagonal tri
 
     return (
-        -2.0 * l_theta +
-        precision_nnz * np.log(n_samples) +
-        4.0 * precision_nnz * np.log(n_features) * gamma
+        -2.0 * l_theta
+        + precision_nnz * np.log(n_samples)
+        + 4.0 * precision_nnz * np.log(n_features) * gamma
     )
