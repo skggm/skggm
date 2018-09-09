@@ -9,8 +9,8 @@ from .quic_graph_lasso import (
     QuicGraphicalLassoCV,
     QuicGraphicalLassoEBIC,
 )
-from .clean import (
-    twoway_standardize,
+from .two_way_standard_scaler import (
+    two_way_standardize,
     TwoWayStandardScaler,
 )
 from .metrics import (
@@ -37,7 +37,7 @@ __all__ = [
     "QuicGraphicalLasso",
     "QuicGraphicalLassoCV",
     "QuicGraphicalLassoEBIC",
-    'twoway_standardize',
+    'two_way_standardize',
     'TwoWayStandardScaler',
     "log_likelihood",
     "kl_loss",

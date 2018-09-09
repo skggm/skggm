@@ -16,7 +16,7 @@ from sklearn.utils.validation import (
     )
 
 
-def twoway_standardize(X, axis=0, with_mean=True, with_std=True, copy=True,
+def two_way_standardize(X, axis=0, with_mean=True, with_std=True, copy=True,
                        max_iter=50, tol=1e-6, verbose=False):
     """Standardize a two-dimensional data matrix along both axes.
     Center to the mean and component wise scale to unit variance.
@@ -100,7 +100,7 @@ def twoway_standardize(X, axis=0, with_mean=True, with_std=True, copy=True,
 
 class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
     """Standardize features by removing the mean and scaling to unit variance
-    in both row and column dimensions. 
+    in both row and column dimensions.
     This class is modeled after StandardScaler in scikit-learn.
     Read more in the :ref:`User Guide <preprocessing_scaler>`.
     Parameters
@@ -150,14 +150,14 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
      [ 1.  1.]]
     See also
     --------
-    twoway_standardize: Equivalent function without the estimator API.
+    two_way_standardize: Equivalent function without the estimator API.
     :class:`sklearn.preprocessing.StandardScaler`
     :class:`sklearn.decomposition.PCA`
         Further removes the linear correlation across features with 'whiten=True'.
     Notes
     -----
     See the implications of one-way vs. two-way standardization in here. TBD
-    
+
     """  # noqa
 
     def __init__(self, copy=True, with_mean=True, with_std=True):
@@ -281,7 +281,7 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
             raise NotImplemented(
                 "Algorithm for sparse matrices currently not supported.")
         else:
-            X = twoway_standardize(X)
+            X = two_way_standardize(X)
         return X
 
     def inverse_transform(self, X, copy=None):

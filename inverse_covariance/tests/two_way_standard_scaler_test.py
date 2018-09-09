@@ -3,8 +3,8 @@ from scipy import sparse
 
 from sklearn.utils.testing import assert_raises
 
-from inverse_covariance.clean import (
-   twoway_standardize
+from inverse_covariance.two_way_standard_scaler import (
+   two_way_standardize
 )
 
 
@@ -29,7 +29,7 @@ def test_invalid_argument():
     '''
     X = np.zeros(shape=(10, 10))
     X_csc = sparse.csc_matrix(X)
-    assert_raises(TypeError, twoway_standardize, X_csc)
+    assert_raises(TypeError, two_way_standardize, X_csc)
 
     X_csr = sparse.csr_matrix(X)
-    assert_raises(TypeError, twoway_standardize, X_csr)
+    assert_raises(TypeError, two_way_standardize, X_csr)
