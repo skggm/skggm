@@ -200,7 +200,6 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
 
         y : Passthrough for ``Pipeline`` compatibility. Input is ignored.
         """
-        # Reset internal state before fitting
         self._reset()
         return self.partial_fit(X, y)
 
@@ -251,10 +250,12 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
 
     def transform(self, X, copy=False):
         """Perform standardization by centering and scaling
+
         Parameters
         ----------
         X : array-like, shape [n_rows, n_cols]
             The data used to scale along the features axis.
+
         copy : bool, optional (default: False)
             Copy the input X or not.
         """
