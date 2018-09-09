@@ -7,7 +7,7 @@ from sklearn.externals.joblib import Parallel, delayed
 
 from .metrics import error_fro
 from .erdos_renyi_graph import ErdosRenyiGraph
-from .. import QuicGraphLasso, QuicGraphLassoCV
+from .. import QuicGraphicalLasso, QuicGraphicalLassoCV
 
 
 def _sample_mvn(n_samples, cov, prng):
@@ -113,7 +113,7 @@ class MonteCarloProfile(object):
         An inverse covariance estimator instance. Estimator to use on each
         instance after selecting a penalty lambda. The penalty parameter 'lam'
         will be overriden by with penalty selected by ms_estimator.
-        If None, this will use QuicGraphLasso.
+        If None, this will use QuicGraphicalLasso.
 
     graph :  An instance of a class with the method .create(n_features, alpha)
         that returns (cov, prec, adj).
@@ -195,10 +195,10 @@ class MonteCarloProfile(object):
             self.graph = ErdosRenyiGraph()
 
         if self.ms_estimator is None:
-            self.ms_estimator = QuicGraphLassoCV()
+            self.ms_estimator = QuicGraphicalLassoCV()
 
         if self.mc_estimator is None:
-            self.mc_estimator = QuicGraphLasso(
+            self.mc_estimator = QuicGraphicalLasso(
                 lam=0.5, mode="default", init_method="corrcoef"
             )
 
