@@ -440,7 +440,6 @@ if __name__ == "__main__":
                 plt.title("{}".format(name))
             else:
                 plt.title("{}\n(lam={:.2f})".format(name, lam))
-            ax.set_axis_bgcolor(".7")
 
         plt.suptitle(suptitle + " (page {})".format(nn), fontsize=14)
         figs.append(fig)

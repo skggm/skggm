@@ -321,7 +321,6 @@ class ModelAverage(BaseEstimator):
         self.seed = seed
         self.prng = np.random.RandomState(seed)
 
-
     def fit(self, X, y=None):
         """Learn a model averaged proportion matrix for X.
         Parameters
