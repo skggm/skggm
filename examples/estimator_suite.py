@@ -161,7 +161,9 @@ def adaptive_graph_lasso(X, model_selector, method):
         )
 
     elif model_selector == "QuicGraphicalLassoEBIC":
-        model = AdaptiveGraphicalLasso(estimator=QuicGraphicalLassoEBIC(), method=method)
+        model = AdaptiveGraphicalLasso(
+            estimator=QuicGraphicalLassoEBIC(), method=method
+        )
     model.fit(X)
     lam_norm_ = np.linalg.norm(model.estimator_.lam_)
     print("   ||lam_||_2: {}".format(lam_norm_))

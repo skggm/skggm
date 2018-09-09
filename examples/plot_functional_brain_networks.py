@@ -68,7 +68,9 @@ estimator_type = "QuicGraphicalLasso"
 
 if estimator_type == "QuicGraphicalLasso":
     # Compute the sparse inverse covariance via QuicGraphicalLasso
-    estimator = QuicGraphicalLasso(init_method="cov", lam=0.5, mode="default", verbose=1)
+    estimator = QuicGraphicalLasso(
+        init_method="cov", lam=0.5, mode="default", verbose=1
+    )
     estimator.fit(timeseries)
 
 elif estimator_type == "QuicGraphicalLassoCV":
@@ -109,4 +111,3 @@ plotting.plot_connectome(
 plotting.show()
 
 eval(input("Press any key to exit.."))
-
