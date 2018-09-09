@@ -64,17 +64,9 @@ def two_way_standardize(
     StandardScaler: Performs scaling to unit variance using the``Transformer`` API
         (e.g. as part of a preprocessing :class:`sklearn.pipeline.Pipeline`).
     """
-    X = check_array(
-        X, accept_sparse=None, copy=copy, warn_on_dtype=True, dtype=FLOAT_DTYPES
-    )
-    if sparse.issparse(X):
-        raise NotImplemented(
-            "Input is sparse: Algorithm for sparse matrices currently not supported."
-        )
-
     Xrow_polish = np.copy(X.T)
     Xcol_polish = np.copy(X)
-    [n_rows, n_cols] = np.shape(X)
+    n_rows, n_cols = np.shape(X)
 
     n_iter = 0
     err_norm = np.inf
@@ -182,15 +174,19 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
         """
         X = check_array(
             X,
-            accept_sparse=None,
+            accept_sparse=False,
             copy=self.copy,
             warn_on_dtype=True,
             dtype=FLOAT_DTYPES,
+            estimator=self,
+            ensure_min_features=2,
         )
         if sparse.issparse(X):
             raise NotImplemented(
                 "Input is sparse: Algorithm for sparse matrices currently not supported."
             )
+
+        self.n_rows_, self.n_cols_ = np.shape(X)
 
         self.col_mean_ = 0.
         self.n_rows_seen_ = 0
@@ -222,7 +218,7 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
 
         return self
 
-    def transform(self, X, y=None, copy=False):
+    def transform(self, X, copy=False):
         """Perform standardization by centering and scaling
         Parameters
         ----------
@@ -232,12 +228,15 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
         check_is_fitted(self, "row_scale_")
         X = check_array(
             X,
-            accept_sparse=None,
+            accept_sparse=False,
             copy=copy,
             warn_on_dtype=True,
-            estimator=self,
             dtype=FLOAT_DTYPES,
+            estimator=self,
         )
+        n_rows, n_cols = np.shape(X)
+        if self.n_cols_ != n_cols:
+            raise ValueError("Number of features must be same as for fit().")
 
         if sparse.issparse(X):
             raise NotImplementedError(
