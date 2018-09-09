@@ -2,23 +2,25 @@ import warnings
 import numpy as np
 from scipy import sparse
 
-from sklearn.preprocessing.data import (
-    scale,
-    _handle_zeros_in_scale
-    )
+from sklearn.preprocessing.data import scale, _handle_zeros_in_scale
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from sklearn.utils import check_array
 from sklearn.externals.six import string_types
 from sklearn.utils.extmath import _incremental_mean_and_var
-from sklearn.utils.validation import (
-    check_is_fitted,
-    FLOAT_DTYPES
-    )
+from sklearn.utils.validation import check_is_fitted, FLOAT_DTYPES
 
 
-def two_way_standardize(X, axis=0, with_mean=True, with_std=True, copy=True,
-                       max_iter=50, tol=1e-6, verbose=False):
+def two_way_standardize(
+    X,
+    axis=0,
+    with_mean=True,
+    with_std=True,
+    copy=True,
+    max_iter=50,
+    tol=1e-6,
+    verbose=False,
+):
     """Standardize a two-dimensional data matrix along both axes.
     Center to the mean and component wise scale to unit variance.
     Read more in the :ref:`User Guide <preprocessing_scaler>`.
@@ -62,39 +64,37 @@ def two_way_standardize(X, axis=0, with_mean=True, with_std=True, copy=True,
     StandardScaler: Performs scaling to unit variance using the``Transformer`` API
         (e.g. as part of a preprocessing :class:`sklearn.pipeline.Pipeline`).
     """
+    X = check_array(
+        X, accept_sparse=None, copy=copy, warn_on_dtype=True, dtype=FLOAT_DTYPES
+    )
+    if sparse.issparse(X):
+        raise NotImplemented(
+            "Input is sparse: Algorithm for sparse matrices currently not supported."
+        )
 
-    X = check_array(X, accept_sparse=None, copy=copy,
-                    warn_on_dtype=True, dtype=FLOAT_DTYPES)
     Xrow_polish = np.copy(X.T)
     Xcol_polish = np.copy(X)
     [n_rows, n_cols] = np.shape(X)
 
-    if sparse.issparse(X):
-        print('Input is sparse')
-        raise NotImplemented(
-                "Algorithm for sparse matrices currently not supported.")
+    n_iter = 0
+    err_norm = np.inf
+    oldXrow = np.copy(Xrow_polish)
+    oldXcol = np.copy(Xcol_polish)
+    while n_iter <= max_iter and err_norm > tol:
+        Xcol_polish = scale(Xrow_polish.T, axis=1, with_mean=True, with_std=with_std)
+        Xrow_polish = scale(Xcol_polish.T, axis=1, with_mean=True, with_std=with_std)
+        n_iter += 1
+        err_norm_row = np.linalg.norm(oldXrow - Xrow_polish, "fro")
+        err_norm_col = np.linalg.norm(oldXcol - Xcol_polish, "fro")
+        err_norm = .5 * err_norm_row / (n_rows * n_cols) + .5 * err_norm_col / (
+            n_rows * n_cols
+        )
 
-    else:
-        n_iter = 0
-        err_norm = np.inf
+        if verbose:
+            print("Iteration: {}, Convergence Err: {}".format(n_iter, err_norm))
+
         oldXrow = np.copy(Xrow_polish)
         oldXcol = np.copy(Xcol_polish)
-        while n_iter <= max_iter and err_norm > tol:
-            Xcol_polish = scale(Xrow_polish.T, axis=1,
-                                with_mean=True, with_std=with_std)
-            Xrow_polish = scale(Xcol_polish.T, axis=1,
-                                with_mean=True, with_std=with_std)
-            n_iter += 1
-            err_norm_row = np.linalg.norm(oldXrow-Xrow_polish, 'fro')
-            err_norm_col = np.linalg.norm(oldXcol-Xcol_polish, 'fro')
-            err_norm = .5 * err_norm_row/(n_rows*n_cols) + .5 * err_norm_col/(n_rows*n_cols)
-
-            if verbose:
-                print('Iteration: {}, Convergence Err: {}'.format(
-                        n_iter, err_norm))
-
-            oldXrow = np.copy(Xrow_polish)
-            oldXcol = np.copy(Xcol_polish)
 
     return Xrow_polish.T
 
@@ -180,31 +180,39 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
             along both row and column axes
         y : Passthrough for ``Pipeline`` compatibility. Input is ignored.
         """
-        X = check_array(X, accept_sparse=None, copy=self.copy,
-                        warn_on_dtype=True, dtype=FLOAT_DTYPES)
-
+        X = check_array(
+            X,
+            accept_sparse=None,
+            copy=self.copy,
+            warn_on_dtype=True,
+            dtype=FLOAT_DTYPES,
+        )
         if sparse.issparse(X):
-            print('Input is sparse')
             raise NotImplemented(
-                "Algorithm for sparse matrices currently not supported.")
-        else:
-            self.col_mean_ = 0.
-            self.n_rows_seen_ = 0
+                "Input is sparse: Algorithm for sparse matrices currently not supported."
+            )
 
-            self.col_var_ = None
-            if self.with_std:
-                self.col_var_ = 0.
+        self.col_mean_ = 0.
+        self.n_rows_seen_ = 0
 
-            self.col_mean_, self.col_var_, self.n_rows_seen_ = _incremental_mean_and_var(X, self.col_mean_, self.col_var_, self.n_rows_seen_)
+        self.col_var_ = None
+        if self.with_std:
+            self.col_var_ = 0.
 
-            self.row_mean_ = 0.
-            self.n_cols_seen_ = 0
+        self.col_mean_, self.col_var_, self.n_rows_seen_ = _incremental_mean_and_var(
+            X, self.col_mean_, self.col_var_, self.n_rows_seen_
+        )
 
-            self.row_var_ = None
-            if self.with_std:
-                self.row_var_ = 0.
+        self.row_mean_ = 0.
+        self.n_cols_seen_ = 0
 
-            self.row_mean_, self.row_var_, self.n_cols_seen_ = _incremental_mean_and_var(X.T, self.row_mean_, self.row_var_, self.n_cols_seen_)
+        self.row_var_ = None
+        if self.with_std:
+            self.row_var_ = 0.
+
+        self.row_mean_, self.row_var_, self.n_cols_seen_ = _incremental_mean_and_var(
+            X.T, self.row_mean_, self.row_var_, self.n_cols_seen_
+        )
 
         self.row_scale_ = None
         self.col_scale_ = None
@@ -214,23 +222,27 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
 
         return self
 
-    def transform(self, X, copy=None):
+    def transform(self, X, y=None, copy=False):
         """Perform standardization by centering and scaling
         Parameters
         ----------
         X : array-like, shape [n_rows, n_cols]
             The data used to scale along the features axis.
-        copy : bool, optional (default: None)
-            Copy the input X or not.
         """
-        check_is_fitted(self, 'row_scale_')
-        copy = copy if copy is not None else self.copy
-        X = check_array(X, accept_sparse=None, copy=copy, warn_on_dtype=True,
-                        estimator=self, dtype=FLOAT_DTYPES)
+        check_is_fitted(self, "row_scale_")
+        X = check_array(
+            X,
+            accept_sparse=None,
+            copy=copy,
+            warn_on_dtype=True,
+            estimator=self,
+            dtype=FLOAT_DTYPES,
+        )
 
         if sparse.issparse(X):
             raise NotImplemented(
-                "Input is sparse: Algorithm for sparse matrices currently not supported.")
+                "Input is sparse: Algorithm for sparse matrices currently not supported."
+            )
 
         return two_way_standardize(X)
 
@@ -247,12 +259,13 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
         X_tr : array-like, shape [n_samples, n_features]
             Transformed array.
         """
-        check_is_fitted(self, 'row_scale_')
+        check_is_fitted(self, "row_scale_")
         if sparse.issparse(X):
             raise NotImplementedError(
-                'Input is sparse: Algorithm for sparse matrices currently not supported.')
+                "Input is sparse: Algorithm for sparse matrices currently not supported."
+            )
 
-        warnings.warn('Two Way standardization not reversible with accuracy')
+        warnings.warn("Two Way standardization not reversible with accuracy")
 
         X = np.asarray(X)
         if copy:
