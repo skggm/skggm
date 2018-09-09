@@ -149,16 +149,15 @@ class InverseCovarianceEstimator(BaseEstimator):
         self.init_method = init_method
         self.auto_scale = auto_scale
 
-        self.covariance_ = None  # assumes a matrix of a list of matrices
-        self.precision_ = None  # assumes a matrix of a list of matrices
-
         # these must be updated upon self.fit()
         # the first 4 will be set if self.init_coefs is used.
+        #   self.covariance_
+        #   self.precision_
         #   self.sample_covariance_
         #   self.lam_scale_
-        #   self.n_samples
-        #   self.n_features
-        self.is_fitted = False
+        #   self.n_samples_
+        #   self.n_features_
+        #   self.is_fitted_
 
         super(InverseCovarianceEstimator, self).__init__()
 
@@ -171,7 +170,7 @@ class InverseCovarianceEstimator(BaseEstimator):
             self.sample_covariance_
             self.lam_scale_
         """
-        self.n_samples, self.n_features = X.shape
+        self.n_samples_, self.n_features_ = X.shape
         self.sample_covariance_, self.lam_scale_ = _init_coefs(
             X, method=self.init_method
         )
@@ -287,15 +286,15 @@ class InverseCovarianceEstimator(BaseEstimator):
         -------
         Scalar ebic score or list of ebic scores.
         """
-        if not self.is_fitted:
+        if not self.is_fitted_:
             return
 
         if not isinstance(self.precision_, list):
             return metrics.ebic(
                 self.sample_covariance_,
                 self.precision_,
-                self.n_samples,
-                self.n_features,
+                self.n_samples_,
+                self.n_features_,
                 gamma=gamma,
             )
 
@@ -305,8 +304,8 @@ class InverseCovarianceEstimator(BaseEstimator):
                 metrics.ebic(
                     self.sample_covariance_,
                     self.precision_[lidx],
-                    self.n_samples,
-                    self.n_features,
+                    self.n_samples_,
+                    self.n_features_,
                     gamma=gamma,
                 )
             )
@@ -338,7 +337,7 @@ class InverseCovarianceEstimator(BaseEstimator):
             raise ValueError("EBIC requires multiple models to select from.")
             return
 
-        if not self.is_fitted:
+        if not self.is_fitted_:
             return
 
         ebic_scores = self.ebic(gamma=gamma)

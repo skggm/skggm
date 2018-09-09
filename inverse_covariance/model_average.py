@@ -321,27 +321,6 @@ class ModelAverage(BaseEstimator):
         self.seed = seed
         self.prng = np.random.RandomState(seed)
 
-        self.proportion_ = None
-        self.support_ = None
-        self.lam_ = None
-        self.lam_scale_ = None
-        self.estimators_ = []
-        self.lams_ = []
-        self.subsets_ = []
-
-        # default to QuicGraphLasso
-        if self.estimator is None:
-            self.estimator = QuicGraphLasso(init_method=self.init_method)
-
-        if self.penalization != "subsampling" and not hasattr(
-            self.estimator, self.penalty_name
-        ):
-            raise ValueError(
-                (
-                    "Must specify valid penalty for "
-                    "estimator: {}.".format(self.penalty_name)
-                )
-            )
 
     def fit(self, X, y=None):
         """Learn a model averaged proportion matrix for X.
@@ -350,10 +329,31 @@ class ModelAverage(BaseEstimator):
         X : ndarray, shape (n_samples, n_features)
             Data from which to compute the proportion matrix.
         """
+        # default to QuicGraphLasso
+        estimator = self.estimator or QuicGraphLasso()
+
+        if self.penalization != "subsampling" and not hasattr(
+            estimator, self.penalty_name
+        ):
+            raise ValueError(
+                (
+                    "Must specify valid penalty for "
+                    "estimator: {}.".format(self.penalty_name)
+                )
+            )
+
+        self.proportion_ = None
+        self.support_ = None
+        self.lam_ = None
+        self.lam_scale_ = None
+        self.estimators_ = []
+        self.lams_ = []
+        self.subsets_ = []
+
         X = check_array(X, ensure_min_features=2, estimator=self)
         X = as_float_array(X, copy=False, force_all_finite=False)
 
-        n_samples, n_features = X.shape
+        n_samples_, n_features_ = X.shape
         _, self.lam_scale_ = _init_coefs(X, method=self.init_method)
 
         fit_fun = partial(
@@ -362,7 +362,7 @@ class ModelAverage(BaseEstimator):
             lam=self.lam,
             lam_perturb=self.lam_perturb,
             lam_scale_=self.lam_scale_,
-            estimator=self.estimator,
+            estimator=estimator,
             penalty_name=self.penalty_name,
             subsample=self.subsample,
             bootstrap=self.bootstrap,
@@ -386,7 +386,7 @@ class ModelAverage(BaseEstimator):
 
         # reduce
         self.lam_ = 0.0
-        self.proportion_ = np.zeros((n_features, n_features))
+        self.proportion_ = np.zeros((n_features_, n_features_))
         for new_estimator in self.estimators_:
             # update proportions
             if isinstance(new_estimator.precision_, list):
@@ -411,6 +411,8 @@ class ModelAverage(BaseEstimator):
         self.lam_ /= self.n_trials
         if self.normalize:
             self.proportion_ /= self.n_trials
+
+        return self
 
     @property
     def precision_(self):

@@ -304,19 +304,6 @@ class QuicGraphLasso(InverseCovarianceEstimator):
             raise ValueError("path required in path mode.")
             return
 
-        self.path_ = _validate_path(self.path)
-
-        # quic-specific outputs
-        self.opt_ = None
-        self.cputime_ = None
-        self.iters_ = None
-        self.duality_gap_ = None
-
-        # these must be updated upon self.fit()
-        self.sample_covariance_ = None
-        self.lam_scale_ = None
-        self.is_fitted = False
-
         super(QuicGraphLasso, self).__init__(
             score_metric=score_metric, init_method=init_method, auto_scale=auto_scale
         )
@@ -334,6 +321,18 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         -------
         self
         """
+        # quic-specific outputs
+        self.opt_ = None
+        self.cputime_ = None
+        self.iters_ = None
+        self.duality_gap_ = None
+
+        # these must be updated upon self.fit()
+        self.sample_covariance_ = None
+        self.lam_scale_ = None
+        self.is_fitted_ = False
+
+        self.path_ = _validate_path(self.path)
         X = check_array(X, ensure_min_features=2, estimator=self)
         X = as_float_array(X, copy=False, force_all_finite=False)
         self.init_coefs(X)
@@ -359,7 +358,7 @@ class QuicGraphLasso(InverseCovarianceEstimator):
         else:
             raise NotImplementedError("Only method='quic' has been implemented.")
 
-        self.is_fitted = True
+        self.is_fitted_ = True
         return self
 
     def lam_at_index(self, lidx):
@@ -540,7 +539,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
     cv_lams_ : list of float
         All penalization parameters explored.
 
-    grid_scores: 2D numpy.ndarray (n_alphas, n_folds)
+    grid_scores_: 2D numpy.ndarray (n_alphas, n_folds)
         Log-likelihood score on left-out data across folds.
 
     n_iter_ : int
@@ -583,17 +582,6 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         self.verbose = verbose
         self.backend = backend
 
-        # quic-specific outputs
-        self.opt_ = None
-        self.cputime_ = None
-        self.iters_ = None
-        self.duality_gap_ = None
-
-        # these must be updated upon self.fit()
-        self.sample_covariance_ = None
-        self.lam_scale_ = None
-        self.is_fitted = False
-
         super(QuicGraphLassoCV, self).__init__(
             score_metric=score_metric, init_method=init_method, auto_scale=auto_scale
         )
@@ -608,6 +596,17 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         X : ndarray, shape (n_samples, n_features)
             Data from which to compute the covariance estimate
         """
+        # quic-specific outputs
+        self.opt_ = None
+        self.cputime_ = None
+        self.iters_ = None
+        self.duality_gap_ = None
+
+        # these must be updated upon self.fit()
+        self.sample_covariance_ = None
+        self.lam_scale_ = None
+        self.is_fitted_ = False
+
         # initialize
         X = check_array(X, ensure_min_features=2, estimator=self)
         X = as_float_array(X, copy=False, force_all_finite=False)
@@ -756,15 +755,15 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
                 )
 
         results = list(zip(*results))
-        grid_scores = list(results[1])
+        grid_scores_ = list(results[1])
         lams = list(results[0])
 
         # Finally, compute the score with lambda = 0
         lams.append(0)
-        grid_scores.append(
+        grid_scores_.append(
             cross_val_score(EmpiricalCovariance(), X, cv=cv, n_jobs=self.n_jobs)
         )
-        self.grid_scores = np.array(grid_scores)
+        self.grid_scores_ = np.array(grid_scores_)
         self.lam_ = self.lam * lams[best_index]
         self.cv_lams_ = [self.lam * l for l in lams]
 
@@ -791,7 +790,7 @@ class QuicGraphLassoCV(InverseCovarianceEstimator):
         else:
             raise NotImplementedError("Only method='quic' has been implemented.")
 
-        self.is_fitted = True
+        self.is_fitted_ = True
         return self
 
 
@@ -902,19 +901,6 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
         self.path = path
         self.gamma = gamma
 
-        # quic-specific outputs
-        self.opt_ = None
-        self.cputime_ = None
-        self.iters_ = None
-        self.duality_gap_ = None
-
-        # these must be updated upon self.fit()
-        self.path_ = None
-        self.sample_covariance_ = None
-        self.lam_scale_ = None
-        self.lam_ = None
-        self.is_fitted = False
-
         super(QuicGraphLassoEBIC, self).__init__(
             init_method=init_method, score_metric=score_metric, auto_scale=auto_scale
         )
@@ -932,6 +918,19 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
         -------
         self
         """
+        # quic-specific outputs
+        self.opt_ = None
+        self.cputime_ = None
+        self.iters_ = None
+        self.duality_gap_ = None
+
+        # these must be updated upon self.fit()
+        self.path_ = None
+        self.sample_covariance_ = None
+        self.lam_scale_ = None
+        self.lam_ = None
+        self.is_fitted_ = False
+
         X = check_array(X, ensure_min_features=2, estimator=self)
         X = as_float_array(X, copy=False, force_all_finite=False)
         self.init_coefs(X)
@@ -963,7 +962,7 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
                 path=self.path_,
                 msg=self.verbose,
             )
-            self.is_fitted = True
+            self.is_fitted_ = True
         else:
             raise NotImplementedError("Only method='quic' has been implemented.")
 
@@ -973,5 +972,5 @@ class QuicGraphLassoEBIC(InverseCovarianceEstimator):
         self.precision_ = self.precision_[best_lam_idx]
         self.covariance_ = self.covariance_[best_lam_idx]
 
-        self.is_fitted = True
+        self.is_fitted_ = True
         return self

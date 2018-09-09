@@ -269,7 +269,7 @@ class TestQuicGraphLasso(object):
         print(result_vec)
         assert_allclose(expected, result_vec, atol=1e-1, rtol=1e-1)
 
-        assert len(ic.grid_scores) == len(ic.cv_lams_)
+        assert len(ic.grid_scores_) == len(ic.cv_lams_)
 
     @pytest.mark.parametrize(
         "params_in, expected",
