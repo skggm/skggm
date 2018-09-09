@@ -5,6 +5,7 @@ from inverse_covariance import (
     QuicGraphicalLassoEBIC,
     AdaptiveGraphicalLasso,
     ModelAverage,
+    TwoWayStandardScaler,
 )
 
 
@@ -26,3 +27,7 @@ def test_adaptive_graphical_lasso():
 
 def test_model_average():
     return check_estimator(ModelAverage)
+
+
+def test_two_way_standard_scaler():
+    return check_estimator(TwoWayStandardScaler)
