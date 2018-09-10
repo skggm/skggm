@@ -10,9 +10,7 @@ from sklearn.covariance import EmpiricalCovariance
 from sklearn.utils import check_array, as_float_array, deprecated
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.externals.joblib import Parallel, delayed
-from sklearn.model_selection import cross_val_score  # NOQA >= 0.18
-
-# from sklearn.cross_validation import cross_val_score  # NOQA < 0.18
+from sklearn.model_selection import cross_val_score, RepeatedKFold
 
 from . import pyquic
 from .inverse_covariance import (
@@ -21,7 +19,6 @@ from .inverse_covariance import (
     _compute_error,
     _validate_path,
 )
-from .cross_validation import RepeatedKFold
 
 
 def quic(
@@ -625,7 +622,7 @@ class QuicGraphicalLassoCV(InverseCovarianceEstimator):
         elif isinstance(self.cv, tuple):
             cv = self.cv
 
-        cv = RepeatedKFold(X.shape[0], n_folds=cv[0], n_trials=cv[1])
+        cv = RepeatedKFold(n_splits=cv[0], n_repeats=cv[1])
 
         self.init_coefs(X)
 
@@ -662,11 +659,11 @@ class QuicGraphicalLassoCV(InverseCovarianceEstimator):
                         score_metric=self.score_metric,
                         init_method=self.init_method,
                     )
-                    for train, test in cv
+                    for train, test in cv.split(X)
                 )
             else:
                 # parallel via spark
-                train_test_grid = [(train, test) for (train, test) in cv]
+                train_test_grid = [(train, test) for (train, test) in cv.split(X)]
                 indexed_param_grid = list(
                     zip(range(len(train_test_grid)), train_test_grid)
                 )

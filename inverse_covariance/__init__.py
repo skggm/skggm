@@ -13,7 +13,6 @@ from .metrics import log_likelihood, kl_loss, quadratic_loss, ebic
 from .rank_correlation import spearman_correlation, kendalltau_correlation
 from .model_average import ModelAverage
 from .adaptive_graph_lasso import AdaptiveGraphLasso, AdaptiveGraphicalLasso
-from .cross_validation import RepeatedKFold
 
 __all__ = [
     "InverseCovarianceEstimator",
@@ -33,5 +32,4 @@ __all__ = [
     "ModelAverage",
     "AdaptiveGraphLasso",
     "AdaptiveGraphicalLasso",
-    "RepeatedKFold",
 ]
