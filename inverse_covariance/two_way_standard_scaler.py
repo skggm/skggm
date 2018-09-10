@@ -283,19 +283,5 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
         )
 
     def inverse_transform(self, X, copy=False):
-        """Scale back the data to the original representation
-
-        Parameters
-        ----------
-        X : array-like, shape [n_samples, n_features]
-            The data used to scale along the features axis.
-
-        copy : bool, optional (default: False)
-            Copy the input X or not.
-
-        Returns
-        -------
-        X_tr : array-like, shape [n_samples, n_features]
-            Transformed array.
-        """
+        """Scale back the data to the original representation."""
         raise NotImplementedError("Reversing two way transformation is not accurate.")
