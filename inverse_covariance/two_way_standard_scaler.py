@@ -126,10 +126,11 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
 
     Attributes
     ----------
-    scale_ : ndarray, shape (n_features,)
+    row_scale_ : ndarray, shape (n_examples,)
         Per feature relative scaling of the data.
-        .. versionadded:: 0.17
-           *scale_*
+
+    col_scale_ : ndarray, shape (n_features,)
+        Per feature relative scaling of the data.
 
     row_mean_ : array of floats with shape [n_examples]
         The mean value for each feature in the training set.
@@ -303,28 +304,4 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
                 "Input is sparse: Algorithm for sparse matrices currently not supported."
             )
 
-        warnings.warn("Reversing two way transformation is not accurate.")
-
-        # Q: Should ^ be a warning or should we just rais here and delete the
-        #    rest of the code?
-
-        if copy:
-            X = X.copy()
-
-        X = X.T
-
-        if self.with_std:
-            X *= self.row_scale_
-
-        if self.with_mean:
-            X += self.row_mean_
-
-        X = X.T
-
-        if self.with_std:
-            X *= self.col_scale_
-
-        if self.with_mean:
-            X += self.col_mean_
-
-        return X
+        raise NotImplementedError("Reversing two way transformation is not accurate.")
