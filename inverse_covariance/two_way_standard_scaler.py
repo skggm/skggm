@@ -298,9 +298,4 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
         X_tr : array-like, shape [n_samples, n_features]
             Transformed array.
         """
-        if sparse.issparse(X):
-            raise NotImplementedError(
-                "Input is sparse: Algorithm for sparse matrices currently not supported."
-            )
-
         raise NotImplementedError("Reversing two way transformation is not accurate.")
