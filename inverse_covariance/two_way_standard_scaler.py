@@ -298,7 +298,6 @@ class TwoWayStandardScaler(BaseEstimator, TransformerMixin):
         X_tr : array-like, shape [n_samples, n_features]
             Transformed array.
         """
-        check_is_fitted(self, "row_scale_")
         if sparse.issparse(X):
             raise NotImplementedError(
                 "Input is sparse: Algorithm for sparse matrices currently not supported."
