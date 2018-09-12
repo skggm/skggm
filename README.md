@@ -48,7 +48,7 @@ An overview of the skggm graphical lasso facilities is depicted by the following
 
 Information on basic usage can be found at [https://skggm.github.io/skggm/tour](https://skggm.github.io/skggm/tour).  The package includes the following classes and submodules.
 
-- **QuicGraphicalLasso** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L138-L239)
+- **QuicGraphicalLasso** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L165)
 
     _QuicGraphicalLasso_ is an implementation of [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) wrapped as a scikit-learn compatible estimator \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\] . The estimator can be run in `default` mode for a fixed penalty or in `path` mode to explore a sequence of penalties efficiently.  The penalty `lam` can be a scalar or matrix.
 
@@ -56,15 +56,15 @@ Information on basic usage can be found at [https://skggm.github.io/skggm/tour](
 
     The interface largely mirrors the built-in _[GraphLasso](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLasso.html)_ although some param names have been changed (e.g., `alpha` to `lam`). Some notable advantages of this implementation over _GraphicalLasso_ are support for a matrix penalization term and speed.
 
-- **QuicGraphicalLassoCV** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L372-L468)
+- **QuicGraphicalLassoCV** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L444)
 
     _QuicGraphicalLassoCV_ is an optimized cross-validation model selection implementation similar to scikit-learn's _[GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html)_. As with _QuicGraphicalLasso_, this implementation also supports matrix penalization.
 
-- **QuicGraphicalLassoEBIC** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L644-L717)
+- **QuicGraphicalLassoEBIC** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L809)
 
     _QuicGraphicalLassoEBIC_ is provided as a convenience class to use the _Extended Bayesian Information Criteria_ (EBIC) for model selection \[[Foygel et al.](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\].
 
-- **ModelAverage** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/model_average.py#L72-L172)
+- **ModelAverage** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/model_average.py#L180)
 
     _ModelAverage_ is an ensemble meta-estimator that computes several fits with a user-specified `estimator` and averages the support of the resulting precision estimates.  The result is a `proportion_` matrix indicating the sample probability of a non-zero at each index. This is a similar facility to scikit-learn's _[RandomizedLasso](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RandomizedLasso.html)_) but for the graph lasso.
 
@@ -76,7 +76,7 @@ Information on basic usage can be found at [https://skggm.github.io/skggm/tour](
 
     The random penalty can be chosen in a variety of ways, specified by the `penalization` parameter.  This technique is also known as _stability selection_ or _random lasso_.
 
-- **AdaptiveGraphicalLasso** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/adaptive_graph_lasso.py#L13-L48)
+- **AdaptiveGraphicalLasso** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/adaptive_graph_lasso.py#L10)
 
     _AdaptiveGraphicalLasso_ performs a two step estimation procedure:
 
