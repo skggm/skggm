@@ -48,21 +48,21 @@ An overview of the skggm graphical lasso facilities is depicted by the following
 
 Information on basic usage can be found at [https://skggm.github.io/skggm/tour](https://skggm.github.io/skggm/tour).  The package includes the following classes and submodules.
 
-- **QuicGraphLasso** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L138-L239)
+- **QuicGraphicalLasso** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L138-L239)
 
-    _QuicGraphLasso_ is an implementation of [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) wrapped as a scikit-learn compatible estimator \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\] . The estimator can be run in `default` mode for a fixed penalty or in `path` mode to explore a sequence of penalties efficiently.  The penalty `lam` can be a scalar or matrix.
+    _QuicGraphicalLasso_ is an implementation of [QUIC](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) wrapped as a scikit-learn compatible estimator \[[Hsieh et al.](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf)\] . The estimator can be run in `default` mode for a fixed penalty or in `path` mode to explore a sequence of penalties efficiently.  The penalty `lam` can be a scalar or matrix.
 
     The primary outputs of interest are: `covariance_`, `precision_`, and `lam_`.
 
-    The interface largely mirrors the built-in _[GraphLasso](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLasso.html)_ although some param names have been changed (e.g., `alpha` to `lam`). Some notable advantages of this implementation over _GraphLasso_ are support for a matrix penalization term and speed.
+    The interface largely mirrors the built-in _[GraphLasso](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLasso.html)_ although some param names have been changed (e.g., `alpha` to `lam`). Some notable advantages of this implementation over _GraphicalLasso_ are support for a matrix penalization term and speed.
 
-- **QuicGraphLassoCV** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L372-L468)
+- **QuicGraphicalLassoCV** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L372-L468)
 
-    _QuicGraphLassoCV_ is an optimized cross-validation model selection implementation similar to scikit-learn's _[GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html)_. As with _QuicGraphLasso_, this implementation also supports matrix penalization.
+    _QuicGraphicalLassoCV_ is an optimized cross-validation model selection implementation similar to scikit-learn's _[GraphLassoCV](http://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphLassoCV.html)_. As with _QuicGraphicalLasso_, this implementation also supports matrix penalization.
 
-- **QuicGraphLassoEBIC** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L644-L717)
+- **QuicGraphicalLassoEBIC** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/quic_graph_lasso.py#L644-L717)
 
-    _QuicGraphLassoEBIC_ is provided as a convenience class to use the _Extended Bayesian Information Criteria_ (EBIC) for model selection \[[Foygel et al.](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\].
+    _QuicGraphicalLassoEBIC_ is provided as a convenience class to use the _Extended Bayesian Information Criteria_ (EBIC) for model selection \[[Foygel et al.](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models)\].
 
 - **ModelAverage** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/model_average.py#L72-L172)
 
@@ -76,9 +76,9 @@ Information on basic usage can be found at [https://skggm.github.io/skggm/tour](
 
     The random penalty can be chosen in a variety of ways, specified by the `penalization` parameter.  This technique is also known as _stability selection_ or _random lasso_.
 
-- **AdaptiveGraphLasso** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/adaptive_graph_lasso.py#L13-L48)
+- **AdaptiveGraphicalLasso** [[doc]](https://github.com/skggm/skggm/blob/master/inverse_covariance/adaptive_graph_lasso.py#L13-L48)
 
-    _AdaptiveGraphLasso_ performs a two step estimation procedure:
+    _AdaptiveGraphicalLasso_ performs a two step estimation procedure:
 
     1. Obtain an initial sparse estimate.
 
@@ -104,7 +104,7 @@ Information on basic usage can be found at [https://skggm.github.io/skggm/tour](
 
 `skggm` supports parallel computation through [sklearn.joblib](http://pythonhosted.org/joblib/) and [Apache Spark](http://spark.apache.org/).  Independent trials, cross validation, and other _embarrassingly parallel_ operations can be farmed out to multiple processes, cores, or worker machines.  In particular,
 
-- `QuicGraphLassoCV`
+- `QuicGraphicalLassoCV`
 - `ModelAverage`
 - `profiling.MonteCarloProfile`
 
@@ -113,7 +113,7 @@ can make use of this through either the `n_jobs` or `sc` (sparkContext) paramete
 Since these are naive implementations, it is not possible to enable parallel work on all three of objects simultaneously when they are being composited together. For example, in this snippet:
 
     model = ModelAverage(
-        estimator=QuicGraphLassoCV(
+        estimator=QuicGraphicalLassoCV(
             cv=2,
             n_refinements=6,
         )
@@ -123,7 +123,7 @@ Since these are naive implementations, it is not possible to enable parallel wor
     )
     model.fit(X)
 
-only one of `ModelAverage` or `QuicGraphLassoCV` can make use of the spark context. The problem size and number of trials will determine the resolution that gives the fastest performance.
+only one of `ModelAverage` or `QuicGraphicalLassoCV` can make use of the spark context. The problem size and number of trials will determine the resolution that gives the fastest performance.
 
 
 ## Installation
@@ -205,7 +205,7 @@ Here is the corresponding Bibtex entry
 
 * ["Extended Bayesian Information Criteria for Gaussian Graphical Models"](https://papers.nips.cc/paper/4087-extended-bayesian-information-criteria-for-gaussian-graphical-models) R. Foygel and M. Drton NIPS 2010
 
-### QuicGraphLasso / QuicGraphLassoCV
+### QuicGraphicalLasso / QuicGraphicalLassoCV
 
 * ["QUIC: Quadratic Approximation for sparse inverse covariance estimation"](http://jmlr.org/papers/volume15/hsieh14a/hsieh14a.pdf) by C. Hsieh, M. A. Sustik, I. S. Dhillon, P. Ravikumar, Journal of Machine Learning Research (JMLR), October 2014.
 
