@@ -71,7 +71,6 @@ setup(
         'inverse_covariance.profiling',
         'inverse_covariance.pyquic'],
     install_requires=INSTALL_REQUIRES,
-    extras_require=dict(contribute=['black==18.6b4']),
     url='https://github.com/skggm/skggm',
     author_email='jlaska@gmail.com',
     ext_package='inverse_covariance',
