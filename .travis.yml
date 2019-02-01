@@ -22,12 +22,11 @@ addons:
 install:
     - pip install -U pip wheel
     - pip install --install-option="--no-cython-compile" cython
-    - pip install -r requirements.txt
+    - pip install -r dev-requirements.txt
     - python setup.py develop
 
 # command to run tests
 script:
-    - pip install black
     - black --check inverse_covariance
     - black --check examples
     - python -m pytest --showlocals --pyargs
