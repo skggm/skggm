@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import numpy as np
 from functools import partial
 from sklearn.base import clone
-from sklearn.externals.joblib import Parallel, delayed
+from joblib import Parallel, delayed
 
 from .metrics import error_fro
 from .erdos_renyi_graph import ErdosRenyiGraph
