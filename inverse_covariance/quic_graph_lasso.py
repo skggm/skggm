@@ -9,7 +9,7 @@ from functools import partial
 from sklearn.covariance import EmpiricalCovariance
 from sklearn.utils import check_array, as_float_array, deprecated
 from sklearn.utils.testing import assert_array_almost_equal
-from sklearn.externals.joblib import Parallel, delayed
+from joblib import Parallel, delayed
 from sklearn.model_selection import cross_val_score, RepeatedKFold
 
 from . import pyquic
