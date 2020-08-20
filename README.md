@@ -102,7 +102,7 @@ Information on basic usage can be found at [https://skggm.github.io/skggm/tour](
 
 ## Parallelization Support
 
-`skggm` supports parallel computation through [sklearn.joblib](http://pythonhosted.org/joblib/) and [Apache Spark](http://spark.apache.org/).  Independent trials, cross validation, and other _embarrassingly parallel_ operations can be farmed out to multiple processes, cores, or worker machines.  In particular,
+`skggm` supports parallel computation through [joblib](http://pythonhosted.org/joblib/) and [Apache Spark](http://spark.apache.org/).  Independent trials, cross validation, and other _embarrassingly parallel_ operations can be farmed out to multiple processes, cores, or worker machines.  In particular,
 
 - `QuicGraphicalLassoCV`
 - `ModelAverage`
