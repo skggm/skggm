@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import numpy as np
 from sklearn.base import BaseEstimator, clone
 from sklearn.utils import check_array, as_float_array
-from sklearn.externals.joblib import Parallel, delayed
+from joblib import Parallel, delayed
 from functools import partial
 
 from .inverse_covariance import _init_coefs
