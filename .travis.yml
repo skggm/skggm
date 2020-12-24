@@ -31,4 +31,4 @@ install:
 script:
     - black --check inverse_covariance
     - black --check examples
-    - pytihon -m pytest --showlocals --pyargis
+    - python -m pytest --showlocals --pyargis
