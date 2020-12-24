@@ -22,7 +22,7 @@ addons:
 
 # command to install dependencies
 install:
-    - pip install -U pip wheel
+    - pip install -U pip wheel pytest
     - pip install --install-option="--no-cython-compile" cython
     - pip install -r dev-requirements.txt
     - python setup.py develop
