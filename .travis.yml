@@ -10,12 +10,14 @@ cache:
     directories:
         - $HOME/.cache/pip
 
+dist: trusty
+
 addons:
     apt:
         packages:
             - libblas-dev
             - liblapack-dev
-            - libatlas3gf-base
+            - libatlas3gf-base  
             - libatlas-dev
 
 # command to install dependencies
@@ -29,4 +31,4 @@ install:
 script:
     - black --check inverse_covariance
     - black --check examples
-    - python -m pytest --showlocals --pyargs
+    - pytihon -m pytest --showlocals --pyargis
