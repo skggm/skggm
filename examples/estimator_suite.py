@@ -13,9 +13,9 @@ import numpy as np
 import tabulate
 import time
 
-from sklearn.grid_search import GridSearchCV
+from sklearn.model_selection import GridSearchCV
 from sklearn.datasets import make_sparse_spd_matrix
-from sklearn.covariance import GraphLassoCV, ledoit_wolf
+from sklearn.covariance import GraphicalLassoCV, ledoit_wolf
 import matplotlib.pyplot as plt
 
 
@@ -293,10 +293,10 @@ def empirical(X):
 
 
 def graph_lasso(X, num_folds):
-    """Estimate inverse covariance via scikit-learn GraphLassoCV class.
+    """Estimate inverse covariance via scikit-learn GraphicalLassoCV class.
     """
     print("GraphLasso (sklearn)")
-    model = GraphLassoCV(cv=num_folds)
+    model = GraphicalLassoCV(cv=num_folds)
     model.fit(X)
     print("   lam_: {}".format(model.alpha_))
     return model.covariance_, model.precision_, model.alpha_
@@ -372,12 +372,12 @@ if __name__ == "__main__":
     print("   frobenius error: {}".format(error))
     print("")
 
-    # sklearn GraphLassoCV
+    # sklearn GraphicalLassoCV
     start_time = time.time()
     cov, prec, lam = graph_lasso(X, cv_folds)
     end_time = time.time()
     ctime = end_time - start_time
-    name = "GraphLassoCV (sklearn)"
+    name = "GraphicalLassoCV (sklearn)"
     plot_covs.append((name, cov))
     plot_precs.append((name, prec, lam))
     error = np.linalg.norm(true_cov - cov, ord="fro")
