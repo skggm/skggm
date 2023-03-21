@@ -318,6 +318,11 @@ class QuicGraphicalLasso(InverseCovarianceEstimator):
         -------
         self
         """
+
+        # To satisfy sklearn 
+        if y is not None and len(y) == 1:
+            raise ValueError("Cannot fit with just 1 sample.")
+    
         # quic-specific outputs
         self.opt_ = None
         self.cputime_ = None
@@ -356,6 +361,7 @@ class QuicGraphicalLasso(InverseCovarianceEstimator):
             raise NotImplementedError("Only method='quic' has been implemented.")
 
         self.is_fitted_ = True
+        self.n_features_in_ = X.shape[1]
         return self
 
     def lam_at_index(self, lidx):
@@ -600,6 +606,11 @@ class QuicGraphicalLassoCV(InverseCovarianceEstimator):
         X : ndarray, shape (n_samples, n_features)
             Data from which to compute the covariance estimate
         """
+
+        # To satisfy sklearn 
+        if y is not None and len(y) == 1:
+            raise ValueError("Cannot fit with just 1 sample.")
+
         # quic-specific outputs
         self.opt_ = None
         self.cputime_ = None
@@ -795,6 +806,7 @@ class QuicGraphicalLassoCV(InverseCovarianceEstimator):
             raise NotImplementedError("Only method='quic' has been implemented.")
 
         self.is_fitted_ = True
+        self.n_features_in_ = X.shape[1]
         return self
 
 
@@ -930,6 +942,11 @@ class QuicGraphicalLassoEBIC(InverseCovarianceEstimator):
         -------
         self
         """
+
+        # To satisfy sklearn 
+        if y is not None and len(y) == 1:
+            raise ValueError("Cannot fit with just 1 sample.")
+
         # quic-specific outputs
         self.opt_ = None
         self.cputime_ = None
@@ -985,6 +1002,7 @@ class QuicGraphicalLassoEBIC(InverseCovarianceEstimator):
         self.covariance_ = self.covariance_[best_lam_idx]
 
         self.is_fitted_ = True
+        self.n_features_in_ = X.shape[1]
         return self
 
 

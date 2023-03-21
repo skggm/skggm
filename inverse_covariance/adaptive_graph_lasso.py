@@ -95,7 +95,7 @@ class AdaptiveGraphicalLasso(BaseEstimator):
         X = as_float_array(X, copy=False, force_all_finite=False)
 
         n_samples_, n_features_ = X.shape
-
+        
         # perform first estimate
         estimator.fit(X)
 
@@ -139,6 +139,7 @@ class AdaptiveGraphicalLasso(BaseEstimator):
             )
 
         self.is_fitted_ = True
+        self.n_features_in_ = X.shape[1]
         return self
 
 

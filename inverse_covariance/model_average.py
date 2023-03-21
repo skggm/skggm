@@ -319,7 +319,7 @@ class ModelAverage(BaseEstimator):
         self.n_jobs = n_jobs
         self.sc = sc
         self.seed = seed
-        self.prng = np.random.RandomState(seed)
+        
 
     def fit(self, X, y=None):
         """Learn a model averaged proportion matrix for X.
@@ -330,7 +330,10 @@ class ModelAverage(BaseEstimator):
         """
         # default to QuicGraphicalLasso
         estimator = self.estimator or QuicGraphicalLasso()
-
+        # To satisfy sklearn 
+        if y is not None and len(y) == 1:
+            raise ValueError("Cannot fit with just 1 sample.")
+        self._prng = np.random.RandomState(self.seed)
         if self.penalization != "subsampling" and not hasattr(
             estimator, self.penalty_name
         ):
@@ -370,7 +373,7 @@ class ModelAverage(BaseEstimator):
 
         if self.sc is None:
             results = _cpu_map(
-                partial(fit_fun, X=X, prng=self.prng),
+                partial(fit_fun, X=X, prng=self._prng),
                 indexed_param_grid,
                 n_jobs=self.n_jobs,
             )
@@ -410,7 +413,7 @@ class ModelAverage(BaseEstimator):
         self.lam_ /= self.n_trials
         if self.normalize:
             self.proportion_ /= self.n_trials
-
+        self.n_features_in_ = X.shape[1]
         return self
 
     @property

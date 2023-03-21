@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from sklearn.covariance import GraphLassoCV
+from sklearn.covariance import GraphicalLassoCV
 
 from inverse_covariance import QuicGraphicalLassoCV, QuicGraphicalLasso, ModelAverage
 from inverse_covariance.profiling import ClusterGraph
@@ -42,7 +42,7 @@ class TestModelAverage(object):
             ),
             (
                 {
-                    "estimator": GraphLassoCV(cv=2),
+                    "estimator": GraphicalLassoCV(cv=2),
                     "n_trials": 2,
                     "normalize": True,
                     "subsample": 0.9,
