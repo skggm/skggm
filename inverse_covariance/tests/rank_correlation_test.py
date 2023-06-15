@@ -1,6 +1,6 @@
 import numpy as np
 
-from sklearn.utils.testing import assert_array_almost_equal
+from sklearn.utils._testing import assert_array_almost_equal
 
 from inverse_covariance.rank_correlation import (
     _compute_ranks,

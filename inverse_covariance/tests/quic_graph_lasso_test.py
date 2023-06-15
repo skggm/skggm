@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from sklearn.utils.testing import assert_raises
-from sklearn.utils.testing import assert_allclose
+from sklearn.utils._testing import assert_raises
+from sklearn.utils._testing import assert_allclose
 from sklearn import datasets
 
 from inverse_covariance import (

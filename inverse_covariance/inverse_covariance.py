@@ -161,6 +161,11 @@ class InverseCovarianceEstimator(BaseEstimator):
 
         super(InverseCovarianceEstimator, self).__init__()
 
+    def fit(self, X, y=None, **fit_params):
+        # To satisfy sklearn 
+        if len(y) == 1:
+            raise ValueError("Cannot fit with just 1 sample.")
+
     def init_coefs(self, X):
         """Computes ...
 
