@@ -1,8 +1,9 @@
 from __future__ import absolute_import
 
 import numpy as np
-from sklearn.utils import check_array, as_float_array, deprecated
+from sklearn.utils import check_array, deprecated
 from sklearn.base import BaseEstimator
+from ._compat import as_float_array
 
 from . import QuicGraphicalLasso, QuicGraphicalLassoCV, InverseCovarianceEstimator
 
@@ -92,7 +93,7 @@ class AdaptiveGraphicalLasso(BaseEstimator):
         self.estimator_ = None
 
         X = check_array(X, ensure_min_features=2, estimator=self)
-        X = as_float_array(X, copy=False, force_all_finite=False)
+        X = as_float_array(X, copy=False, ensure_all_finite=False)
 
         n_samples_, n_features_ = X.shape
         

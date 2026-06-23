@@ -2,7 +2,8 @@ from __future__ import absolute_import
 
 import numpy as np
 from sklearn.base import BaseEstimator, clone
-from sklearn.utils import check_array, as_float_array
+from sklearn.utils import check_array
+from ._compat import as_float_array
 from joblib import Parallel, delayed
 from functools import partial
 
@@ -353,7 +354,7 @@ class ModelAverage(BaseEstimator):
         self.subsets_ = []
 
         X = check_array(X, ensure_min_features=2, estimator=self)
-        X = as_float_array(X, copy=False, force_all_finite=False)
+        X = as_float_array(X, copy=False, ensure_all_finite=False)
 
         n_samples_, n_features_ = X.shape
         _, self.lam_scale_ = _init_coefs(X, method=self.init_method)
