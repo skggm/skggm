@@ -51,6 +51,19 @@ class TestModelAverage(object):
                 }
             ),
             (
+                # Regression test for #103: in subsampling mode with the
+                # default scalar penalty, new_estimator.lam_ is a float, so
+                # the reduce step must not assume an ndarray (no `.flat`).
+                {
+                    "estimator": QuicGraphicalLasso(lam=0.1),
+                    "n_trials": 2,
+                    "normalize": True,
+                    "subsample": 0.6,
+                    "penalization": "subsampling",
+                    "penalty_name": "lam",
+                }
+            ),
+            (
                 {
                     "estimator": QuicGraphicalLasso(),
                     "n_trials": 10,

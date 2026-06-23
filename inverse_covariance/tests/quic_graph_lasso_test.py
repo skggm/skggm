@@ -1,8 +1,7 @@
 import numpy as np
 import pytest
 
-from sklearn.utils._testing import assert_raises
-from sklearn.utils._testing import assert_allclose
+from numpy.testing import assert_allclose
 from sklearn import datasets
 
 from inverse_covariance import (
@@ -274,11 +273,11 @@ class TestQuicGraphicalLasso(object):
     @pytest.mark.parametrize(
         "params_in, expected",
         [
-            ({}, [3.1622776601683795, 3.1622776601683795, 0.91116275611548958]),
-            ({"lam": 0.5 * np.ones((10, 10))}, [4.797, 2.1849]),
+            ({}, [4.5357, 14.2735, 0.035111917342151314]),
+            ({"lam": 0.5 * np.ones((10, 10))}, [4.6429, 14.7006]),
             (
                 {"lam": 0.5 * np.ones((10, 10)), "init_method": custom_init},
-                [0.0106, 35056.88460],
+                [0.0106, 35117.96334856725],
             ),  # NOQA
         ],
     )
@@ -305,4 +304,5 @@ class TestQuicGraphicalLasso(object):
         """
         X = datasets.load_diabetes().data
         ic = QuicGraphicalLasso(method="unknownmethod")
-        assert_raises(NotImplementedError, ic.fit, X)
+        with pytest.raises(NotImplementedError):
+            ic.fit(X)

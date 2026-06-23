@@ -7,7 +7,8 @@ import numpy as np
 from functools import partial
 
 from sklearn.covariance import EmpiricalCovariance
-from sklearn.utils import check_array, as_float_array, deprecated
+from sklearn.utils import check_array, deprecated
+from ._compat import as_float_array
 from numpy.testing import assert_array_almost_equal
 from joblib import Parallel, delayed
 from sklearn.model_selection import cross_val_score, RepeatedKFold
@@ -65,7 +66,7 @@ def quic(
         _lam[np.diag_indices(Sn)] = 0.  # make sure diagonal is zero
     else:
         assert lam.shape == S.shape, "lam, S shape mismatch."
-        _lam = as_float_array(lam, copy=False, force_all_finite=False)
+        _lam = as_float_array(lam, copy=False, ensure_all_finite=False)
 
     # Defaults.
     optSize = 1
@@ -82,8 +83,8 @@ def quic(
     assert Sigma0 is not None, "Theta0 and Sigma0 must both be None or both specified."
     assert Theta0.shape == S.shape, "Theta0, S shape mismatch."
     assert Sigma0.shape == S.shape, "Theta0, Sigma0 shape mismatch."
-    Theta0 = as_float_array(Theta0, copy=False, force_all_finite=False)
-    Sigma0 = as_float_array(Sigma0, copy=False, force_all_finite=False)
+    Theta0 = as_float_array(Theta0, copy=False, ensure_all_finite=False)
+    Sigma0 = as_float_array(Sigma0, copy=False, ensure_all_finite=False)
 
     if mode == "path":
         assert path is not None, "Please specify the path scaling values."
@@ -336,7 +337,7 @@ class QuicGraphicalLasso(InverseCovarianceEstimator):
 
         self.path_ = _validate_path(self.path)
         X = check_array(X, ensure_min_features=2, estimator=self)
-        X = as_float_array(X, copy=False, force_all_finite=False)
+        X = as_float_array(X, copy=False, ensure_all_finite=False)
         self.init_coefs(X)
         if self.method == "quic":
             (
@@ -624,7 +625,7 @@ class QuicGraphicalLassoCV(InverseCovarianceEstimator):
 
         # initialize
         X = check_array(X, ensure_min_features=2, estimator=self)
-        X = as_float_array(X, copy=False, force_all_finite=False)
+        X = as_float_array(X, copy=False, ensure_all_finite=False)
 
         if self.cv is None:
             cv = (3, 10)
@@ -961,7 +962,7 @@ class QuicGraphicalLassoEBIC(InverseCovarianceEstimator):
         self.is_fitted_ = False
 
         X = check_array(X, ensure_min_features=2, estimator=self)
-        X = as_float_array(X, copy=False, force_all_finite=False)
+        X = as_float_array(X, copy=False, ensure_all_finite=False)
         self.init_coefs(X)
 
         # either use passed in path, or make our own path

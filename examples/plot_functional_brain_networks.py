@@ -110,4 +110,4 @@ plotting.plot_connectome(
 )
 plotting.show()
 
-eval(input("Press any key to exit.."))
+input("Press any key to exit..")
