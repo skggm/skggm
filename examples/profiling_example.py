@@ -26,9 +26,10 @@ from inverse_covariance.profiling import (
 plt.ion()
 
 
-def r_input(val):
+def r_input(val=""):
+    # Just pauses execution; do not eval() user input (code injection risk).
     if sys.version_info[0] >= 3:
-        return eval(input(val))
+        return input(val)
 
     return raw_input(val)
 

@@ -403,7 +403,9 @@ class ModelAverage(BaseEstimator):
 
             # currently, dont estimate self.lam_ if penalty_name is different
             if self.penalty_name == "lam":
-                self.lam_ += np.mean(new_estimator.lam_.flat)
+                # new_estimator.lam_ may be a scalar (float) or an ndarray;
+                # np.mean handles both (a bare float has no ``.flat``).
+                self.lam_ += np.mean(new_estimator.lam_)
 
         # estimate support locations
         threshold = self.support_thresh * self.n_trials

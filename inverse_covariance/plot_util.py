@@ -8,9 +8,16 @@ import seaborn  # NOQA
 plt.ion()
 
 
-def r_input(val):
+def r_input(val=""):
+    """Prompt for and return a line of input.
+
+    Used only to pause execution (e.g. "Press any key to continue"); the
+    return value is discarded by callers.  Note: do not wrap ``input`` in
+    ``eval`` -- doing so evaluates whatever the user types as Python code,
+    which is an arbitrary code execution risk.
+    """
     if sys.version_info[0] >= 3:
-        return eval(input(val))
+        return input(val)
 
     return raw_input(val)  # NOQA
 

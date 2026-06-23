@@ -114,7 +114,7 @@ def ebic(covariance, precision, n_samples, n_features, gamma=0):
     ebic score (float).  Caller should minimized this score.
     """
     l_theta = -np.sum(covariance * precision) + fast_logdet(precision)
-    l_theta *= n_features / 2.
+    l_theta *= n_samples / 2.
 
     # is something goes wrong with fast_logdet, return large value
     if np.isinf(l_theta) or np.isnan(l_theta):
